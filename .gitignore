@@ -1,0 +1,23 @@
+### Android Studio ###
+*.iml
+/.idea
+/.kotlin
+
+### Gradle ###
+.gradle
+local.properties
+/local.properties
+
+### Build ###
+.externalNativeBuild
+.cxx
+/captures
+/build
+/app/release
+
+### OS ###
+.DS_Store
+
+### Xposed ###
+/app/src/main/assets/xposed_init
+/app/src/main/resources/META-INF/yukihookapi_init
