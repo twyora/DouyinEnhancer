@@ -52,6 +52,11 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.junit)
+
+    // ------------------ 底层与工具库 ------------------
+    implementation(libs.luckypray.dexkit)
+
+    // ---------------------- HOOK ----------------------
     // 基础依赖
     implementation(libs.yukihookapi.api)
     // 推荐使用 KavaRef 作为核心反射 API
