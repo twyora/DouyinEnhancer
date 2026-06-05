@@ -7,35 +7,97 @@ plugins {
 }
 
 android {
-    namespace = "com.yst.mkga.hook.dy"
+    namespace = gropify.project.namespace
     compileSdk {
-        version = release(37) {
+        version = release(gropify.project.compileSdk) {
         }
     }
+
     defaultConfig {
-        applicationId = "com.yst.mkga.hook.dy"
-        minSdk = 27
-        targetSdk = 36
-        versionCode = 1
-        versionName = "0.0.1"
+        applicationId = gropify.project.applicationId
+        minSdk = gropify.project.minSdk
+        targetSdk = gropify.project.targetSdk
+        versionCode = gropify.project.versionCode
+        versionName = gropify.project.versionName
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
+
+    val isKeyStoreAvailable = try {
+        gropify.keystore.path.isNotBlank() && gropify.keystore.password.isNotBlank() && gropify.key.alias.isNotBlank() && gropify.key.password.isNotBlank()
+    } catch (_: Exception) {
+        false
+    }
+    if (isKeyStoreAvailable) {
+        signingConfigs {
+            create("universal") {
+                storeFile = File(gropify.keystore.path)
+                storePassword = gropify.keystore.password
+                keyAlias = gropify.key.alias
+                keyPassword = gropify.key.password
+                enableV1Signing = true
+                enableV2Signing = true
+                enableV3Signing = true
+            }
+        }
+    }
+
+    flavorDimensions += "tier"
+    productFlavors {
+        create("CI") {
+            dimension = "tier"
+            versionCode = defaultConfig.versionCode?.plus(1)
+            versionName = "${defaultConfig.versionName?.split(Regex("\\s+-\\s+"))?.get(0)}-CI.${
+                getGitHeadRefsSuffix(rootProject)
+            }"
+        }
+        create("App") {
+            dimension = "tier"
+        }
+    }
+
     buildFeatures {
         buildConfig = true
     }
+
     buildTypes {
-        release {
-            isMinifyEnabled = false
+        all {
+            if (isKeyStoreAvailable) {
+                signingConfig = signingConfigs.getByName("universal")
+            }
+        }
+        getByName("release") {
+            isMinifyEnabled = true
+            isShrinkResources = true
+            vcsInfo.include = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
         }
     }
+
+    packaging {
+        jniLibs {
+            keepDebugSymbols += "**/libdexkit.so"
+        }
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_21
         targetCompatibility = JavaVersion.VERSION_21
+    }
+
+}
+
+androidComponents {
+    onVariants { variant ->
+        val flavorVN = android.productFlavors.findByName(variant.flavorName ?: "")?.versionName
+        val vn: String = flavorVN ?: android.defaultConfig.versionName ?: ""
+        val buildTypeSuffix = if (variant.buildType == "debug") "-debug" else ""
+        variant.outputs.forEach { output ->
+            output.outputFileName.set("DouyinEnhancer_${vn}${buildTypeSuffix}.apk")
+        }
     }
 }
 
@@ -66,4 +128,32 @@ dependencies {
     compileOnly(libs.xposed.api)
     // 作为 Xposed 模块使用务必添加，其它情况可选
     ksp(libs.yukihookapi.ksp.xposed)
+}
+
+/**
+ * from [MiuiHomeR](https://github.com/qqlittleice/MiuiHome_R/blob/main/app/build.gradle.kts)
+ * 用于获取 git commit id
+ */
+fun getGitHeadRefsSuffix(project: Project): String {
+    // .git/HEAD描述当前目录所指向的分支信息，内容示例："ref: refs/heads/master\n"
+    val headFile = File(project.rootProject.projectDir, ".git" + File.separator + "HEAD")
+    if (headFile.exists()) {
+        val string: String = headFile.readText(Charsets.UTF_8)
+        val string1 = string.replace(Regex("""ref:|\s"""), "")
+        val result = if (string1.isNotBlank() && string1.contains('/')) {
+            val refFilePath = ".git" + File.separator + string1
+            // 根据HEAD读取当前指向的hash值，路径示例为：".git/refs/heads/master"
+            val refFile = File(project.rootProject.projectDir, refFilePath)
+            // 索引文件内容为hash值+"\n"，
+            // 示例："90312cd9157587d11779ed7be776e3220050b308\n"
+            refFile.readText(Charsets.UTF_8).replace(Regex("""\s"""), "").subSequence(0, 7)
+        } else {
+            string.take(7)
+        }
+        println("commit_id: $result")
+        return result.toString()
+    } else {
+        println("WARN: .git/HEAD does NOT exist")
+        return ""
+    }
 }
