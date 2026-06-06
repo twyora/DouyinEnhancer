@@ -1,0 +1,62 @@
+name: Android CI
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "main" ]
+    paths-ignore:
+      - ".github/workflows/android.yml"
+      - "README.md"
+      - "doc/*"
+      - "LICENSE"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v6
+        with:
+          submodules: true
+
+      - name: Setup Java JDK
+        uses: actions/setup-java@v5.2.0
+        with:
+          java-version: "21"
+          distribution: "temurin"
+
+      - name: Build with Gradle and Sign
+        run: |
+          echo ${{ secrets.SIGNING_KEY }} | base64 -d > keystore.jks
+          if [[ ${{ github.ref }} == refs/tags/v* ]]; then
+            bash ./gradlew :app:assembleAppRelease
+            echo "APK_FILE=$(find app/build/outputs/apk/App/release/ -name '*.apk' | head -n 1)" >> $GITHUB_ENV
+            echo "Building Type: App Release Version" >> $GITHUB_STEP_SUMMARY
+          else
+            bash ./gradlew :app:assembleCIRelease
+            echo "APK_FILE=$(find app/build/outputs/apk/CI/release/ -name '*.apk' | head -n 1)" >> $GITHUB_ENV
+            echo "Building Type: CI Release Version" >> $GITHUB_STEP_SUMMARY
+          fi
+        env:
+          KEYSTORE_PATH: "../keystore.jks"
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+
+      - name: Upload a Build Artifact
+        if: ${{ !startsWith(github.ref, 'refs/tags/v') }}
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: DouyinEnhancer_CI_Release
+          path: ${{ env.APK_FILE }}
+
+      - name: Display APK Hashes
+        run: |
+          apk=${{ env.APK_FILE }}
+          echo "### APK Hashes" >> $GITHUB_STEP_SUMMARY
+          echo "| Hash Type | Hash Value |" >> $GITHUB_STEP_SUMMARY
+          echo "| --- | --- |" >> $GITHUB_STEP_SUMMARY
+          echo "| SHA256 | \`$(sha256sum $apk | awk '{ print $1 }')\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| SHA1 | \`$(sha1sum $apk | awk '{ print $1 }')\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| MD5 | \`$(md5sum $apk | awk '{ print $1 }')\` |" >> $GITHUB_STEP_SUMMARY
