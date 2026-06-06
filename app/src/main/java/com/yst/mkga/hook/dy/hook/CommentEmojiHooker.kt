@@ -1,6 +1,5 @@
 package com.yst.mkga.hook.dy.hook
 
-import com.highcapable.kavaref.KavaRef.Companion.asResolver
 import com.highcapable.kavaref.KavaRef.Companion.resolve
 import com.highcapable.yukihookapi.hook.entity.YukiBaseHooker
 import com.highcapable.yukihookapi.hook.log.YLog
@@ -39,15 +38,23 @@ object CommentEmojiHooker : YukiBaseHooker() {
                     result.className.toClass().resolve().firstMethod {
                         name = result.methodName
                     }.hook {
+                        val emojiField =
+                            result.paramTypes[0].name.toClass().getDeclaredField("emoji").apply {
+                                isAccessible = true
+                            }
+                        val animateUrlField = emojiField.type.getDeclaredField("animateUrl").apply {
+                            isAccessible = true
+                        }
+                        val urlListField = animateUrlField.type.getDeclaredField("urlList").apply {
+                            isAccessible = true
+                        }
+
                         before {
-                            val comment = args[0]
-                            val emojiUrlList = comment?.asResolver()?.firstField {
-                                name = "emoji"
-                            }?.get()?.asResolver()?.firstField {
-                                name = "animateUrl"
-                            }?.get()?.asResolver()?.firstField {
-                                name = "urlList"
-                            }?.get<List<String>>()
+                            val comment = args[0] ?: return@before
+
+                            val emojiUrlList = runCatching {
+                                urlListField.get(animateUrlField.get(emojiField.get(comment)))
+                            }.getOrNull() as? List<*>
 
                             if (emojiUrlList?.isNotEmpty() == true) {
                                 resultTrue()
