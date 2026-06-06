@@ -62,11 +62,10 @@ android {
 
     buildTypes {
         all {
-            if (isKeyStoreAvailable) {
-                signingConfig = signingConfigs.getByName("universal")
-            }
+            signingConfig =
+                signingConfigs.findByName("universal") ?: signingConfigs.getByName("debug")
         }
-        getByName("release") {
+        release {
             isMinifyEnabled = true
             isShrinkResources = true
             vcsInfo.include = false
