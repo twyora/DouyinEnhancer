@@ -23,5 +23,6 @@ object HookEntry : IYukiHookXposedInit {
         }
 
         loadApp(hooker = CommentImageHooker)
+        loadApp(hooker = CommentEmojiHooker)
     }
 }
