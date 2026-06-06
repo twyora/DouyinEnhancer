@@ -1,5 +1,6 @@
 package com.yst.mkga.hook.dy.hook
 
+import com.highcapable.kavaref.KavaRef.Companion.asResolver
 import com.highcapable.kavaref.KavaRef.Companion.resolve
 import com.highcapable.yukihookapi.hook.entity.YukiBaseHooker
 import com.highcapable.yukihookapi.hook.log.YLog
@@ -25,7 +26,9 @@ object CommentImageHooker : YukiBaseHooker() {
                         name = result.methodName
                     }.hook {
                         replaceAny {
-                            instance.javaClass.getDeclaredMethod("getOriginUrl").invoke(instance)
+                            instance.asResolver().firstMethod {
+                                name = "getOriginUrl"
+                            }.invoke()
                         }
                     }.result {
                         onConductFailure { param, throwable ->
