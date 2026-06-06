@@ -23,6 +23,10 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    /*
+     * Referenced from [RestoreSplashScreen](https://github.com/GSWXXN/RestoreSplashScreen/blob/master/app/build.gradle.kts)
+     * Thanks to [GSWXXN](https://github.com/GSWXXN)
+     */
     val isKeyStoreAvailable = try {
         gropify.keystore.path.isNotBlank() && gropify.keystore.password.isNotBlank() && gropify.key.alias.isNotBlank() && gropify.key.password.isNotBlank()
     } catch (_: Exception) {
