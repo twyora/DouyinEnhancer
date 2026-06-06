@@ -35,7 +35,7 @@ android {
     if (isKeyStoreAvailable) {
         signingConfigs {
             create("universal") {
-                storeFile = File(gropify.keystore.path)
+                storeFile = file(gropify.keystore.path)
                 storePassword = gropify.keystore.password
                 keyAlias = gropify.key.alias
                 keyPassword = gropify.key.password
@@ -67,7 +67,15 @@ android {
     buildTypes {
         all {
             signingConfig =
-                signingConfigs.findByName("universal") ?: signingConfigs.getByName("debug")
+                signingConfigs.findByName("universal") ?: run {
+                    println("WARN: Keystore not available, using debug signingConfig")
+                    println("NOTE: To set up custom signing, configure the following environment variables:")
+                    println("  KEYSTORE_PATH       - Path to the keystore file")
+                    println("  KEYSTORE_PASSWORD   - Keystore password")
+                    println("  KEY_ALIAS           - Key alias name")
+                    println("  KEY_PASSWORD        - Key password")
+                    signingConfigs.getByName("debug")
+                }
         }
         release {
             isMinifyEnabled = true

@@ -28,23 +28,22 @@ dependencyResolutionManagement {
 
 gropify {
     projects(":app") {
-        common {
+        buildscript {
             existsPropertyFiles(
                 "local.properties",
                 addDefault = true
             )
             permanentKeyValues(
-                "KEYSTORE.PATH" to "",
-                "KEYSTORE.PASSWORD" to "",
-                "KEY.ALIAS" to "",
-                "KEY.PASSWORD" to ""
+                "KEYSTORE_PATH" to "",
+                "KEYSTORE_PASSWORD" to "",
+                "KEY_ALIAS" to "",
+                "KEY_PASSWORD" to ""
             )
             locations(
                 GropifyLocation.SystemEnv,
                 GropifyLocation.RootProject,
                 GropifyLocation.CurrentProject
             )
-            useTypeAutoConversion = true
         }
     }
 }
