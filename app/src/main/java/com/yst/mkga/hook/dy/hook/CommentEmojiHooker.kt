@@ -41,7 +41,7 @@ object CommentEmojiHooker : YukiBaseHooker() {
     }
 
     override fun onHook() {
-        loadApp(name = "com.ss.android.ugc.aweme") {
+        withProcess(mainProcessName) {
             DexKitBridge.create(this.appInfo.sourceDir).use { bridge ->
                 // Force enable "Save to Album" button for emoji comments
                 bridge.findMethod {
