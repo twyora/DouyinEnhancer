@@ -30,7 +30,7 @@ class HookTransaction(private val tag: String?) {
         hookActions.add(Pair(name, action))
     }
 
-    fun commit() {
+    fun commit(): Boolean {
         var hasFailure = false
         for ((name, action) in hookActions) {
             if (hasFailure) {
@@ -56,5 +56,7 @@ class HookTransaction(private val tag: String?) {
         if (hasFailure) {
             rollback()
         }
+
+        return !hasFailure
     }
 }
