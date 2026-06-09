@@ -18,9 +18,17 @@ object CommentEmojiHooker : YukiBaseHooker() {
     private val UrlModelClass by lazyClass("com.ss.android.ugc.aweme.base.model.UrlModel")
     private val SaveImageActionItemClass by lazyClass("com.ss.android.ugc.aweme.comment.manager.longclickaction.actions.SaveImageActionItem")
     private val CommentActionParamsClass by lazyClass("com.ss.android.ugc.aweme.comment.CommentActionParams")
+    private val CommentLongPressItemModelClass by lazyClass(
+        "com.ss.android.ugc.aweme.comment.ui.longpress.CommentLongPressItemModel"
+    )
+    private val CommentImageStructClass by lazyClass(
+        "com.ss.android.ugc.aweme.comment.model.CommentImageStruct"
+    )
     private var saveImageActionItemClassCommentActionParamsField: Field? = null
     private var commentActionParamsClassFragmentActivityField: Field? = null
     private var commentActionParamsClassCommentField: Field? = null
+    private var commentActionParamsClassImageIndexField: Field? = null
+    private var CommentLongPressItemModelClassCommentActionParamsField: Field? = null
 
     private val CommentClassEmojiField: Field by lazy {
         CommentClass.getDeclaredField("emoji").apply {
@@ -37,6 +45,18 @@ object CommentEmojiHooker : YukiBaseHooker() {
 
     private val UrlModelClassUrlListField: Field by lazy {
         UrlModelClass.getDeclaredField("urlList").apply {
+            isAccessible = true
+        }
+    }
+
+    private val CommentClassImageListField: Field by lazy {
+        CommentClass.getDeclaredField("imageList").apply {
+            isAccessible = true
+        }
+    }
+
+    private val CommentImageStructClassDownloadUrlField: Field by lazy {
+        CommentImageStructClass.getDeclaredField("downloadUrl").apply {
             isAccessible = true
         }
     }
@@ -66,6 +86,82 @@ object CommentEmojiHooker : YukiBaseHooker() {
             @Suppress("UNCHECKED_CAST")
             (UrlModelClassUrlListField.get(animateUrl) as? List<String>)
         }.getOrNull()
+    }
+
+    private fun getImageUrlListFromCommentOrNull(
+        comment: Any?,
+        imageIndex: Int = 0
+    ): List<String>? {
+        comment ?: return null
+
+        // start to extract image url list
+        val imageList = (CommentClassImageListField.get(comment) as? List<*>)
+            ?: return null//List<CommentImageStruct>
+
+        val imageStruct = imageList.getOrNull(imageIndex) ?: return null
+
+        val downloadUrlModel =
+            CommentImageStructClassDownloadUrlField.get(imageStruct) ?: return null
+
+        @Suppress("UNCHECKED_CAST")
+        val downloadUrlList = UrlModelClassUrlListField.get(downloadUrlModel) as? List<String>
+
+        return downloadUrlList
+    }
+
+    private fun getCommentFromSaveImageActionItemOrNull(saveImageActionItem: Any?): Any? {
+        saveImageActionItem ?: return null
+
+        val longPressActionParamsField = CommentLongPressItemModelClassCommentActionParamsField
+            ?: CommentLongPressItemModelClass.resolve().firstField {
+                type = CommentActionParamsClass.name
+            }.self.also {
+                it.isAccessible = true
+                CommentLongPressItemModelClassCommentActionParamsField = it
+            }
+        val longPressActionParams =
+            longPressActionParamsField.get(saveImageActionItem) ?: return null
+
+        // get comment
+        val commentField =
+            commentActionParamsClassCommentField ?: CommentActionParamsClass.resolve().firstField {
+                type = CommentClass.name
+            }.self.also {
+                it.isAccessible = true
+                commentActionParamsClassCommentField = it
+            }
+
+        return commentField.get(longPressActionParams)
+    }
+
+    private fun getImageUrlListFromSaveImageActionItemOrNull(saveImageActionItem: Any?): List<String>? {
+        saveImageActionItem ?: return null
+
+        val actionParamsField =
+            saveImageActionItemClassCommentActionParamsField ?: SaveImageActionItemClass.resolve()
+                .firstField {
+                    type = CommentActionParamsClass.name
+                }.self.also {
+                    it.isAccessible = true
+                    saveImageActionItemClassCommentActionParamsField = it
+                }
+
+        val commentActionParams = actionParamsField.get(saveImageActionItem)
+
+        // get the image index from the long-pressed comment
+        val imageIndexField =
+            commentActionParamsClassImageIndexField ?: CommentActionParamsClass.resolve()
+                .firstField {
+                    type = Int::class
+                }.self.also {
+                    it.isAccessible = true
+                    commentActionParamsClassImageIndexField = it
+                }
+        val imageIndex = imageIndexField.get(commentActionParams) as Int
+
+        val comment = getCommentFromSaveImageActionItemOrNull(saveImageActionItem) ?: return null
+
+        return getImageUrlListFromCommentOrNull(comment, imageIndex)
     }
 
     private fun installSaveEmojiBtnHook(bridge: DexKitBridge): YukiMemberHookCreator.MemberHookCreator.Result? {
@@ -158,41 +254,10 @@ object CommentEmojiHooker : YukiBaseHooker() {
                         return@before
                     }
 
-                    val commentActionParamsField =
-                        saveImageActionItemClassCommentActionParamsField ?: runCatching {
-                            SaveImageActionItemClass.resolve().firstField {
-                                type = CommentActionParamsClass.name
-                            }.self.also {
-                                saveImageActionItemClassCommentActionParamsField = it
-                            }
-                        }.onFailure {
-                            YLog.error("$TAG: Failed to find CommentActionParams field in SaveImageActionItem: ${it.message}")
-                        }.getOrNull()
+                    val comment = getCommentFromSaveImageActionItemOrNull(saveImageActionItem)
+                        ?: return@before
 
-                    val commentActionParams =
-                        commentActionParamsField?.get(saveImageActionItem) ?: run {
-                            YLog.debug("$TAG: Failed to get CommentActionParams from SaveImageActionItem")
-                            return@before
-                        }
-
-                    val commentField = commentActionParamsClassCommentField ?: runCatching {
-                        CommentActionParamsClass.resolve().firstField {
-                            type = CommentClass.name
-                        }.self.also {
-                            commentActionParamsClassCommentField = it
-                        }
-                    }.onFailure {
-                        YLog.error("$TAG: Failed to find Comment field in CommentActionParams: ${it.message}")
-                    }.getOrNull()
-
-                    val comment = commentField?.get(commentActionParams) ?: run {
-                        YLog.debug("$TAG: Failed to get Comment from CommentActionParams")
-                        return@before
-                    }
-
-                    val emojiUrlList = getEmojiUrlListFromCommentOrNull(comment)?.takeIf {
-                        it.isNotEmpty()
-                    } ?: return@before
+                    val emojiUrlList = getEmojiUrlListFromCommentOrNull(comment) ?: return@before
 
                     YLog.warn("$TAG: Download Emoji Function is NOT IMPLEMENT yet, got ${emojiUrlList.size} emoji url(s)")
                     return@before
