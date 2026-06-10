@@ -1,12 +1,23 @@
 package com.yst.mkga.hook.dy.hook
 
-import com.highcapable.kavaref.KavaRef.Companion.asResolver
 import com.highcapable.kavaref.KavaRef.Companion.resolve
 import com.highcapable.yukihookapi.hook.entity.YukiBaseHooker
 import com.highcapable.yukihookapi.hook.log.YLog
 import org.luckypray.dexkit.DexKitBridge
+import java.lang.reflect.Field
 
 object CommentImageHooker : YukiBaseHooker() {
+    private val TAG=this::class.simpleName
+
+    val CommentImageStruct by lazyClass("com.ss.android.ugc.aweme.comment.model.CommentImageStruct")
+    val originUrlField: Field by lazy{
+        CommentImageStruct.resolve().firstField {
+            name="originUrl"
+        }.self.apply{
+            isAccessible=true
+        }
+    }
+
     override fun onHook() {
         loadApp(name = "com.ss.android.ugc.aweme") {
             DexKitBridge.create(this.appInfo.sourceDir).use { bridge ->
@@ -19,16 +30,17 @@ object CommentImageHooker : YukiBaseHooker() {
                             name = "downloadUrl"
                         }
                     }
-                }.singleOrNull()?.also { result ->
-                    YLog.debug("CommentImageHooker: Target method found: ${result.className}.${result.methodName}")
+                }.singleOrNull()?.also { match ->
+                    YLog.debug("CommentImageHooker: Target method found: ${match.className}.${match.methodName}")
 
-                    result.className.toClass().resolve().firstMethod {
-                        name = result.methodName
+                    match.className.toClass().resolve().firstMethod {
+                        name = match.methodName
                     }.hook {
-                        replaceAny {
-                            instance.asResolver().firstMethod {
-                                name = "getOriginUrl"
-                            }.invoke()
+                        before {
+                            val originUrl = originUrlField.get(instance)
+                            if (originUrl != null) {
+                                result = originUrl
+                            }
                         }
                     }.result {
                         onConductFailure { param, throwable ->
