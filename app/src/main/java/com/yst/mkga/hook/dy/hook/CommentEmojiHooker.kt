@@ -18,156 +18,141 @@ object CommentEmojiHooker : YukiBaseHooker() {
     private val UrlModelClass by lazyClass("com.ss.android.ugc.aweme.base.model.UrlModel")
     private val SaveImageActionItemClass by lazyClass("com.ss.android.ugc.aweme.comment.manager.longclickaction.actions.SaveImageActionItem")
     private val CommentActionParamsClass by lazyClass("com.ss.android.ugc.aweme.comment.CommentActionParams")
-    private val CommentLongPressItemModelClass by lazyClass(
-        "com.ss.android.ugc.aweme.comment.ui.longpress.CommentLongPressItemModel"
-    )
-    private val CommentImageStructClass by lazyClass(
-        "com.ss.android.ugc.aweme.comment.model.CommentImageStruct"
-    )
-    private var saveImageActionItemClassCommentActionParamsField: Field? = null
-    private var commentActionParamsClassFragmentActivityField: Field? = null
-    private var commentActionParamsClassCommentField: Field? = null
-    private var commentActionParamsClassImageIndexField: Field? = null
-    private var CommentLongPressItemModelClassCommentActionParamsField: Field? = null
+    private val CommentLongPressItemModelClass by lazyClass("com.ss.android.ugc.aweme.comment.ui.longpress.CommentLongPressItemModel")
+    private val CommentImageStructClass by lazyClass("com.ss.android.ugc.aweme.comment.model.CommentImageStruct")
 
     private val CommentClassEmojiField: Field by lazy {
-        CommentClass.getDeclaredField("emoji").apply {
+        CommentClass.resolve().firstField {
+            name = "emoji"
+        }.self.apply {
             isAccessible = true
         }
     }
 
     private val EmojiClassAnimateUrlField: Field by lazy {
-        EmojiClass.getDeclaredField("animateUrl")
-            .apply {
-                isAccessible = true
-            }
+        EmojiClass.resolve().firstField {
+            name = "animateUrl"
+        }.self.apply {
+            isAccessible = true
+        }
     }
 
     private val UrlModelClassUrlListField: Field by lazy {
-        UrlModelClass.getDeclaredField("urlList").apply {
+        UrlModelClass.resolve().firstField {
+            name = "urlList"
+        }.self.apply {
             isAccessible = true
         }
     }
 
     private val CommentClassImageListField: Field by lazy {
-        CommentClass.getDeclaredField("imageList").apply {
+        CommentClass.resolve().firstField {
+            name = "imageList"
+        }.self.apply {
             isAccessible = true
         }
     }
 
     private val CommentImageStructClassDownloadUrlField: Field by lazy {
-        CommentImageStructClass.getDeclaredField("downloadUrl").apply {
+        CommentImageStructClass.resolve().firstField {
+            name = "downloadUrl"
+        }.self.apply {
             isAccessible = true
         }
     }
 
+    private var commentActionParamsClassCommentField: Field? = null
+    private var commentActionParamsClassImageIndexField: Field? = null
+    private var commentLongPressItemModelClassCommentActionParamsField: Field? = null
+    private var saveImageActionItemClassCommentActionParamsField: Field? = null
+
     override fun onHook() {
         withProcess(mainProcessName) {
             val transaction = HookTransaction(TAG)
-
             DexKitBridge.create(this.appInfo.sourceDir).use { bridge ->
-                transaction.add(::installSaveEmojiBtnHook.name) {
-                    installSaveEmojiBtnHook(bridge)
+                transaction.add(::installSaveEmojiToAlbumButtonHook.name) {
+                    installSaveEmojiToAlbumButtonHook(bridge)
                 }
-
-                transaction.add(::installSaveEmojiCallbackHook.name) {
-                    installSaveEmojiCallbackHook(bridge)
+                transaction.add(::installClickSaveEmojiToAlbumButtonCallbackHook.name) {
+                    installClickSaveEmojiToAlbumButtonCallbackHook(bridge)
                 }
-
                 transaction.commit()
             }
         }
     }
 
-    private fun getEmojiUrlListFromCommentOrNull(comment: Any?): List<String>? {
-        return runCatching {
-            val emoji = CommentClassEmojiField.get(comment)
-            val animateUrl = EmojiClassAnimateUrlField.get(emoji)
-            @Suppress("UNCHECKED_CAST")
-            (UrlModelClassUrlListField.get(animateUrl) as? List<String>)
-        }.getOrNull()
-    }
-
-    private fun getImageUrlListFromCommentOrNull(
-        comment: Any?,
-        imageIndex: Int = 0
-    ): List<String>? {
-        comment ?: return null
-
-        // start to extract image url list
-        val imageList = (CommentClassImageListField.get(comment) as? List<*>)
-            ?: return null//List<CommentImageStruct>
-
-        val imageStruct = imageList.getOrNull(imageIndex) ?: return null
-
-        val downloadUrlModel =
-            CommentImageStructClassDownloadUrlField.get(imageStruct) ?: return null
-
-        @Suppress("UNCHECKED_CAST")
-        val downloadUrlList = UrlModelClassUrlListField.get(downloadUrlModel) as? List<String>
-
-        return downloadUrlList
-    }
-
-    private fun getCommentFromSaveImageActionItemOrNull(saveImageActionItem: Any?): Any? {
-        saveImageActionItem ?: return null
-
-        val longPressActionParamsField = CommentLongPressItemModelClassCommentActionParamsField
-            ?: CommentLongPressItemModelClass.resolve().firstField {
+    private fun extractActionParams(actionItem: Any): Any? {
+        val field = commentLongPressItemModelClassCommentActionParamsField ?: CommentLongPressItemModelClass.resolve()
+            .firstField {
                 type = CommentActionParamsClass.name
             }.self.also {
                 it.isAccessible = true
-                CommentLongPressItemModelClassCommentActionParamsField = it
+                commentLongPressItemModelClassCommentActionParamsField = it
             }
-        val longPressActionParams =
-            longPressActionParamsField.get(saveImageActionItem) ?: return null
+        return field.get(actionItem)
+    }
 
-        // get comment
-        val commentField =
-            commentActionParamsClassCommentField ?: CommentActionParamsClass.resolve().firstField {
+    private fun extractComment(actionItem: Any): Any? {
+        val params = extractActionParams(actionItem) ?: return null
+        val field = commentActionParamsClassCommentField
+            ?: CommentActionParamsClass.resolve().firstField {
                 type = CommentClass.name
             }.self.also {
                 it.isAccessible = true
                 commentActionParamsClassCommentField = it
             }
-
-        return commentField.get(longPressActionParams)
+        return field.get(params)
     }
 
-    private fun getImageUrlListFromSaveImageActionItemOrNull(saveImageActionItem: Any?): List<String>? {
-        saveImageActionItem ?: return null
-
-        val actionParamsField =
-            saveImageActionItemClassCommentActionParamsField ?: SaveImageActionItemClass.resolve()
-                .firstField {
-                    type = CommentActionParamsClass.name
-                }.self.also {
-                    it.isAccessible = true
-                    saveImageActionItemClassCommentActionParamsField = it
-                }
-
-        val commentActionParams = actionParamsField.get(saveImageActionItem)
-
-        // get the image index from the long-pressed comment
-        val imageIndexField =
-            commentActionParamsClassImageIndexField ?: CommentActionParamsClass.resolve()
-                .firstField {
-                    type = Int::class
-                }.self.also {
-                    it.isAccessible = true
-                    commentActionParamsClassImageIndexField = it
-                }
-        val imageIndex = imageIndexField.get(commentActionParams) as Int
-
-        val comment = getCommentFromSaveImageActionItemOrNull(saveImageActionItem) ?: return null
-
-        return getImageUrlListFromCommentOrNull(comment, imageIndex)
+    private fun extractEmojiUrls(comment: Any): List<String>? {
+        return runCatching {
+            val emoji = CommentClassEmojiField.get(comment) ?: return@runCatching null
+            val animateUrl = EmojiClassAnimateUrlField.get(emoji) ?: return@runCatching null
+            @Suppress("UNCHECKED_CAST")
+            UrlModelClassUrlListField.get(animateUrl) as? List<String>
+        }.getOrNull()
     }
 
-    private fun installSaveEmojiBtnHook(bridge: DexKitBridge): YukiMemberHookCreator.MemberHookCreator.Result? {
+    private fun overrideImageIndex(actionItem: Any, index: Int) {
+        val paramsField = saveImageActionItemClassCommentActionParamsField
+            ?: SaveImageActionItemClass.resolve().firstField {
+                type = CommentActionParamsClass.name
+            }.self.also {
+                it.isAccessible = true
+                saveImageActionItemClassCommentActionParamsField = it
+            }
+
+        val params = paramsField.get(actionItem) ?: return
+        val field = commentActionParamsClassImageIndexField
+            ?: CommentActionParamsClass.resolve().firstField {
+                type = Int::class
+            }.self.also {
+                it.isAccessible = true
+                commentActionParamsClassImageIndexField = it
+            }
+        field.set(params, index)
+    }
+
+    private fun replaceImageUrls(comment: Any, urls: List<String>) {
+        var imageList = CommentClassImageListField.get(comment) as? List<*>
+        if (imageList.isNullOrEmpty()) {
+            val newStruct = CommentImageStructClass.getConstructor().newInstance()
+            imageList = listOf(newStruct)
+            CommentClassImageListField.set(comment, imageList)
+        }
+
+        val targetStruct = imageList[0]
+        var urlModel = CommentImageStructClassDownloadUrlField.get(targetStruct)
+        if (urlModel == null) {
+            urlModel = UrlModelClass.getConstructor().newInstance()
+            CommentImageStructClassDownloadUrlField.set(targetStruct, urlModel)
+        }
+        UrlModelClassUrlListField.set(urlModel, urls)
+    }
+
+    private fun installSaveEmojiToAlbumButtonHook(bridge: DexKitBridge): YukiMemberHookCreator.MemberHookCreator.Result? {
         var ret: YukiMemberHookCreator.MemberHookCreator.Result? = null
 
-        // Force enable "Save to Album" button for emoji comments
         bridge.findMethod {
             matcher {
                 modifiers = Modifier.STATIC
@@ -177,9 +162,8 @@ object CommentEmojiHooker : YukiBaseHooker() {
                 }
                 returnType = "boolean"
                 invokeMethods {
-                    // TODO: This method has already been looked up in CommentImageHooker, consider caching and sharing it here
                     add {
-                        declaredClass = "com.ss.android.ugc.aweme.comment.model.CommentImageStruct"
+                        declaredClass = CommentImageStructClass.name
                         returnType = UrlModelClass.name
                         paramCount = 0
                         addUsingField {
@@ -191,39 +175,34 @@ object CommentEmojiHooker : YukiBaseHooker() {
         }.singleOrNull()?.also { result ->
             YLog.debug("$TAG: Target method found: ${result.className}.${result.methodName}")
 
-            result.className.toClass().resolve().firstMethod {
-                name = result.methodName
-            }.hook {
+            result.className.toClass().resolve().firstMethod { name = result.methodName }.hook {
                 before {
                     val comment = args[0] ?: return@before
-
-                    val emojiUrlList = getEmojiUrlListFromCommentOrNull(comment)
-                    if (emojiUrlList?.isNotEmpty() == true) {
+                    val emojiUrls = extractEmojiUrls(comment)
+                    if (!emojiUrls.isNullOrEmpty()) {
                         resultTrue()
                     }
                 }
             }.result {
-                onHookingFailure { throwable ->
-                    YLog.error("$TAG: Unable to replace with original emoji URL: ${throwable.message}")
-                }
                 onConductFailure { param, throwable ->
-                    YLog.error("$TAG: Error during download callback hook: ${throwable.message}")
-                    param.result = param.callOriginal()
+                    YLog.error("$TAG: Save emoji button hook runtime error", throwable)
+                }
+                onHookingFailure { throwable ->
+                    YLog.error("$TAG: Failed to hook save emoji button", throwable)
                 }
                 onHooked {
-                    YLog.info("$TAG: Hook installed, 'Save to album' button will show for emoji comments")
+                    YLog.info("$TAG: Save emoji button hook installed successfully. The button will be shown for emoji comments")
                 }.also {
                     ret = it
                 }
             }
         } ?: run {
-            YLog.warn("$TAG: Target method not found, save to album feature is not active")
+            YLog.warn("$TAG: Target method not found, save emoji to album button will not be shown")
         }
-
         return ret
     }
 
-    private fun installSaveEmojiCallbackHook(bridge: DexKitBridge): YukiMemberHookCreator.MemberHookCreator.Result? {
+    private fun installClickSaveEmojiToAlbumButtonCallbackHook(bridge: DexKitBridge): YukiMemberHookCreator.MemberHookCreator.Result? {
         var ret: YukiMemberHookCreator.MemberHookCreator.Result? = null
 
         bridge.findMethod {
@@ -238,46 +217,44 @@ object CommentEmojiHooker : YukiBaseHooker() {
         }.singleOrNull()?.also { result ->
             YLog.debug("$TAG: Target method found: ${result.className}.${result.methodName}")
 
-            result.className.toClass().resolve().firstMethod {
-                name = result.methodName
-            }.hook {
+            result.className.toClass().resolve().firstMethod { name = result.methodName }.hook {
                 before {
-                    val cbkInstance = args[0] ?: run {
-                        YLog.debug("$TAG: Failed to extract cbkInstance from args")
-                        return@before
-                    }
+                    val cbkInstance = args[0] ?: return@before
 
-                    val saveImageActionItem = cbkInstance.asResolver().firstField {
-                        type = "java.lang.Object"
-                    }.get() ?: run {
-                        YLog.debug("$TAG: Failed to extract saveImageActionItem from args")
-                        return@before
-                    }
+                    val actionItem = cbkInstance.asResolver().firstField {
+                        type = Object::class
+                    }.get() ?: return@before
 
-                    val comment = getCommentFromSaveImageActionItemOrNull(saveImageActionItem)
-                        ?: return@before
+                    val comment = extractComment(actionItem) ?: return@before
+                    val emojiUrls = extractEmojiUrls(comment) ?: return@before
 
-                    val emojiUrlList = getEmojiUrlListFromCommentOrNull(comment) ?: return@before
+                    overrideImageIndex(actionItem, 0)
+                    //TODO: prepend emoji urls to image url list
+                    replaceImageUrls(comment, emojiUrls)
 
-                    YLog.warn("$TAG: Download Emoji Function is NOT IMPLEMENT yet, got ${emojiUrlList.size} emoji url(s)")
-                    return@before
+                    YLog.debug("$TAG: Injected ${emojiUrls.size} emoji url(s) into comment.")
+
+                    YLog.warn("$TAG: HEIF to GIF conversion not yet implemented, saved file may not be viewable in gallery")
                 }
+                // TODO: restore original image URL list after emoji URL injection
+                /* after{
+
+                } */
             }.result {
                 onConductFailure { param, throwable ->
-                    YLog.error("$TAG: Error during download callback hook: ${throwable.message}")
-                    param.result = param.callOriginal()
+                    YLog.error("$TAG: Download callback hook runtime error", throwable)
                 }
                 onHookingFailure { throwable ->
-                    YLog.error("$TAG: Failed to install download callback hook: ${throwable.message}")
+                    YLog.error("$TAG: Failed to hook download callback", throwable)
                 }
                 onHooked {
-                    YLog.info("$TAG: Download callback hook installed, emoji download function is active")
+                    YLog.info("$TAG: Download callback hook installed successfully. Emoji URLs will be injected when saving")
                 }.also {
                     ret = it
                 }
             }
         } ?: run {
-            YLog.warn("$TAG: Target method not found, emoji download function is not active")
+            YLog.warn("$TAG: Target method not found, download callback hook will not be installed")
         }
 
         return ret
