@@ -7,14 +7,14 @@ import org.luckypray.dexkit.DexKitBridge
 import java.lang.reflect.Field
 
 object CommentImageHooker : YukiBaseHooker() {
-    private val TAG=this::class.simpleName
+    private val TAG = this::class.simpleName
 
     val CommentImageStruct by lazyClass("com.ss.android.ugc.aweme.comment.model.CommentImageStruct")
-    val originUrlField: Field by lazy{
+    val originUrlField: Field by lazy {
         CommentImageStruct.resolve().firstField {
-            name="originUrl"
-        }.self.apply{
-            isAccessible=true
+            name = "originUrl"
+        }.self.apply {
+            isAccessible = true
         }
     }
 
@@ -31,7 +31,7 @@ object CommentImageHooker : YukiBaseHooker() {
                         }
                     }
                 }.singleOrNull()?.also { match ->
-                    YLog.debug("CommentImageHooker: Target method found: ${match.className}.${match.methodName}")
+                    YLog.debug("$TAG: Target method found: ${match.className}.${match.methodName}")
 
                     match.className.toClass().resolve().firstMethod {
                         name = match.methodName
@@ -44,12 +44,12 @@ object CommentImageHooker : YukiBaseHooker() {
                         }
                     }.result {
                         onConductFailure { param, throwable ->
-                            YLog.error("CommentImageHooker: Unable to replace with original image URL: ${throwable.message}")
+                            YLog.error("$TAG: Unable to replace with original image URL: ${throwable.message}")
                             param.result = param.callOriginal()
                         }
                     }
                 } ?: run {
-                    YLog.warn("CommentImageHooker: Target method not found, watermark-free comment image download is not active")
+                    YLog.warn("$TAG: Target method not found, watermark-free comment image download is not active")
                 }
             }
         }
