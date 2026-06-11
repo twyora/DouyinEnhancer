@@ -113,7 +113,7 @@ object CommentEmojiHooker : YukiBaseHooker() {
         }.getOrNull()
     }
 
-    private fun overrideImageIndex(actionItem: Any, index: Int) {
+    private fun overrideImageIndex(actionItem: Any, index: Int): Int {
         val paramsField = saveImageActionItemClassCommentActionParamsField
             ?: SaveImageActionItemClass.resolve().firstField {
                 type = CommentActionParamsClass.name
@@ -122,7 +122,7 @@ object CommentEmojiHooker : YukiBaseHooker() {
                 saveImageActionItemClassCommentActionParamsField = it
             }
 
-        val params = paramsField.get(actionItem) ?: return
+        val params = paramsField.get(actionItem) ?: return -1
         val field = commentActionParamsClassImageIndexField
             ?: CommentActionParamsClass.resolve().firstField {
                 type = Int::class
@@ -130,10 +130,13 @@ object CommentEmojiHooker : YukiBaseHooker() {
                 it.isAccessible = true
                 commentActionParamsClassImageIndexField = it
             }
+
+        val originImageIndex = field.get(params) as Int
         field.set(params, index)
+        return originImageIndex
     }
 
-    private fun replaceImageUrls(comment: Any, urls: List<String>) {
+    private fun injectEmojiUrls(comment: Any, emojiUrls: List<String>, prepend: Boolean = true) {
         var imageList = CommentClassImageListField.get(comment) as? List<*>
         if (imageList.isNullOrEmpty()) {
             val newStruct = CommentImageStructClass.getConstructor().newInstance()
@@ -147,7 +150,19 @@ object CommentEmojiHooker : YukiBaseHooker() {
             urlModel = UrlModelClass.getConstructor().newInstance()
             CommentImageStructClassDownloadUrlField.set(targetStruct, urlModel)
         }
-        UrlModelClassUrlListField.set(urlModel, urls)
+
+        var finalUrls: List<String>? = if (prepend) {
+            @Suppress("UNCHECKED_CAST")
+            val imageUrls = UrlModelClassUrlListField.get(urlModel) as? List<String>
+            if (imageUrls.isNullOrEmpty()) {
+                emojiUrls
+            } else {
+                emojiUrls + imageUrls
+            }
+        } else {
+            emojiUrls
+        }
+        UrlModelClassUrlListField.set(urlModel, finalUrls)
     }
 
     private fun installSaveEmojiToAlbumButtonHook(bridge: DexKitBridge): YukiMemberHookCreator.MemberHookCreator.Result? {
@@ -218,6 +233,10 @@ object CommentEmojiHooker : YukiBaseHooker() {
             YLog.debug("$TAG: Target method found: ${result.className}.${result.methodName}")
 
             result.className.toClass().resolve().firstMethod { name = result.methodName }.hook {
+                var savedComment: Any? = null
+                var savedActionItem: Any? = null
+                var originImageUrlList: List<*>? = null
+                var originImageIndex = -1
                 before {
                     val cbkInstance = args[0] ?: return@before
 
@@ -228,18 +247,32 @@ object CommentEmojiHooker : YukiBaseHooker() {
                     val comment = extractComment(actionItem) ?: return@before
                     val emojiUrls = extractEmojiUrls(comment) ?: return@before
 
-                    overrideImageIndex(actionItem, 0)
-                    //TODO: prepend emoji urls to image url list
-                    replaceImageUrls(comment, emojiUrls)
+                    // store original state for after
+                    originImageUrlList = CommentClassImageListField.get(comment) as? List<*>
+                    originImageIndex = overrideImageIndex(actionItem, 0)
+                    savedActionItem = actionItem
+                    savedComment = comment
+
+                    injectEmojiUrls(comment, emojiUrls, prepend = true)
 
                     YLog.debug("$TAG: Injected ${emojiUrls.size} emoji url(s) into comment.")
 
                     YLog.warn("$TAG: HEIF to GIF conversion not yet implemented, saved file may not be viewable in gallery")
                 }
-                // TODO: restore original image URL list after emoji URL injection
-                /* after{
-
-                } */
+                after {
+                    savedComment?.let { c ->
+                        CommentClassImageListField.set(c, originImageUrlList)
+                        if (originImageIndex >= 0) {
+                            savedActionItem?.let {
+                                overrideImageIndex(it, originImageIndex)
+                            }
+                        }
+                    }
+                    savedComment = null
+                    savedActionItem = null
+                    originImageUrlList = null
+                    originImageIndex = -1
+                }
             }.result {
                 onConductFailure { param, throwable ->
                     YLog.error("$TAG: Download callback hook runtime error", throwable)
