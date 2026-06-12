@@ -1,13 +1,17 @@
 package com.yst.mkga.hook.dy.hook
 
+import android.content.Context
 import com.highcapable.kavaref.KavaRef.Companion.asResolver
 import com.highcapable.kavaref.KavaRef.Companion.resolve
+import com.highcapable.kavaref.condition.type.Modifiers
 import com.highcapable.yukihookapi.hook.core.YukiMemberHookCreator
 import com.highcapable.yukihookapi.hook.entity.YukiBaseHooker
 import com.highcapable.yukihookapi.hook.log.YLog
 import com.yst.mkga.hook.dy.hook.utils.HookTransaction
 import org.luckypray.dexkit.DexKitBridge
+import java.io.File
 import java.lang.reflect.Field
+import java.lang.reflect.Method
 import java.lang.reflect.Modifier
 
 object CommentEmojiHooker : YukiBaseHooker() {
@@ -20,6 +24,11 @@ object CommentEmojiHooker : YukiBaseHooker() {
     private val CommentActionParamsClass by lazyClass("com.ss.android.ugc.aweme.comment.CommentActionParams")
     private val CommentLongPressItemModelClass by lazyClass("com.ss.android.ugc.aweme.comment.ui.longpress.CommentLongPressItemModel")
     private val CommentImageStructClass by lazyClass("com.ss.android.ugc.aweme.comment.model.CommentImageStruct")
+    private val DownloadInfoClass by lazyClass("com.ss.android.socialbase.downloader.model.DownloadInfo")
+    private val UGFileUtilsKtClass by lazyClass("com.bytedance.android.ug.UGFileUtilsKt")
+    private val TokenCertClass by lazyClass("com.bytedance.bpea.cert.token.TokenCert")
+    private val DigestUtilsClass by lazyClass("com.bytedance.common.utility.DigestUtils")
+    private val CmtImageProgressDownloadListenerClass by lazyClass("com.ss.android.ugc.aweme.comment.helper.download.CmtImageProgressDownloadListener")
 
     private val CommentClassEmojiField: Field by lazy {
         CommentClass.resolve().firstField {
@@ -61,10 +70,124 @@ object CommentEmojiHooker : YukiBaseHooker() {
         }
     }
 
+    private val UGFileUtilsKtClassCopyFileMethod: Method by lazy {
+        UGFileUtilsKtClass.resolve().firstMethod {
+            name = "copyFile"
+            returnType = Boolean::class
+            modifiers(Modifiers.PUBLIC, Modifiers.STATIC, Modifiers.FINAL)
+            parameters(String::class, String::class, TokenCertClass)
+            parameterCount = 3
+        }.self.apply {
+            isAccessible = true
+        }
+    }
+
+    private val UGFileUtilsKtClassRemoveFileMethod: Method by lazy {
+        UGFileUtilsKtClass.resolve().firstMethod {
+            name = "removeFile"
+            returnType = Boolean::class
+            modifiers(Modifiers.PUBLIC, Modifiers.STATIC, Modifiers.FINAL)
+            parameters(String::class, String::class)
+            parameterCount = 2
+        }.self.apply {
+            isAccessible = true
+        }
+    }
+
+    private val UGFileUtilsKtClassGetStorageDirMethod: Method by lazy {
+        UGFileUtilsKtClass.resolve().firstMethod {
+            name = "getStorageDir"
+            returnType = String::class
+            modifiers(Modifiers.PUBLIC, Modifiers.STATIC, Modifiers.FINAL)
+            parameters(String::class, Boolean::class)
+            parameterCount = 2
+        }.self.apply {
+            isAccessible = true
+        }
+    }
+
+    private val UGFileUtilsKtClassGetExternalStorageDirectoryMethod: Method by lazy {
+        UGFileUtilsKtClass.resolve().firstMethod {
+            name = "getExternalStorageDirectory"
+            returnType = String::class
+            modifiers(Modifiers.PUBLIC, Modifiers.STATIC, Modifiers.FINAL)
+            parameters(String::class, Boolean::class)
+            parameterCount = 2
+        }.self.apply {
+            isAccessible = true
+        }
+    }
+
+    private val UGFileUtilsKtClassGetImageUriMethod: Method by lazy {
+        UGFileUtilsKtClass.resolve().firstMethod {
+            name = "getImageUri"
+            returnType = android.net.Uri::class
+            modifiers(Modifiers.PUBLIC, Modifiers.STATIC, Modifiers.FINAL)
+            parameters(android.content.Context::class, String::class, String::class, String::class, TokenCertClass)
+            parameterCount = 5
+        }.self.apply {
+            isAccessible = true
+        }
+    }
+
+    private val UGFileUtilsClassContextField: Field by lazy {
+        UGFileUtilsKtClass.resolve().firstField {
+            name = "context"
+        }.self.apply {
+            isAccessible = true
+        }
+    }
+
+    private val DigestUtilsClassMd5HexMethod: Method by lazy {
+        DigestUtilsClass.resolve().firstMethod {
+            name = "md5Hex"
+            returnType = String::class
+            modifiers(Modifiers.PUBLIC, Modifiers.STATIC)
+            parameters(String::class)
+            parameterCount = 1
+        }.self.apply {
+            isAccessible = true
+        }
+    }
+
+    private val CmtImageProgressDownloadListenerClassReportDownloadRetMethod: Method by lazy {
+        CmtImageProgressDownloadListenerClass.resolve().firstMethod {
+            modifiers(Modifiers.PUBLIC, Modifiers.FINAL)
+            parameters(Context::class, Boolean::class)
+            parameterCount = 2
+        }.self.apply {
+            isAccessible = true
+        }
+    }
+
     private var commentActionParamsClassCommentField: Field? = null
     private var commentActionParamsClassImageIndexField: Field? = null
     private var commentLongPressItemModelClassCommentActionParamsField: Field? = null
     private var saveImageActionItemClassCommentActionParamsField: Field? = null
+
+    private val downloadInfoClassUrlField: Field by lazy {
+        DownloadInfoClass.resolve().firstField {
+            name = "url"
+        }.self.apply {
+            isAccessible = true
+        }
+    }
+
+    private val downloadInfoClassSavePathField: Field by lazy {
+        DownloadInfoClass.resolve().firstField {
+            name = "savePath"
+        }.self.apply {
+            isAccessible = true
+        }
+    }
+
+    private val downloadInfoClassGetTargetFilePathMethod: Method by lazy {
+        DownloadInfoClass.resolve().firstMethod {
+            name = "getTargetFilePath"
+        }.self.apply {
+            isAccessible = true
+        }
+    }
 
     override fun onHook() {
         withProcess(mainProcessName) {
@@ -76,19 +199,26 @@ object CommentEmojiHooker : YukiBaseHooker() {
                 transaction.add(::installClickSaveEmojiToAlbumButtonCallbackHook.name) {
                     installClickSaveEmojiToAlbumButtonCallbackHook(bridge)
                 }
+                transaction.add(::installCreateGifUrihook.name) {
+                    installCreateGifUrihook(bridge)
+                }
+                transaction.add(::installEmojiDownloadedCallbackHook.name) {
+                    installEmojiDownloadedCallbackHook(bridge)
+                }
                 transaction.commit()
             }
         }
     }
 
     private fun extractActionParams(actionItem: Any): Any? {
-        val field = commentLongPressItemModelClassCommentActionParamsField ?: CommentLongPressItemModelClass.resolve()
-            .firstField {
-                type = CommentActionParamsClass.name
-            }.self.also {
-                it.isAccessible = true
-                commentLongPressItemModelClassCommentActionParamsField = it
-            }
+        val field = commentLongPressItemModelClassCommentActionParamsField
+            ?: CommentLongPressItemModelClass.resolve()
+                .firstField {
+                    type = CommentActionParamsClass.name
+                }.self.also {
+                    it.isAccessible = true
+                    commentLongPressItemModelClassCommentActionParamsField = it
+                }
         return field.get(actionItem)
     }
 
@@ -102,6 +232,13 @@ object CommentEmojiHooker : YukiBaseHooker() {
                 commentActionParamsClassCommentField = it
             }
         return field.get(params)
+    }
+
+    private fun convertHeif2Gif(heifPath: String, gifPath: String): Boolean {
+        return runCatching {
+            File(heifPath).copyTo(File(gifPath), overwrite = true)
+            true
+        }.getOrDefault(false)
     }
 
     private fun extractEmojiUrls(comment: Any): List<String>? {
@@ -288,6 +425,186 @@ object CommentEmojiHooker : YukiBaseHooker() {
             }
         } ?: run {
             YLog.warn("$TAG: Target method not found, download callback hook will not be installed")
+        }
+
+        return ret
+    }
+
+    private fun installEmojiDownloadedCallbackHook(bridge: DexKitBridge): YukiMemberHookCreator.MemberHookCreator.Result? {
+        var ret: YukiMemberHookCreator.MemberHookCreator.Result? = null
+
+        bridge.findMethod {
+            matcher {
+                name = "onSuccessed"
+                modifiers = Modifier.FINAL + Modifier.PUBLIC
+                returnType = "void"
+                params {
+                    add("com.ss.android.socialbase.downloader.model.DownloadInfo")
+                }
+                usingStrings {
+                    add("/douyin/comment")
+                    add("comment_")
+                }
+                invokeMethods {
+                    add {
+                        descriptor =
+                            "Lcom/bytedance/android/ug/UGFileUtilsKt;->copyFile(Ljava/lang/String;Ljava/lang/String;Lcom/bytedance/bpea/cert/token/TokenCert;)Z"
+                    }
+                }
+            }
+        }.singleOrNull()?.also { match ->
+            YLog.debug("$TAG: Target method found: ${match.className}.${match.methodName}")
+
+            match.className.toClass().resolve().firstMethod {
+                name = match.methodName
+            }.hook {
+                before {
+                    val downloadInfo = args[0] ?: return@before
+
+                    val dlUrl =
+                        downloadInfoClassUrlField.get(downloadInfo) as? String ?: return@before
+
+                    if (!dlUrl.contains(".heif")) {
+                        return@before
+                    }
+
+                    //val sourcePath =
+                    //downloadInfoClassSavePathField.get(downloadInfo) as? String ?: return@before
+                    val sourcePath =
+                        downloadInfoClassGetTargetFilePathMethod.invoke(downloadInfo) as? String
+                            ?: return@before
+                    YLog.debug("$TAG: Source path: $sourcePath")
+
+                    val gifFileName = "comment_${
+                        DigestUtilsClassMd5HexMethod.invoke(
+                            null,
+                            dlUrl + System.currentTimeMillis().toString()
+                        ) as String?
+                    }.gif"
+                    val gifTempPath = "${
+                        UGFileUtilsKtClassGetStorageDirMethod.invoke(
+                            null,
+                            "/comment/images",
+                            false
+                        ) as String
+                    }${File.separator}${gifFileName}"
+                    YLog.debug("$TAG: GIF temp path: $gifTempPath")
+                    if (!convertHeif2Gif(sourcePath, gifTempPath)) {
+                        YLog.error("$TAG: Convert HEIF To GIF failed")
+                        return@before
+                    }
+
+                    val gifSavePath = "${
+                        UGFileUtilsKtClassGetExternalStorageDirectoryMethod.invoke(
+                            null,
+                            "/douyin/comment",
+                            false
+                        ) as String
+                    }${File.separator}${gifFileName}"
+                    YLog.debug("$TAG: GIF save path: $gifSavePath")
+
+                    val cpRet = UGFileUtilsKtClassCopyFileMethod.invoke(
+                        null,
+                        gifTempPath,
+                        gifSavePath,
+                        TokenCertClass.getConstructor(String::class.java)
+                            .newInstance("bpea-comment_save_image_to_album")
+                    ) as Boolean
+
+                    File(gifTempPath).delete()
+
+                    val context =
+                        instance.asResolver().firstField().get()?.asResolver()?.firstField {
+                            type = Context::class
+                        }?.get<Context?>()
+
+                    YLog.debug("$TAG: cpRet: $cpRet")
+                    CmtImageProgressDownloadListenerClassReportDownloadRetMethod.invoke(
+                        instance,
+                        context,
+                        cpRet
+                    )
+
+                    resultNull()
+                }
+            }.result {
+                onConductFailure { param, throwable ->
+                    YLog.error("$TAG: Emoji download completion callback runtime error", throwable)
+                }
+                onHookingFailure { throwable ->
+                    YLog.error("$TAG: Failed to hook emoji download completion callback", throwable)
+                }
+                onHooked {
+                    YLog.info("$TAG: Emoji download completion callback hooked. Emoji will be converted to GIF before saving to album.")
+                }.also {
+                    ret = it
+                }
+            }
+        } ?: run {
+            YLog.warn("$TAG: Target method not found, emoji save completion callback will not be installed")
+        }
+
+        return ret
+    }
+
+    @Suppress("UNUSED_PARAMETER")
+    private fun installCreateGifUrihook(unused: DexKitBridge): YukiMemberHookCreator.MemberHookCreator.Result? {
+        var ret: YukiMemberHookCreator.MemberHookCreator.Result? = null
+
+        UGFileUtilsKtClass.resolve().firstMethod {
+            name = "createUri"
+            returnType = android.net.Uri::class
+            modifiers(Modifiers.PUBLIC, Modifiers.STATIC, Modifiers.FINAL)
+            parameters(String::class, Boolean::class, Array<android.net.Uri>::class, TokenCertClass)
+            parameterCount = 4
+        }.hook {
+            after {
+                val uriRet = result as? android.net.Uri
+                if (uriRet != null && uriRet != android.net.Uri.EMPTY) {
+                    return@after
+                }
+
+                val filePath = args[0] as? String
+                if (filePath.isNullOrEmpty() || !filePath.endsWith(".gif", ignoreCase = true)) {
+                    return@after
+                }
+
+                val context = UGFileUtilsClassContextField.get(null) as? Context ?: return@after
+                val fileName = filePath.substring(filePath.lastIndexOf(File.separator) + 1)
+                val fileRelPath = filePath.substring(1, filePath.lastIndexOf(File.separator) + 1)
+                val tokenCert = args[3]
+
+                val finalUri = UGFileUtilsKtClassGetImageUriMethod.invoke(
+                    null,
+                    context,
+                    fileName,
+                    "image/gif",
+                    fileRelPath,
+                    tokenCert
+                ) as? android.net.Uri ?: return@after
+                result = finalUri
+                YLog.debug("$TAG: finalUri: $finalUri")
+
+
+                @Suppress("UNCHECKED_CAST")
+                val uriArr = args[2] as? Array<android.net.Uri> ?: return@after
+
+                if (uriArr.isNotEmpty()) {
+                    uriArr[0] = finalUri
+                }
+            }
+        }.result {
+            onConductFailure { param, throwable ->
+                YLog.error("$TAG: createUri hook runtime error", throwable)
+            }
+            onHookingFailure { throwable ->
+                YLog.error("$TAG: Failed to hook createUri", throwable)
+            }
+            onHooked {
+                YLog.info("$TAG: createUri hooked. URI creation will be intercepted for emoji GIF conversion.")
+            }.also {
+                ret = it
+            }
         }
 
         return ret
