@@ -128,6 +128,7 @@ dependencies {
 
     // ------------------ 底层与工具库 ------------------
     implementation(libs.luckypray.dexkit)
+    implementation(libs.gifkt)
 
     // ---------------------- HOOK ----------------------
     // 基础依赖

@@ -1,18 +1,31 @@
 package com.yst.mkga.hook.dy.hook
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.media.MediaExtractor
+import android.media.MediaFormat
+import android.media.MediaMetadataRetriever
+import android.os.Build
+import java.io.File
+import java.lang.reflect.Field
+import java.lang.reflect.Method
+import java.lang.reflect.Modifier
+import kotlinx.io.buffered
+import kotlinx.io.files.Path
+import kotlinx.io.files.SystemFileSystem
+import kotlinx.io.Sink
+import kotlin.time.Duration.Companion.milliseconds
+
 import com.highcapable.kavaref.KavaRef.Companion.asResolver
 import com.highcapable.kavaref.KavaRef.Companion.resolve
 import com.highcapable.kavaref.condition.type.Modifiers
 import com.highcapable.yukihookapi.hook.core.YukiMemberHookCreator
 import com.highcapable.yukihookapi.hook.entity.YukiBaseHooker
 import com.highcapable.yukihookapi.hook.log.YLog
-import com.yst.mkga.hook.dy.hook.utils.HookTransaction
+import com.shakster.gifkt.GifEncoder
 import org.luckypray.dexkit.DexKitBridge
-import java.io.File
-import java.lang.reflect.Field
-import java.lang.reflect.Method
-import java.lang.reflect.Modifier
+
+import com.yst.mkga.hook.dy.hook.utils.HookTransaction
 
 object CommentEmojiHooker : YukiBaseHooker() {
     private val TAG = this::class.simpleName
@@ -123,7 +136,13 @@ object CommentEmojiHooker : YukiBaseHooker() {
             name = "getImageUri"
             returnType = android.net.Uri::class
             modifiers(Modifiers.PUBLIC, Modifiers.STATIC, Modifiers.FINAL)
-            parameters(android.content.Context::class, String::class, String::class, String::class, TokenCertClass)
+            parameters(
+                android.content.Context::class,
+                String::class,
+                String::class,
+                String::class,
+                TokenCertClass
+            )
             parameterCount = 5
         }.self.apply {
             isAccessible = true
@@ -234,11 +253,131 @@ object CommentEmojiHooker : YukiBaseHooker() {
         return field.get(params)
     }
 
-    private fun convertHeif2Gif(heifPath: String, gifPath: String): Boolean {
-        return runCatching {
-            File(heifPath).copyTo(File(gifPath), overwrite = true)
-            true
-        }.getOrDefault(false)
+    private fun convertMedia2Gif(mediaPath: String, gifPath: String): Boolean {
+        var extractor: MediaExtractor? = null
+        var retriever: MediaMetadataRetriever? = null
+        var encoder: GifEncoder? = null
+        var sink: Sink? = null
+
+        try {
+            // 1. Initialize MediaExtractor
+            extractor = MediaExtractor().apply {
+                setDataSource(mediaPath)
+            }
+
+            // Find the visual track
+            var trackIndex = -1
+            for (i in 0 until extractor.trackCount) {
+                val format = extractor.getTrackFormat(i)
+                val mime = format.getString(MediaFormat.KEY_MIME) ?: ""
+                YLog.debug("$TAG: track[$i] mime=$mime")
+                if (mime.startsWith("video/") || mime.startsWith("image/")) {
+                    trackIndex = i
+                    break
+                }
+            }
+
+            // If no track is found, we can't process it
+            if (trackIndex == -1) {
+                YLog.warn("$TAG: No video/image track found in $mediaPath")
+                return false
+            }
+            extractor.selectTrack(trackIndex)
+
+            // 2. Iterate to fetch timestamps
+            val timestampsUs = mutableListOf<Long>()
+            while (true) {
+                val time = extractor.sampleTime
+                if (time < 0) {
+                    break // End of stream
+                }
+                timestampsUs.add(time)
+                extractor.advance()
+            }
+
+            if (timestampsUs.isEmpty()) {
+                YLog.warn("$TAG: No timestamps extracted from $mediaPath")
+                return false
+            }
+
+            // 3. Initialize MediaMetadataRetriever
+            retriever = MediaMetadataRetriever()
+            retriever.setDataSource(mediaPath)
+
+            // 4. Initialize gif.kt Multiplatform Encoder
+            val outPath = Path(gifPath)
+            sink = SystemFileSystem.sink(outPath).buffered()
+            encoder = GifEncoder(sink)
+
+            // 5. Process each frame
+            for (i in timestampsUs.indices) {
+                val currentUs = timestampsUs[i]
+
+                // Calculate delay: difference to next timestamp, duplicate the previous delta for the final frame
+                val nextUs = if (i + 1 < timestampsUs.size) {
+                    timestampsUs[i + 1]
+                } else {
+                    if (i > 0) timestampsUs[i] + (timestampsUs[i] - timestampsUs[i - 1]) else currentUs + 100_000L
+                }
+
+                val delayMs = ((nextUs - currentUs) / 1000L).coerceAtLeast(10L)
+
+                // Extract frame
+                var bitmap: Bitmap? = null
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                    try {
+                        // Try by index for animated
+                        bitmap = retriever.getFrameAtIndex(i)
+                    } catch (e: Exception) {
+                        // Fallback
+                    }
+                }
+
+                // Fallback for static or if index retrieval fails
+                if (bitmap == null) {
+                    // If it's a single frame, getFrameAtTime(0) works reliably for HEIC
+                    bitmap =
+                        retriever.getFrameAtTime(currentUs, MediaMetadataRetriever.OPTION_CLOSEST)
+                }
+
+                if (bitmap == null) continue
+
+                val width = bitmap.width
+                val height = bitmap.height
+                val pixels = IntArray(width * height)
+
+                // 6. Convert Bitmap to IntArray
+                bitmap.getPixels(pixels, 0, width, 0, 0, width, height)
+
+                // 7. Write frame to GIF
+                encoder.writeFrame(pixels, width, height, delayMs.milliseconds)
+
+                bitmap.recycle()
+            }
+
+            return true
+        } catch (e: Exception) {
+            YLog.error("$TAG: convertMedia2Gif failed", e)
+            return false
+        } finally {
+            // Enforce rigorous cleanup
+            try {
+                extractor?.release()
+            } catch (e: Exception) {
+            }
+            try {
+                retriever?.release()
+            } catch (e: Exception) {
+            }
+            try {
+                encoder?.close()
+            } catch (e: Exception) {
+            }
+            try {
+                sink?.close()
+            } catch (e: Exception) {
+            }
+        }
     }
 
     private fun extractEmojiUrls(comment: Any): List<String>? {
@@ -392,7 +531,13 @@ object CommentEmojiHooker : YukiBaseHooker() {
 
                     injectEmojiUrls(comment, emojiUrls, prepend = true)
 
-                    YLog.debug("$TAG: Injected ${emojiUrls.size} emoji url(s) into comment.")
+                    YLog.debug(
+                        "$TAG: Injected ${emojiUrls.size} emoji url(s) into comment, emoji url list[0]: ${
+                            emojiUrls.getOrNull(
+                                0
+                            ) ?: "null"
+                        }"
+                    )
 
                     YLog.warn("$TAG: HEIF to GIF conversion not yet implemented, saved file may not be viewable in gallery")
                 }
@@ -489,7 +634,8 @@ object CommentEmojiHooker : YukiBaseHooker() {
                         ) as String
                     }${File.separator}${gifFileName}"
                     YLog.debug("$TAG: GIF temp path: $gifTempPath")
-                    if (!convertHeif2Gif(sourcePath, gifTempPath)) {
+
+                    if (!convertMedia2Gif(sourcePath, gifTempPath)) {
                         YLog.error("$TAG: Convert HEIF To GIF failed")
                         return@before
                     }
@@ -584,7 +730,6 @@ object CommentEmojiHooker : YukiBaseHooker() {
                 ) as? android.net.Uri ?: return@after
                 result = finalUri
                 YLog.debug("$TAG: finalUri: $finalUri")
-
 
                 @Suppress("UNCHECKED_CAST")
                 val uriArr = args[2] as? Array<android.net.Uri> ?: return@after
