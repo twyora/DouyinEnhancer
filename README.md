@@ -32,3 +32,4 @@ A small Xposed module that adds quality-of-life features to Douyin.
 - [KavaRef](https://github.com/HighCapable/KavaRef) for reflection API support
 - [Gropify](https://github.com/HighCapable/Gropify) for managing build configuration
 - [gif.kt](https://github.com/shaksternano/gif.kt) for GIF encoding and decoding
+- [RestoreSplashScreen](https://github.com/GSWXXN/RestoreSplashScreen) for being the core inspiration for this project, with deep references in build configurations, hook logic organization, Android CI setups, and so on.

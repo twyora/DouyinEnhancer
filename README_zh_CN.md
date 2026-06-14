@@ -32,3 +32,4 @@
 - 使用 [KavaRef](https://github.com/HighCapable/KavaLib) 提供反射 API 支持
 - 使用 [Gropify](https://github.com/HighCapable/Gropify) 管理项目构建配置
 - 使用 [gif.kt](https://github.com/shaksternano/gif.kt) 处理 GIF 动图的编码与解码
+- [RestoreSplashScreen](https://github.com/GSWXXN/RestoreSplashScreen) 是本人初次接触 Xposed 时的启蒙模块，第一次让我领略到 Xposed 的强大，也因此成为后来开发本项目的“白月光”与灵感源泉。本项目在构建配置、Hook 代码组织、Android CI 搭建等方面大量借鉴了[迷璐](https://github.com/GSWXXN)的设计思路。
