@@ -6,6 +6,7 @@ import android.media.MediaExtractor
 import android.media.MediaFormat
 import android.media.MediaMetadataRetriever
 import android.os.Build
+import android.webkit.MimeTypeMap
 import java.io.File
 import java.lang.reflect.Field
 import java.lang.reflect.Method
@@ -711,9 +712,12 @@ object CommentEmojiHooker : YukiBaseHooker() {
                 }
 
                 val filePath = args[0] as? String
-                if (filePath.isNullOrEmpty() || !filePath.endsWith(".gif", ignoreCase = true)) {
+                if (filePath.isNullOrEmpty()) {
                     return@after
                 }
+
+                val fileExt = filePath.substringAfterLast('.', "")
+                val fileMimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(fileExt) ?: return@after
 
                 val context = UGFileUtilsClassContextField.get(null) as? Context ?: return@after
                 val fileName = filePath.substring(filePath.lastIndexOf(File.separator) + 1)
@@ -724,7 +728,7 @@ object CommentEmojiHooker : YukiBaseHooker() {
                     null,
                     context,
                     fileName,
-                    "image/gif",
+                    fileMimeType,
                     fileRelPath,
                     tokenCert
                 ) as? android.net.Uri ?: return@after
