@@ -27,6 +27,7 @@ import com.shakster.gifkt.GifEncoder
 import org.luckypray.dexkit.DexKitBridge
 
 import com.yst.mkga.hook.dy.hook.utils.HookTransaction
+import com.yst.mkga.hook.dy.hook.utils.FileTypeDetector
 
 object CommentEmojiHooker : YukiBaseHooker() {
     private val TAG = this::class.simpleName
@@ -614,51 +615,76 @@ object CommentEmojiHooker : YukiBaseHooker() {
                         return@before
                     }
 
-                    //val sourcePath =
-                    //downloadInfoClassSavePathField.get(downloadInfo) as? String ?: return@before
                     val sourcePath =
                         downloadInfoClassGetTargetFilePathMethod.invoke(downloadInfo) as? String
                             ?: return@before
                     YLog.debug("$TAG: Source path: $sourcePath")
 
-                    val gifFileName = "comment_${
+                    val saveFileMimeType = FileTypeDetector.detect(sourcePath).mimeType
+                    YLog.debug("$TAG: Save file mime type: $saveFileMimeType")
+
+                    val saveFilePrefix = "comment_${
                         DigestUtilsClassMd5HexMethod.invoke(
                             null,
                             dlUrl + System.currentTimeMillis().toString()
                         ) as String?
-                    }.gif"
-                    val gifTempPath = "${
-                        UGFileUtilsKtClassGetStorageDirMethod.invoke(
-                            null,
-                            "/comment/images",
-                            false
-                        ) as String
-                    }${File.separator}${gifFileName}"
-                    YLog.debug("$TAG: GIF temp path: $gifTempPath")
+                    }"
 
-                    if (!convertMedia2Gif(sourcePath, gifTempPath)) {
-                        YLog.error("$TAG: Convert HEIF To GIF failed")
-                        return@before
+                    var cpRet: Boolean? = null
+                    if (saveFileMimeType.startsWith("video/")) {
+                        val saveFileName = "${saveFilePrefix}.gif"
+                        val saveFilePath = "${
+                            UGFileUtilsKtClassGetExternalStorageDirectoryMethod.invoke(
+                                null,
+                                "/douyin/comment",
+                                false
+                            ) as String
+                        }${File.separator}${saveFileName}"
+                        YLog.debug("$TAG: GIF save path: $saveFilePath")
+
+                        val gifTempPath = "${
+                            UGFileUtilsKtClassGetStorageDirMethod.invoke(
+                                null,
+                                "/comment/images",
+                                false
+                            ) as String
+                        }${File.separator}${saveFileName}"
+                        YLog.debug("$TAG: GIF temp path: $gifTempPath")
+
+                        if (!convertMedia2Gif(sourcePath, gifTempPath)) {
+                            YLog.error("$TAG: Convert HEIF To GIF failed")
+                            return@before
+                        }
+
+                        cpRet = UGFileUtilsKtClassCopyFileMethod.invoke(
+                            null,
+                            gifTempPath,
+                            saveFilePath,
+                            TokenCertClass.getConstructor(String::class.java)
+                                .newInstance("bpea-comment_save_image_to_album")
+                        ) as Boolean
+
+                        File(gifTempPath).delete()
+                    } else {
+                        val saveFileExt = MimeTypeMap.getSingleton().getExtensionFromMimeType(saveFileMimeType)
+                            ?: sourcePath.substringAfterLast('.', "")
+                        val saveFileName = "${saveFilePrefix}.${saveFileExt}"
+                        val saveFilePath = "${
+                            UGFileUtilsKtClassGetExternalStorageDirectoryMethod.invoke(
+                                null,
+                                "/douyin/comment",
+                                false
+                            ) as String
+                        }${File.separator}${saveFileName}"
+
+                        cpRet = UGFileUtilsKtClassCopyFileMethod.invoke(
+                            null,
+                            sourcePath,
+                            saveFilePath,
+                            TokenCertClass.getConstructor(String::class.java)
+                                .newInstance("bpea-comment_save_image_to_album")
+                        ) as Boolean
                     }
-
-                    val gifSavePath = "${
-                        UGFileUtilsKtClassGetExternalStorageDirectoryMethod.invoke(
-                            null,
-                            "/douyin/comment",
-                            false
-                        ) as String
-                    }${File.separator}${gifFileName}"
-                    YLog.debug("$TAG: GIF save path: $gifSavePath")
-
-                    val cpRet = UGFileUtilsKtClassCopyFileMethod.invoke(
-                        null,
-                        gifTempPath,
-                        gifSavePath,
-                        TokenCertClass.getConstructor(String::class.java)
-                            .newInstance("bpea-comment_save_image_to_album")
-                    ) as Boolean
-
-                    File(gifTempPath).delete()
 
                     val context =
                         instance.asResolver().firstField().get()?.asResolver()?.firstField {
