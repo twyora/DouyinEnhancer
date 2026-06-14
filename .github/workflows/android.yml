@@ -34,11 +34,13 @@ jobs:
             bash ./gradlew :app:assembleAppRelease
             bash ./gradlew :app:assembleAppRelease
             echo "APK_FILE=$(find app/build/outputs/apk/App/release/ -name '*.apk' | head -n 1)" >> $GITHUB_ENV
+            echo "ARTIFACT_NAME=DouyinEnhancer_App_Release" >> $GITHUB_ENV
             echo "Building Type: App Release Version" >> $GITHUB_STEP_SUMMARY
           else
             bash ./gradlew :app:assembleCIRelease
             bash ./gradlew :app:assembleCIRelease
             echo "APK_FILE=$(find app/build/outputs/apk/CI/release/ -name '*.apk' | head -n 1)" >> $GITHUB_ENV
+            echo "ARTIFACT_NAME=DouyinEnhancer_CI_Release" >> $GITHUB_ENV
             echo "Building Type: CI Release Version" >> $GITHUB_STEP_SUMMARY
           fi
         env:
@@ -50,7 +52,7 @@ jobs:
       - name: Upload a Build Artifact
         uses: actions/upload-artifact@v7.0.1
         with:
-          name: DouyinEnhancer_CI_Release
+          name: ${{ env.ARTIFACT_NAME }}
           path: ${{ env.APK_FILE }}
 
       - name: Display APK Hashes
