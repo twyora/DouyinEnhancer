@@ -33,6 +33,7 @@ object CommentEmojiHooker : YukiBaseHooker() {
     private val TAG = this::class.simpleName
 
     private val CmtImageProgressDownloadListenerClass by lazyClass("com.ss.android.ugc.aweme.comment.helper.download.CmtImageProgressDownloadListener")
+
     // notify result (log tracing + show toast)
     private val CmtImageProgressDownloadListenerClassNotifyResultMethod: Method by lazy {
         CmtImageProgressDownloadListenerClass.resolve().firstMethod {
@@ -45,6 +46,7 @@ object CommentEmojiHooker : YukiBaseHooker() {
     }
 
     private val CommentClass by lazyClass("com.ss.android.ugc.aweme.comment.model.Comment")
+
     // linked Emoji object
     private val CommentClassEmojiField: Field by lazy {
         CommentClass.resolve().firstField {
@@ -53,6 +55,7 @@ object CommentEmojiHooker : YukiBaseHooker() {
             isAccessible = true
         }
     }
+
     //comment image list (List<CommentImageStruct>)
     private val CommentClassImageListField: Field by lazy {
         CommentClass.resolve().firstField {
@@ -63,13 +66,16 @@ object CommentEmojiHooker : YukiBaseHooker() {
     }
 
     private val CommentActionParamsClass by lazyClass("com.ss.android.ugc.aweme.comment.CommentActionParams")
+
     // the associated Comment
     private var commentActionParamsClassCommentField: Field? = null
+
     // current image index (int)
     private var commentActionParamsClassImageIndexField: Field? = null
 
     // comment image data
     private val CommentImageStructClass by lazyClass("com.ss.android.ugc.aweme.comment.model.CommentImageStruct")
+
     // image download URL (UrlModel)
     private val CommentImageStructClassDownloadUrlField: Field by lazy {
         CommentImageStructClass.resolve().firstField {
@@ -80,10 +86,12 @@ object CommentEmojiHooker : YukiBaseHooker() {
     }
 
     private val CommentLongPressItemModelClass by lazyClass("com.ss.android.ugc.aweme.comment.ui.longpress.CommentLongPressItemModel")
+
     // CommentActionParams carried by the menu item
     private var commentLongPressItemModelClassCommentActionParamsField: Field? = null
 
     private val DigestUtilsClass by lazyClass("com.bytedance.common.utility.DigestUtils")
+
     // md5Hex(String): String
     private val DigestUtilsClassMd5HexMethod: Method by lazy {
         DigestUtilsClass.resolve().firstMethod {
@@ -98,6 +106,7 @@ object CommentEmojiHooker : YukiBaseHooker() {
     }
 
     private val DownloadInfoClass by lazyClass("com.ss.android.socialbase.downloader.model.DownloadInfo")
+
     // url: download URL
     private val downloadInfoClassUrlField: Field by lazy {
         DownloadInfoClass.resolve().firstField {
@@ -106,6 +115,7 @@ object CommentEmojiHooker : YukiBaseHooker() {
             isAccessible = true
         }
     }
+
     // getTargetFilePath(): String
     private val downloadInfoClassGetTargetFilePathMethod: Method by lazy {
         DownloadInfoClass.resolve().firstMethod {
@@ -116,6 +126,7 @@ object CommentEmojiHooker : YukiBaseHooker() {
     }
 
     private val EmojiClass by lazyClass("com.ss.android.ugc.aweme.emoji.model.Emoji")
+
     // animateUrl: animated emoji URL
     private val EmojiClassAnimateUrlField: Field by lazy {
         EmojiClass.resolve().firstField {
@@ -127,6 +138,7 @@ object CommentEmojiHooker : YukiBaseHooker() {
 
     // save-image long-press action
     private val SaveImageActionItemClass by lazyClass("com.ss.android.ugc.aweme.comment.manager.longclickaction.actions.SaveImageActionItem")
+
     // CommentActionParams carried by the action item
     private var saveImageActionItemClassCommentActionParamsField: Field? = null
 
@@ -149,6 +161,7 @@ object CommentEmojiHooker : YukiBaseHooker() {
             isAccessible = true
         }
     }
+
     // get internal storage dir
     private val UGFileUtilsKtClassGetStorageDirMethod: Method by lazy {
         UGFileUtilsKtClass.resolve().firstMethod {
@@ -161,6 +174,7 @@ object CommentEmojiHooker : YukiBaseHooker() {
             isAccessible = true
         }
     }
+
     // get external album dir
     private val UGFileUtilsKtClassGetExternalStorageDirectoryMethod: Method by lazy {
         UGFileUtilsKtClass.resolve().firstMethod {
@@ -173,6 +187,7 @@ object CommentEmojiHooker : YukiBaseHooker() {
             isAccessible = true
         }
     }
+
     // create media store URI
     private val UGFileUtilsKtClassGetImageUriMethod: Method by lazy {
         UGFileUtilsKtClass.resolve().firstMethod {
@@ -201,6 +216,7 @@ object CommentEmojiHooker : YukiBaseHooker() {
 
     // URL list model with multiple CDN URLs
     private val UrlModelClass by lazyClass("com.ss.android.ugc.aweme.base.model.UrlModel")
+
     // download URL list ( List<String> )
     private val UrlModelClassUrlListField: Field by lazy {
         UrlModelClass.resolve().firstField {
@@ -334,7 +350,7 @@ object CommentEmojiHooker : YukiBaseHooker() {
 
                     injectEmojiUrls(comment, emojiUrls, prepend = true)
 
-                    YLog.debug( "$TAG: Injected ${emojiUrls.size} emoji url(s) into comment")
+                    YLog.debug("$TAG: Injected ${emojiUrls.size} emoji url(s) into comment")
                 }
                 // undo temporary edits — restore comment.imageList and actionItem.imageIndex
                 after {
@@ -429,6 +445,11 @@ object CommentEmojiHooker : YukiBaseHooker() {
                         .getExtensionFromMimeType(sourceMimeType)
                         ?: sourcePath.substringAfterLast('.', "")
                     var hasTempFile = false
+
+                    if (!sourceMimeType.startsWith("image/") && !sourceMimeType.startsWith("video/")) {
+                        YLog.error("$TAG: Source MIME type restricted, not allowed: $sourceMimeType")
+                        return@before
+                    }
 
                     // Convert video source to GIF animation
                     if (sourceMimeType.startsWith("video/")) {
@@ -530,7 +551,16 @@ object CommentEmojiHooker : YukiBaseHooker() {
                     return@after
                 }
                 val fileExt = filePath.substringAfterLast('.', "")
-                val fileMimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(fileExt) ?: return@after
+
+                val fileMimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(fileExt)
+                if (fileMimeType == null) {
+                    YLog.error("$TAG: createUri failed, unable to resolve MIME type")
+                    return@after
+                } else if (!(fileMimeType.startsWith("image/") || fileMimeType.startsWith("video/"))) {
+                    YLog.error("$TAG: createUri is not allowed for restricted MIME type. mimeType=$fileMimeType")
+                    return@after
+                }
+
                 val fileName = filePath.substring(filePath.lastIndexOf(File.separator) + 1)
                 // Ensure the virtual path has no leading '/' but strictly retains a trailing '/'.
                 val fileRelPath = filePath.substring(1, filePath.lastIndexOf(File.separator) + 1)
