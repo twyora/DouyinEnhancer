@@ -45,7 +45,6 @@ object CommentImageHooker : YukiBaseHooker() {
                     }.result {
                         onConductFailure { param, throwable ->
                             YLog.error("$TAG: Unable to replace with original image URL: ${throwable.message}")
-                            param.result = param.callOriginal()
                         }
                     }
                 } ?: run {
