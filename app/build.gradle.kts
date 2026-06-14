@@ -89,6 +89,9 @@ android {
     }
 
     packaging {
+        resources {
+            merges += "META-INF/yukihookapi_init"
+        }
         jniLibs {
             keepDebugSymbols += "**/libdexkit.so"
         }
