@@ -11,6 +11,7 @@ ksp = "2.3.9"
 kavaref-core = "1.0.3"
 kavaref-extension = "1.0.3"
 dexkit = "2.2.0"
+gifkt = "0.3.3"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -29,6 +30,7 @@ kavaref-extension = { module = "com.highcapable.kavaref:kavaref-extension", vers
 # 作为 Xposed 模块使用务必添加，其它情况可选
 xposed-api = { module = "de.robv.android.xposed:api", version = "82" }
 luckypray-dexkit = { group = "org.luckypray", name = "dexkit", version.ref = "dexkit" }
+gifkt = { module = "com.shakster:gifkt", version.ref = "gifkt" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
