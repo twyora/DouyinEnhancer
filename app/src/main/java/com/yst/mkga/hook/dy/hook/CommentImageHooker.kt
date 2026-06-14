@@ -31,7 +31,7 @@ object CommentImageHooker : YukiBaseHooker() {
                         }
                     }
                 }.singleOrNull()?.also { match ->
-                    YLog.debug("$TAG: Target method found: ${match.className}.${match.methodName}")
+                    YLog.info("$TAG: Target method found: ${match.className}.${match.methodName}")
 
                     match.className.toClass().resolve().firstMethod {
                         name = match.methodName
@@ -44,7 +44,7 @@ object CommentImageHooker : YukiBaseHooker() {
                         }
                     }.result {
                         onConductFailure { param, throwable ->
-                            YLog.error("$TAG: Unable to replace with original image URL: ${throwable.message}")
+                            YLog.error("$TAG: Unable to replace with original image URL: ", throwable)
                         }
                     }
                 } ?: run {

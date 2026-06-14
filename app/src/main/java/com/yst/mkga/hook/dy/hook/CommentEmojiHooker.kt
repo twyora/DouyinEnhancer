@@ -578,7 +578,6 @@ object CommentEmojiHooker : YukiBaseHooker() {
                 ) as? android.net.Uri ?: return@after
                 // replace the hook's return value with the URI we just created
                 result = finalUri
-                YLog.debug("$TAG: finalUri: $finalUri")
 
                 // also write into the caller's out-parameter array
                 @Suppress("UNCHECKED_CAST")
@@ -781,7 +780,9 @@ object CommentEmojiHooker : YukiBaseHooker() {
                         retriever.getFrameAtTime(currentUs, MediaMetadataRetriever.OPTION_CLOSEST)
                 }
 
-                if (bitmap == null) continue
+                if (bitmap == null) {
+                    continue
+                }
 
                 val width = bitmap.width
                 val height = bitmap.height
