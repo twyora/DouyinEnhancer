@@ -68,10 +68,22 @@ object CommentEmojiHooker : YukiBaseHooker() {
     private val CommentActionParamsClass by lazyClass("com.ss.android.ugc.aweme.comment.CommentActionParams")
 
     // the associated Comment
-    private var commentActionParamsClassCommentField: Field? = null
+    private val commentActionParamsClassCommentField: Field by lazy {
+        CommentActionParamsClass.resolve().firstField {
+            type = CommentClass.name
+        }.self.also {
+            it.isAccessible = true
+        }
+    }
 
     // current image index (int)
-    private var commentActionParamsClassImageIndexField: Field? = null
+    private val commentActionParamsClassImageIndexField: Field by lazy {
+        CommentActionParamsClass.resolve().firstField {
+            type = Int::class
+        }.self.also {
+            it.isAccessible = true
+        }
+    }
 
     // comment image data
     private val CommentImageStructClass by lazyClass("com.ss.android.ugc.aweme.comment.model.CommentImageStruct")
@@ -88,7 +100,14 @@ object CommentEmojiHooker : YukiBaseHooker() {
     private val CommentLongPressItemModelClass by lazyClass("com.ss.android.ugc.aweme.comment.ui.longpress.CommentLongPressItemModel")
 
     // CommentActionParams carried by the menu item
-    private var commentLongPressItemModelClassCommentActionParamsField: Field? = null
+    private val commentLongPressItemModelClassCommentActionParamsField: Field by lazy {
+        CommentLongPressItemModelClass.resolve()
+            .firstField {
+                type = CommentActionParamsClass.name
+            }.self.also {
+                it.isAccessible = true
+            }
+    }
 
     private val DigestUtilsClass by lazyClass("com.bytedance.common.utility.DigestUtils")
 
@@ -140,7 +159,13 @@ object CommentEmojiHooker : YukiBaseHooker() {
     private val SaveImageActionItemClass by lazyClass("com.ss.android.ugc.aweme.comment.manager.longclickaction.actions.SaveImageActionItem")
 
     // CommentActionParams carried by the action item
-    private var saveImageActionItemClassCommentActionParamsField: Field? = null
+    private val saveImageActionItemClassCommentActionParamsField: Field by lazy {
+        SaveImageActionItemClass.resolve().firstField {
+            type = CommentActionParamsClass.name
+        }.self.also {
+            it.isAccessible = true
+        }
+    }
 
     // BPEA cert token for media store auth
     private val TokenCertClass by lazyClass("com.bytedance.bpea.cert.token.TokenCert")
@@ -605,28 +630,13 @@ object CommentEmojiHooker : YukiBaseHooker() {
 
     // Gets CommentActionParams held by a long-press menu item
     private fun extractActionParams(actionItem: Any): Any? {
-        val field = commentLongPressItemModelClassCommentActionParamsField
-            ?: CommentLongPressItemModelClass.resolve()
-                .firstField {
-                    type = CommentActionParamsClass.name
-                }.self.also {
-                    it.isAccessible = true
-                    commentLongPressItemModelClassCommentActionParamsField = it
-                }
-        return field.get(actionItem)
+        return commentLongPressItemModelClassCommentActionParamsField.get(actionItem)
     }
 
     // Gets the Comment from a long-press menu item
     private fun extractComment(actionItem: Any): Any? {
         val params = extractActionParams(actionItem) ?: return null
-        val field = commentActionParamsClassCommentField
-            ?: CommentActionParamsClass.resolve().firstField {
-                type = CommentClass.name
-            }.self.also {
-                it.isAccessible = true
-                commentActionParamsClassCommentField = it
-            }
-        return field.get(params)
+        return commentActionParamsClassCommentField.get(params)
     }
 
     // Gets emoji download URLs from comment.emoji.animateUrl.urlList
@@ -671,25 +681,9 @@ object CommentEmojiHooker : YukiBaseHooker() {
 
     // Sets a new image index on the save-image action, returns the previous one
     private fun overrideImageIndex(actionItem: Any, index: Int): Int {
-        val paramsField = saveImageActionItemClassCommentActionParamsField
-            ?: SaveImageActionItemClass.resolve().firstField {
-                type = CommentActionParamsClass.name
-            }.self.also {
-                it.isAccessible = true
-                saveImageActionItemClassCommentActionParamsField = it
-            }
-
-        val params = paramsField.get(actionItem) ?: return -1
-        val field = commentActionParamsClassImageIndexField
-            ?: CommentActionParamsClass.resolve().firstField {
-                type = Int::class
-            }.self.also {
-                it.isAccessible = true
-                commentActionParamsClassImageIndexField = it
-            }
-
-        val originImageIndex = field.get(params) as Int
-        field.set(params, index)
+        val params = saveImageActionItemClassCommentActionParamsField.get(actionItem) ?: return -1
+        val originImageIndex = commentActionParamsClassImageIndexField.get(params) as Int
+        commentActionParamsClassImageIndexField.set(params, index)
         return originImageIndex
     }
 
