@@ -11,8 +11,16 @@ A small Xposed module that adds quality-of-life features to Douyin.
 
 ## Features
 
-1. Download comment images without watermark
-2. Save comment emojis to album
+- Download comment images without watermark
+- Save comment emojis to album
+
+## TODO
+
+- Video filtering
+- Save playing content to album
+- Save favorited emojis to album
+- Module settings UI
+- Cache obfuscated method lookup results for faster host app startup
 
 ## Usage
 
