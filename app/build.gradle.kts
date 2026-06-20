@@ -1,9 +1,11 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import com.google.protobuf.gradle.*
 
 plugins {
     alias(libs.plugins.android.application)
     // 作为 Xposed 模块使用务必添加，其它情况可选
     alias(libs.plugins.ksp)
+    alias(libs.plugins.protobuf)
 }
 
 android {
@@ -121,6 +123,25 @@ kotlin {
     }
 }
 
+protobuf {
+    protoc {
+        artifact = libs.protobuf.protoc.get().toString()
+    }
+
+    generateProtoTasks {
+        all().forEach { task ->
+            task.plugins {
+                id("java") {
+                    option("lite")
+                }
+                id("kotlin") {
+                    option("lite")
+                }
+            }
+        }
+    }
+}
+
 dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.core.ktx)
@@ -132,6 +153,8 @@ dependencies {
     // ------------------ 底层与工具库 ------------------
     implementation(libs.luckypray.dexkit)
     implementation(libs.gifkt)
+    implementation(libs.protobuf.javalite)
+    implementation(libs.protobuf.kotlin.lite)
 
     // ---------------------- HOOK ----------------------
     // 基础依赖
