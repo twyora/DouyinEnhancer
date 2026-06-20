@@ -20,3 +20,5 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 -dontwarn java.lang.reflect.AnnotatedType
+
+-keepclassmembers class * extends com.google.protobuf.GeneratedMessageLite { *; }
