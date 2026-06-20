@@ -28,228 +28,10 @@ import org.luckypray.dexkit.DexKitBridge
 
 import com.yst.mkga.hook.dy.hook.utils.HookTransaction
 import com.yst.mkga.hook.dy.hook.utils.FileTypeDetector
+import com.yst.mkga.hook.dy.hook.utils.toClassIfPrimitiveElseString
 
 object CommentEmojiHooker : YukiBaseHooker() {
     private val TAG = this::class.simpleName
-
-    private val CmtImageProgressDownloadListenerClass by lazyClass("com.ss.android.ugc.aweme.comment.helper.download.CmtImageProgressDownloadListener")
-
-    // notify result (log tracing + show toast)
-    private val CmtImageProgressDownloadListenerClassNotifyResultMethod: Method by lazy {
-        CmtImageProgressDownloadListenerClass.resolve().firstMethod {
-            modifiers(Modifiers.PUBLIC, Modifiers.FINAL)
-            parameters(Context::class, Boolean::class)
-            parameterCount = 2
-        }.self.apply {
-            isAccessible = true
-        }
-    }
-
-    private val CommentClass by lazyClass("com.ss.android.ugc.aweme.comment.model.Comment")
-
-    // linked Emoji object
-    private val CommentClassEmojiField: Field by lazy {
-        CommentClass.resolve().firstField {
-            name = "emoji"
-        }.self.apply {
-            isAccessible = true
-        }
-    }
-
-    //comment image list (List<CommentImageStruct>)
-    private val CommentClassImageListField: Field by lazy {
-        CommentClass.resolve().firstField {
-            name = "imageList"
-        }.self.apply {
-            isAccessible = true
-        }
-    }
-
-    private val CommentActionParamsClass by lazyClass("com.ss.android.ugc.aweme.comment.CommentActionParams")
-
-    // the associated Comment
-    private val commentActionParamsClassCommentField: Field by lazy {
-        CommentActionParamsClass.resolve().firstField {
-            type = CommentClass.name
-        }.self.also {
-            it.isAccessible = true
-        }
-    }
-
-    // current image index (int)
-    private val commentActionParamsClassImageIndexField: Field by lazy {
-        CommentActionParamsClass.resolve().firstField {
-            type = Int::class
-        }.self.also {
-            it.isAccessible = true
-        }
-    }
-
-    // comment image data
-    private val CommentImageStructClass by lazyClass("com.ss.android.ugc.aweme.comment.model.CommentImageStruct")
-
-    // image download URL (UrlModel)
-    private val CommentImageStructClassDownloadUrlField: Field by lazy {
-        CommentImageStructClass.resolve().firstField {
-            name = "downloadUrl"
-        }.self.apply {
-            isAccessible = true
-        }
-    }
-
-    private val CommentLongPressItemModelClass by lazyClass("com.ss.android.ugc.aweme.comment.ui.longpress.CommentLongPressItemModel")
-
-    // CommentActionParams carried by the menu item
-    private val commentLongPressItemModelClassCommentActionParamsField: Field by lazy {
-        CommentLongPressItemModelClass.resolve()
-            .firstField {
-                type = CommentActionParamsClass.name
-            }.self.also {
-                it.isAccessible = true
-            }
-    }
-
-    private val DigestUtilsClass by lazyClass("com.bytedance.common.utility.DigestUtils")
-
-    // md5Hex(String): String
-    private val DigestUtilsClassMd5HexMethod: Method by lazy {
-        DigestUtilsClass.resolve().firstMethod {
-            name = "md5Hex"
-            returnType = String::class
-            modifiers(Modifiers.PUBLIC, Modifiers.STATIC)
-            parameters(String::class)
-            parameterCount = 1
-        }.self.apply {
-            isAccessible = true
-        }
-    }
-
-    private val DownloadInfoClass by lazyClass("com.ss.android.socialbase.downloader.model.DownloadInfo")
-
-    // url: download URL
-    private val downloadInfoClassUrlField: Field by lazy {
-        DownloadInfoClass.resolve().firstField {
-            name = "url"
-        }.self.apply {
-            isAccessible = true
-        }
-    }
-
-    // getTargetFilePath(): String
-    private val downloadInfoClassGetTargetFilePathMethod: Method by lazy {
-        DownloadInfoClass.resolve().firstMethod {
-            name = "getTargetFilePath"
-        }.self.apply {
-            isAccessible = true
-        }
-    }
-
-    private val EmojiClass by lazyClass("com.ss.android.ugc.aweme.emoji.model.Emoji")
-
-    // animateUrl: animated emoji URL
-    private val EmojiClassAnimateUrlField: Field by lazy {
-        EmojiClass.resolve().firstField {
-            name = "animateUrl"
-        }.self.apply {
-            isAccessible = true
-        }
-    }
-
-    // save-image long-press action
-    private val SaveImageActionItemClass by lazyClass("com.ss.android.ugc.aweme.comment.manager.longclickaction.actions.SaveImageActionItem")
-
-    // CommentActionParams carried by the action item
-    private val saveImageActionItemClassCommentActionParamsField: Field by lazy {
-        SaveImageActionItemClass.resolve().firstField {
-            type = CommentActionParamsClass.name
-        }.self.also {
-            it.isAccessible = true
-        }
-    }
-
-    // BPEA cert token for media store auth
-    private val TokenCertClass by lazyClass("com.bytedance.bpea.cert.token.TokenCert")
-    private val commentSaveTokenCert by lazy {
-        TokenCertClass.getConstructor(String::class.java).newInstance("bpea-comment_save_image_to_album")
-    }
-
-    // file utility extension functions
-    private val UGFileUtilsKtClass by lazyClass("com.bytedance.android.ug.UGFileUtilsKt")
-    private val UGFileUtilsKtClassCopyFileMethod: Method by lazy {
-        UGFileUtilsKtClass.resolve().firstMethod {
-            name = "copyFile"
-            returnType = Boolean::class
-            modifiers(Modifiers.PUBLIC, Modifiers.STATIC, Modifiers.FINAL)
-            parameters(String::class, String::class, TokenCertClass)
-            parameterCount = 3
-        }.self.apply {
-            isAccessible = true
-        }
-    }
-
-    // get internal storage dir
-    private val UGFileUtilsKtClassGetStorageDirMethod: Method by lazy {
-        UGFileUtilsKtClass.resolve().firstMethod {
-            name = "getStorageDir"
-            returnType = String::class
-            modifiers(Modifiers.PUBLIC, Modifiers.STATIC, Modifiers.FINAL)
-            parameters(String::class, Boolean::class)
-            parameterCount = 2
-        }.self.apply {
-            isAccessible = true
-        }
-    }
-
-    // get external album dir
-    private val UGFileUtilsKtClassGetExternalStorageDirectoryMethod: Method by lazy {
-        UGFileUtilsKtClass.resolve().firstMethod {
-            name = "getExternalStorageDirectory"
-            returnType = String::class
-            modifiers(Modifiers.PUBLIC, Modifiers.STATIC, Modifiers.FINAL)
-            parameters(String::class, Boolean::class)
-            parameterCount = 2
-        }.self.apply {
-            isAccessible = true
-        }
-    }
-
-    // create media store URI
-    private val UGFileUtilsKtClassGetImageUriMethod: Method by lazy {
-        UGFileUtilsKtClass.resolve().firstMethod {
-            name = "getImageUri"
-            returnType = android.net.Uri::class
-            modifiers(Modifiers.PUBLIC, Modifiers.STATIC, Modifiers.FINAL)
-            parameters(
-                android.content.Context::class,
-                String::class,
-                String::class,
-                String::class,
-                TokenCertClass
-            )
-            parameterCount = 5
-        }.self.apply {
-            isAccessible = true
-        }
-    }
-    private val UGFileUtilsClassContextField: Field by lazy {
-        UGFileUtilsKtClass.resolve().firstField {
-            name = "context"
-        }.self.apply {
-            isAccessible = true
-        }
-    }
-
-    // URL list model with multiple CDN URLs
-    private val UrlModelClass by lazyClass("com.ss.android.ugc.aweme.base.model.UrlModel")
-
-    // download URL list ( List<String> )
-    private val UrlModelClassUrlListField: Field by lazy {
-        UrlModelClass.resolve().firstField {
-            name = "urlList"
-        }.self.apply {
-            isAccessible = true
-        }
-    }
 
     override fun onHook() {
         withProcess(mainProcessName) {
@@ -286,49 +68,30 @@ object CommentEmojiHooker : YukiBaseHooker() {
     private fun installSaveEmojiToAlbumButtonHook(bridge: DexKitBridge): YukiMemberHookCreator.MemberHookCreator.Result? {
         var ret: YukiMemberHookCreator.MemberHookCreator.Result? = null
 
-        bridge.findMethod {
-            matcher {
-                modifiers = Modifier.STATIC
-                params {
-                    add(CommentClass.name)
-                    add("int")
-                }
-                returnType = "boolean"
-                invokeMethods {
-                    add {
-                        declaredClass = CommentImageStructClass.name
-                        returnType = UrlModelClass.name
-                        paramCount = 0
-                        addUsingField {
-                            name = "downloadUrl"
-                        }
-                    }
+        val packageInstance = DouyinPackage.instance
+
+        packageInstance.commentExtensionsKt.selfClass?.resolve()?.firstMethod {
+            name = packageInstance.commentExtensionsKt.saveToAlbumVisibility().name
+        }?.hook {
+            before {
+                val comment = args[0] ?: return@before
+                val emojiUrls = extractEmojiUrls(comment)
+                if (!emojiUrls.isNullOrEmpty()) {
+                    // force the visibility check to return true — show save button
+                    resultTrue()
                 }
             }
-        }.singleOrNull()?.also { result ->
-            YLog.info("$TAG: Target method found: ${result.className}.${result.methodName}")
-
-            result.className.toClass().resolve().firstMethod { name = result.methodName }.hook {
-                before {
-                    val comment = args[0] ?: return@before
-                    val emojiUrls = extractEmojiUrls(comment)
-                    if (!emojiUrls.isNullOrEmpty()) {
-                        // force the visibility check to return true — show save button
-                        resultTrue()
-                    }
-                }
-            }.result {
-                onConductFailure { param, throwable ->
-                    YLog.error("$TAG: Save emoji button hook runtime error", throwable)
-                }
-                onHookingFailure { throwable ->
-                    YLog.error("$TAG: Failed to hook save emoji button", throwable)
-                }
-                onHooked {
-                    YLog.info("$TAG: Save emoji button hook installed successfully. The button will be shown for emoji comments")
-                }.also {
-                    ret = it
-                }
+        }?.result {
+            onConductFailure { param, throwable ->
+                YLog.error("$TAG: Save emoji button hook runtime error", throwable)
+            }
+            onHookingFailure { throwable ->
+                YLog.error("$TAG: Failed to hook save emoji button", throwable)
+            }
+            onHooked {
+                YLog.info("$TAG: Save emoji button hook installed successfully. The button will be shown for emoji comments")
+            }.also {
+                ret = it
             }
         } ?: run {
             YLog.error("$TAG: Target method not found, save emoji to album button will not be shown")
@@ -339,71 +102,66 @@ object CommentEmojiHooker : YukiBaseHooker() {
     private fun installClickSaveEmojiToAlbumButtonCallbackHook(bridge: DexKitBridge): YukiMemberHookCreator.MemberHookCreator.Result? {
         var ret: YukiMemberHookCreator.MemberHookCreator.Result? = null
 
-        bridge.findMethod {
-            matcher {
-                modifiers = Modifier.STATIC + Modifier.FINAL + Modifier.PUBLIC
-                returnType = "java.lang.Object"
-                params {
-                    count = 1
-                }
-                addUsingString("bpea-comment_save_image_to_album")
+        val packageInstance = DouyinPackage.instance
+
+        packageInstance.commentSaveToAlbumButtonClick.selfClass?.resolve()?.firstMethodOrNull {
+            name = packageInstance.commentSaveToAlbumButtonClick.onClicked().name
+        }?.hook {
+            var savedComment: Any? = null
+            var savedActionItem: Any? = null
+            var originImageUrlList: List<*>? = null
+            var originImageIndex = -1
+            before {
+                val cbkInstance = args[0] ?: return@before
+
+                val actionItem = cbkInstance.asResolver().firstField {
+                    type = Object::class
+                }.get() ?: return@before
+
+                val comment = extractComment(actionItem) ?: return@before
+                val emojiUrls = extractEmojiUrls(comment) ?: return@before
+
+                // temporarily install emoji URLs so the downloader sees them
+                // save original state to be restored in after{}
+                originImageUrlList = comment.asResolver().firstFieldOrNull {
+                    name = DouyinPackage.instance.comment.imageList().name
+                }?.get<List<*>>()
+                originImageIndex = overrideImageIndex(actionItem, 0) // target the first (just-injected) image
+                savedActionItem = actionItem
+                savedComment = comment
+
+                injectEmojiUrls(comment, emojiUrls, prepend = true)
+
+                YLog.debug("$TAG: Injected ${emojiUrls.size} emoji url(s) into comment")
             }
-        }.singleOrNull()?.also { result ->
-            YLog.info("$TAG: Target method found: ${result.className}.${result.methodName}")
-
-            result.className.toClass().resolve().firstMethod { name = result.methodName }.hook {
-                var savedComment: Any? = null
-                var savedActionItem: Any? = null
-                var originImageUrlList: List<*>? = null
-                var originImageIndex = -1
-                before {
-                    val cbkInstance = args[0] ?: return@before
-
-                    val actionItem = cbkInstance.asResolver().firstField {
-                        type = Object::class
-                    }.get() ?: return@before
-
-                    val comment = extractComment(actionItem) ?: return@before
-                    val emojiUrls = extractEmojiUrls(comment) ?: return@before
-
-                    // temporarily install emoji URLs so the downloader sees them
-                    // save original state to be restored in after{}
-                    originImageUrlList = CommentClassImageListField.get(comment) as? List<*>
-                    originImageIndex = overrideImageIndex(actionItem, 0) // target the first (just-injected) image
-                    savedActionItem = actionItem
-                    savedComment = comment
-
-                    injectEmojiUrls(comment, emojiUrls, prepend = true)
-
-                    YLog.debug("$TAG: Injected ${emojiUrls.size} emoji url(s) into comment")
-                }
-                // undo temporary edits — restore comment.imageList and actionItem.imageIndex
-                after {
-                    savedComment?.let { c ->
-                        CommentClassImageListField.set(c, originImageUrlList)
-                        if (originImageIndex >= 0) {
-                            savedActionItem?.let {
-                                overrideImageIndex(it, originImageIndex)
-                            }
+            // undo temporary edits — restore comment.imageList and actionItem.imageIndex
+            after {
+                savedComment?.let { c ->
+                    c.asResolver().firstFieldOrNull {
+                        name = DouyinPackage.instance.comment.imageList().name
+                    }?.set(originImageUrlList)
+                    if (originImageIndex >= 0) {
+                        savedActionItem?.let {
+                            overrideImageIndex(it, originImageIndex)
                         }
                     }
-                    savedComment = null
-                    savedActionItem = null
-                    originImageUrlList = null
-                    originImageIndex = -1
                 }
-            }.result {
-                onConductFailure { param, throwable ->
-                    YLog.error("$TAG: Download callback hook runtime error", throwable)
-                }
-                onHookingFailure { throwable ->
-                    YLog.error("$TAG: Failed to hook download callback", throwable)
-                }
-                onHooked {
-                    YLog.info("$TAG: Download callback hook installed successfully. Emoji URLs will be injected when saving")
-                }.also {
-                    ret = it
-                }
+                savedComment = null
+                savedActionItem = null
+                originImageUrlList = null
+                originImageIndex = -1
+            }
+        }?.result {
+            onConductFailure { param, throwable ->
+                YLog.error("$TAG: Download callback hook runtime error", throwable)
+            }
+            onHookingFailure { throwable ->
+                YLog.error("$TAG: Failed to hook download callback", throwable)
+            }
+            onHooked {
+                YLog.info("$TAG: Download callback hook installed successfully. Emoji URLs will be injected when saving")
+            }.also {
+                ret = it
             }
         } ?: run {
             YLog.warn("$TAG: Target method not found, download callback hook will not be installed")
@@ -415,135 +173,118 @@ object CommentEmojiHooker : YukiBaseHooker() {
     private fun installEmojiDownloadedCallbackHook(bridge: DexKitBridge): YukiMemberHookCreator.MemberHookCreator.Result? {
         var ret: YukiMemberHookCreator.MemberHookCreator.Result? = null
 
-        bridge.findMethod {
-            matcher {
-                name = "onSuccessed"
-                modifiers = Modifier.FINAL + Modifier.PUBLIC
-                returnType = "void"
-                params {
-                    add("com.ss.android.socialbase.downloader.model.DownloadInfo")
+        val packageInstance = DouyinPackage.instance
+
+        packageInstance.commentImageSaveHelper.selfClass?.resolve()?.firstMethodOrNull {
+            name = packageInstance.commentImageSaveHelper.onSuccessed().name
+        }?.hook {
+            before {
+                val downloadInfo = args[0] ?: return@before
+
+                val dlUrl = downloadInfo.asResolver().firstFieldOrNull {
+                    name = DouyinPackage.instance.downloadInfo.url().name
+                }?.get<String>() ?: return@before
+                // Emoji animateUrl file extension is always .heif
+                if (!dlUrl.contains(".heif")) {
+                    return@before
                 }
-                usingStrings {
-                    add("/douyin/comment")
-                    add("comment_")
+
+                // Downloaded file save path
+                val sourcePath = downloadInfo.asResolver().firstMethodOrNull {
+                    val downloadInfoMethod = DouyinPackage.instance.downloadInfo.getTargetFilePath()
+                    name = downloadInfoMethod.name
+                    parameters(*downloadInfoMethod.parameters.toClassIfPrimitiveElseString())
+                }?.invoke<String>() ?: return@before
+                val sourceMimeType = FileTypeDetector.detect(sourcePath).mimeType
+                YLog.info("$TAG: Source MIME type: $sourceMimeType")
+
+                val saveFilePrefix = "comment_${
+                    DouyinPackage.instance.digestUtils.selfClass?.resolve()?.firstMethodOrNull{
+                        val md5HexMethod=DouyinPackage.instance.digestUtils.md5Hex()
+                        name=md5HexMethod.name
+                        parameters(*md5HexMethod.parameters.toClassIfPrimitiveElseString())
+                    }?.invoke<String>( dlUrl + System.currentTimeMillis().toString())
+                }"
+
+                // Prepare file to save
+                var fileToSave = sourcePath
+                var saveFileExt = MimeTypeMap.getSingleton()
+                    .getExtensionFromMimeType(sourceMimeType)
+                    ?: sourcePath.substringAfterLast('.', "")
+                var hasTempFile = false
+
+                if (!sourceMimeType.startsWith("image/") && !sourceMimeType.startsWith("video/")) {
+                    YLog.error("$TAG: Source MIME type restricted, not allowed: $sourceMimeType")
+                    return@before
                 }
-                invokeMethods {
-                    add {
-                        descriptor =
-                            "Lcom/bytedance/android/ug/UGFileUtilsKt;->copyFile(Ljava/lang/String;Ljava/lang/String;Lcom/bytedance/bpea/cert/token/TokenCert;)Z"
+
+                // Convert video source to GIF animation
+                if (sourceMimeType.startsWith("video/")) {
+                    YLog.info("$TAG: Source MIME type is video, converting to GIF")
+
+                    val gifTempPath = "${
+                        DouyinPackage.instance.ugFileUtils.selfClass?.resolve()?.firstMethodOrNull{
+                            val getStorageDirMethod=DouyinPackage.instance.ugFileUtils.getStorageDir()
+                            name=getStorageDirMethod.name
+                            parameters(*getStorageDirMethod.parameters.toClassIfPrimitiveElseString())
+                        }?.invoke<String>( "/comment/images", false)!!
+                    }${File.separator}${saveFilePrefix}.gif"
+
+                    if (convertMedia2Gif(sourcePath, gifTempPath)) {
+                        fileToSave = gifTempPath
+                        saveFileExt = "gif"
+                        hasTempFile = true
+                    } else {
+                        YLog.error("$TAG: Convert video to GIF failed, fallback to direct copy")
                     }
                 }
+
+                // Copy to album
+                val saveFilePath = "${
+                    DouyinPackage.instance.ugFileUtils.selfClass?.resolve()?.firstMethodOrNull{
+                        val getExternalStorageDirMethod=DouyinPackage.instance.ugFileUtils.getExternalStorageDir()
+                        name=getExternalStorageDirMethod.name
+                        parameters(*getExternalStorageDirMethod.parameters.toClassIfPrimitiveElseString())
+                    }?.invoke<String>("/douyin/comment", false)
+                }${File.separator}${saveFilePrefix}.${saveFileExt}"
+
+                val cpRet = DouyinPackage.instance.ugFileUtils.selfClass?.resolve()?.firstMethodOrNull{
+                    val copyFileMethod=DouyinPackage.instance.ugFileUtils.copyFile()
+                    name=copyFileMethod.name
+                    parameters(*copyFileMethod.parameters.toClassIfPrimitiveElseString())
+                }?.invoke<Boolean>(fileToSave, saveFilePath, DouyinPackage.instance.tokenCert.selfClass?.getConstructor(String::class.java)?.newInstance("bpea-comment_save_image_to_album"))
+
+                // shows success dialog
+                val context =
+                    instance.asResolver().firstField().get()?.asResolver()?.firstFieldOrNull {
+                        type = Context::class.java
+                    }?.get<Context?>()
+
+                instance.asResolver().firstMethodOrNull{
+                    val notifyResultMethod=DouyinPackage.instance.commentImageSaveHelper.notifyResult()
+                    name=notifyResultMethod.name
+                    parameters(*notifyResultMethod.parameters.toClassIfPrimitiveElseString())
+                    superclass()
+                }?.invoke(context,cpRet)
+
+                if (hasTempFile) {
+                    File(fileToSave).delete()
+                }
+
+                // Return null to skip original method execution
+                resultNull()
             }
-        }.singleOrNull()?.also { match ->
-            YLog.info("$TAG: Target method found: ${match.className}.${match.methodName}")
-
-            match.className.toClass().resolve().firstMethod {
-                name = match.methodName
-            }.hook {
-                before {
-                    val downloadInfo = args[0] ?: return@before
-
-                    val dlUrl =
-                        downloadInfoClassUrlField.get(downloadInfo) as? String ?: return@before
-                    // Emoji animateUrl file extension is always .heif
-                    if (!dlUrl.contains(".heif")) {
-                        return@before
-                    }
-
-                    // Downloaded file save path
-                    val sourcePath =
-                        downloadInfoClassGetTargetFilePathMethod.invoke(downloadInfo) as? String
-                            ?: return@before
-                    val sourceMimeType = FileTypeDetector.detect(sourcePath).mimeType
-                    YLog.info("$TAG: Source MIME type: $sourceMimeType")
-
-                    val saveFilePrefix = "comment_${
-                        DigestUtilsClassMd5HexMethod.invoke(
-                            null,
-                            dlUrl + System.currentTimeMillis().toString()
-                        ) as String?
-                    }"
-
-                    // Prepare file to save
-                    var fileToSave = sourcePath
-                    var saveFileExt = MimeTypeMap.getSingleton()
-                        .getExtensionFromMimeType(sourceMimeType)
-                        ?: sourcePath.substringAfterLast('.', "")
-                    var hasTempFile = false
-
-                    if (!sourceMimeType.startsWith("image/") && !sourceMimeType.startsWith("video/")) {
-                        YLog.error("$TAG: Source MIME type restricted, not allowed: $sourceMimeType")
-                        return@before
-                    }
-
-                    // Convert video source to GIF animation
-                    if (sourceMimeType.startsWith("video/")) {
-                        YLog.info("$TAG: Source MIME type is video, converting to GIF")
-
-                        val gifTempPath = "${
-                            UGFileUtilsKtClassGetStorageDirMethod.invoke(
-                                null,
-                                "/comment/images",
-                                false
-                            ) as String
-                        }${File.separator}${saveFilePrefix}.gif"
-
-                        if (convertMedia2Gif(sourcePath, gifTempPath)) {
-                            fileToSave = gifTempPath
-                            saveFileExt = "gif"
-                            hasTempFile = true
-                        } else {
-                            YLog.error("$TAG: Convert video to GIF failed, fallback to direct copy")
-                        }
-                    }
-
-                    // Copy to album
-                    val saveFilePath = "${
-                        UGFileUtilsKtClassGetExternalStorageDirectoryMethod.invoke(
-                            null,
-                            "/douyin/comment",
-                            false
-                        ) as String
-                    }${File.separator}${saveFilePrefix}.${saveFileExt}"
-
-                    val cpRet = UGFileUtilsKtClassCopyFileMethod.invoke(
-                        null,
-                        fileToSave,
-                        saveFilePath,
-                        commentSaveTokenCert
-                    ) as Boolean
-
-                    // shows success dialog
-                    val context =
-                        instance.asResolver().firstField().get()?.asResolver()?.firstField {
-                            type = Context::class
-                        }?.get<Context?>()
-
-                    CmtImageProgressDownloadListenerClassNotifyResultMethod.invoke(
-                        instance,
-                        context,
-                        cpRet
-                    )
-
-                    if (hasTempFile) {
-                        File(fileToSave).delete()
-                    }
-
-                    // Return null to skip original method execution
-                    resultNull()
-                }
-            }.result {
-                onConductFailure { param, throwable ->
-                    YLog.error("$TAG: Emoji download completion callback runtime error", throwable)
-                }
-                onHookingFailure { throwable ->
-                    YLog.error("$TAG: Failed to hook emoji download completion callback", throwable)
-                }
-                onHooked {
-                    YLog.info("$TAG: Emoji download completion callback hooked")
-                }.also {
-                    ret = it
-                }
+        }?.result {
+            onConductFailure { param, throwable ->
+                YLog.error("$TAG: Emoji download completion callback runtime error", throwable)
+            }
+            onHookingFailure { throwable ->
+                YLog.error("$TAG: Failed to hook emoji download completion callback", throwable)
+            }
+            onHooked {
+                YLog.info("$TAG: Emoji download completion callback hooked")
+            }.also {
+                ret = it
             }
         } ?: run {
             YLog.warn("$TAG: Target method not found, emoji download completion callback will not be installed")
@@ -556,13 +297,15 @@ object CommentEmojiHooker : YukiBaseHooker() {
     private fun installCreateUriHook(unused: DexKitBridge): YukiMemberHookCreator.MemberHookCreator.Result? {
         var ret: YukiMemberHookCreator.MemberHookCreator.Result? = null
 
-        UGFileUtilsKtClass.resolve().firstMethod {
+        val packageInstance = DouyinPackage.instance
+
+        packageInstance.ugFileUtils.selfClass?.resolve()?.firstMethodOrNull {
             name = "createUri"
             returnType = android.net.Uri::class
             modifiers(Modifiers.PUBLIC, Modifiers.STATIC, Modifiers.FINAL)
-            parameters(String::class, Boolean::class, Array<android.net.Uri>::class, TokenCertClass)
+            parameters(String::class, Boolean::class, Array<android.net.Uri>::class, DouyinPackage.instance.tokenCert.selfClass!!)
             parameterCount = 4
-        }.hook {
+        }?.hook {
             after {
                 val uriRet = result as? android.net.Uri
                 // original createUri succeeded — nothing to fix
@@ -590,17 +333,16 @@ object CommentEmojiHooker : YukiBaseHooker() {
                 // Ensure the virtual path has no leading '/' but strictly retains a trailing '/'.
                 val fileRelPath = filePath.substring(1, filePath.lastIndexOf(File.separator) + 1)
 
-                val context = UGFileUtilsClassContextField.get(null) as? Context ?: return@after
+                val context = DouyinPackage.instance.ugFileUtils.selfClass?.resolve()?.firstFieldOrNull{
+                    name= DouyinPackage.instance.ugFileUtils.context().name
+                }?.get<Context>()?:return@after
                 val tokenCert = args[3]
 
-                val finalUri = UGFileUtilsKtClassGetImageUriMethod.invoke(
-                    null,
-                    context,
-                    fileName,
-                    fileMimeType,
-                    fileRelPath,
-                    tokenCert
-                ) as? android.net.Uri ?: return@after
+                val finalUri = DouyinPackage.instance.ugFileUtils.selfClass?.resolve()?.firstMethodOrNull{
+                    val getImageUriMethod=DouyinPackage.instance.ugFileUtils.getImageUri()
+                    name=getImageUriMethod.name
+                    parameters(*getImageUriMethod.parameters.toClassIfPrimitiveElseString())
+                }?.invoke<android.net.Uri>(context, fileName, fileMimeType, fileRelPath, tokenCert)  ?: return@after
                 // replace the hook's return value with the URI we just created
                 result = finalUri
 
@@ -611,7 +353,7 @@ object CommentEmojiHooker : YukiBaseHooker() {
                     uriArr[0] = finalUri
                 }
             }
-        }.result {
+        }?.result {
             onConductFailure { param, throwable ->
                 YLog.error("$TAG: createUri hook runtime error", throwable)
             }
@@ -630,44 +372,63 @@ object CommentEmojiHooker : YukiBaseHooker() {
 
     // Gets CommentActionParams held by a long-press menu item
     private fun extractActionParams(actionItem: Any): Any? {
-        return commentLongPressItemModelClassCommentActionParamsField.get(actionItem)
+        return actionItem.asResolver().firstFieldOrNull {
+            name = DouyinPackage.instance.commentLongPressItemModel.commentActionParams().name
+            superclass()
+        }?.get()
     }
 
     // Gets the Comment from a long-press menu item
     private fun extractComment(actionItem: Any): Any? {
         val params = extractActionParams(actionItem) ?: return null
-        return commentActionParamsClassCommentField.get(params)
+        return params.asResolver().firstFieldOrNull {
+            name = DouyinPackage.instance.commentActionParams.comment().name
+        }?.get()
     }
 
     // Gets emoji download URLs from comment.emoji.animateUrl.urlList
     private fun extractEmojiUrls(comment: Any): List<String>? {
         return runCatching {
-            val emoji = CommentClassEmojiField.get(comment) ?: return@runCatching null
-            val animateUrl = EmojiClassAnimateUrlField.get(emoji) ?: return@runCatching null
-            @Suppress("UNCHECKED_CAST")
-            UrlModelClassUrlListField.get(animateUrl) as? List<String>
+            val emoji = comment.asResolver().firstFieldOrNull {
+                name = DouyinPackage.instance.comment.emoji().name
+            }?.get() ?: return@runCatching null
+            val animateUrl = emoji.asResolver().firstFieldOrNull {
+                name = DouyinPackage.instance.emoji.animateUrl().name
+            }?.get() ?: return@runCatching null
+            animateUrl.asResolver().firstFieldOrNull {
+                name = DouyinPackage.instance.urlModel.urlList().name
+            }?.get<List<String>>()
         }.getOrNull()
     }
 
     // Writes emoji URLs into comment.imageList[0].downloadUrl.urlList, optionally prepended to existing URLs
     private fun injectEmojiUrls(comment: Any, emojiUrls: List<String>, prepend: Boolean = true) {
-        var imageList = CommentClassImageListField.get(comment) as? List<*>
+        var imageList = comment.asResolver().firstFieldOrNull {
+            name = DouyinPackage.instance.comment.imageList().name
+        }?.get<List<*>>()
         if (imageList.isNullOrEmpty()) {
-            val newStruct = CommentImageStructClass.getConstructor().newInstance()
+            val newStruct = DouyinPackage.instance.commentImageStruct.selfClass?.getConstructor()?.newInstance()
             imageList = listOf(newStruct)
-            CommentClassImageListField.set(comment, imageList)
+            comment.asResolver().firstFieldOrNull {
+                name = DouyinPackage.instance.comment.imageList().name
+            }?.set(imageList)
         }
 
         val targetStruct = imageList[0]
-        var urlModel = CommentImageStructClassDownloadUrlField.get(targetStruct)
+        var urlModel = targetStruct?.asResolver()?.firstFieldOrNull {
+            name = DouyinPackage.instance.commentImageStruct.downloadUrl().name
+        }?.get()
         if (urlModel == null) {
-            urlModel = UrlModelClass.getConstructor().newInstance()
-            CommentImageStructClassDownloadUrlField.set(targetStruct, urlModel)
+            urlModel = DouyinPackage.instance.urlModel.selfClass?.getConstructor()?.newInstance()
+            targetStruct?.asResolver()?.firstFieldOrNull {
+                name = DouyinPackage.instance.commentImageStruct.downloadUrl().name
+            }?.set(urlModel)
         }
 
         var finalUrls: List<String>? = if (prepend) {
-            @Suppress("UNCHECKED_CAST")
-            val imageUrls = UrlModelClassUrlListField.get(urlModel) as? List<String>
+            val imageUrls = urlModel?.asResolver()?.firstFieldOrNull {
+                name = DouyinPackage.instance.urlModel.urlList().name
+            }?.get<List<String>>()
             if (imageUrls.isNullOrEmpty()) {
                 emojiUrls
             } else {
@@ -676,14 +437,22 @@ object CommentEmojiHooker : YukiBaseHooker() {
         } else {
             emojiUrls
         }
-        UrlModelClassUrlListField.set(urlModel, finalUrls)
+        urlModel?.asResolver()?.firstFieldOrNull {
+            name = DouyinPackage.instance.urlModel.urlList().name
+            }?.set(finalUrls)
     }
 
     // Sets a new image index on the save-image action, returns the previous one
     private fun overrideImageIndex(actionItem: Any, index: Int): Int {
-        val params = saveImageActionItemClassCommentActionParamsField.get(actionItem) ?: return -1
-        val originImageIndex = commentActionParamsClassImageIndexField.get(params) as Int
-        commentActionParamsClassImageIndexField.set(params, index)
+        val params = actionItem.asResolver().firstFieldOrNull {
+            name = DouyinPackage.instance.saveImageActionItem.saveImageActionParams().name
+        }?.get() ?: return -1
+        val originImageIndex = params.asResolver().firstFieldOrNull {
+            name = DouyinPackage.instance.commentActionParams.imageIndex().name
+        }?.get<Int>()!!
+        params.asResolver().firstFieldOrNull {
+            name = DouyinPackage.instance.commentActionParams.imageIndex().name
+        }?.set(index)
         return originImageIndex
     }
 

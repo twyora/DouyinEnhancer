@@ -13,12 +13,14 @@ object CommentImageHooker : YukiBaseHooker() {
 
     override fun onHook() {
         withProcess(mainProcessName) {
-            DouyinPackage.instance.commentImageStructClass?.resolve()?.firstMethodOrNull {
-                name = DouyinPackage.instance.getDownloadUrlMethodName()
+            val packageInstance=DouyinPackage.instance
+
+            packageInstance.commentImageStruct.selfClass?.resolve()?.firstMethodOrNull {
+                name = packageInstance.commentImageStruct.getDownloadUrl().name
             }?.hook {
                 before {
                     val originUrl = instance.asResolver().firstFieldOrNull {
-                        name = DouyinPackage.instance.originUrlFieldName()
+                        name = packageInstance.commentImageStruct.originUrl().name
                     }?.get()
                     if (originUrl != null) {
                         result = originUrl
