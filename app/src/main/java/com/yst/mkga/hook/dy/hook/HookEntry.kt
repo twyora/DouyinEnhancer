@@ -1,10 +1,8 @@
 package com.yst.mkga.hook.dy.hook
 
-import android.app.AndroidAppHelper
 import android.app.Application
 import android.app.Instrumentation
 import android.content.Context
-import java.util.concurrent.atomic.AtomicBoolean
 
 import com.highcapable.kavaref.KavaRef.Companion.resolve
 import com.highcapable.yukihookapi.YukiHookAPI

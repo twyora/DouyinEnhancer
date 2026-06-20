@@ -2,11 +2,9 @@ package com.yst.mkga.hook.dy.hook
 
 import java.lang.reflect.Field
 
-import com.highcapable.kavaref.KavaRef.Companion.asResolver
 import com.highcapable.kavaref.KavaRef.Companion.resolve
 import com.highcapable.yukihookapi.hook.entity.YukiBaseHooker
 import com.highcapable.yukihookapi.hook.log.YLog
-import org.luckypray.dexkit.DexKitBridge
 
 import com.yst.mkga.hook.dy.hook.utils.getField
 
@@ -21,7 +19,8 @@ object CommentImageHooker : YukiBaseHooker() {
                 name = packageInstance.commentImageStruct.getDownloadUrl().name
             }?.hook {
                 before {
-                    val originUrl = instance.getField<Any?>(packageInstance.commentImageStruct.originUrl())
+                    val originUrl =
+                        instance.getField<Any?>(packageInstance.commentImageStruct.originUrl())
                     if (originUrl != null) {
                         result = originUrl
                     }

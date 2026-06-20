@@ -262,7 +262,8 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
                 context.contentResolver,
                 Settings.Secure.ANDROID_ID
             ) ?: "unknown"
-            val hookInfoFileName = androidId.hashCode().toUInt().toHexString()
+            val hookInfoFileName =
+                "${AppProperties.PROJECT_NAMESPACE}-${androidId.hashCode().toUInt()}".hashCode().toHexString()
             YLog.debug("$TAG: hookInfoFileName: $hookInfoFileName")
 
             runCatching {
@@ -354,8 +355,6 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
                             }
                         }
                     }.singleOrNull() ?: run {
-                        YLog.debug("$TAG: sourceDir: ${context.applicationInfo.sourceDir}")
-                        YLog.error("$TAG: getDownloadUrl in CommentImageStruct not matched, hookInfo will lack getDownloadUrl config")
                         return@commentImageStruct
                     }
 
@@ -421,7 +420,6 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
                                 type = Int::class
                             }?.self?.name
                     if (commentFieldName == null || imageFieldName == null) {
-                        YLog.error("$TAG: commentField or intField is null, hookInfo will lack commentField or intField config")
                         return@commentActionParams
                     }
 
@@ -446,7 +444,6 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
                             }?.self?.name
 
                     if (commentActionParamsFieldName == null) {
-                        YLog.error("$TAG: commentActionParamsField is null, hookInfo will lack commentActionParamsField config")
                         return@commentLongPressItemModel
                     }
 
@@ -470,7 +467,6 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
                                 type = "com.ss.android.ugc.aweme.comment.CommentActionParams"
                             }?.self?.name
                     if (cmtActionParamsFieldName == null || saveImageActionParamsFieldName == null) {
-                        YLog.error("$TAG: cmtLongPressItemModelField or saveImageActionParamsField is null, hookInfo will lack cmtLongPressItemModelField or saveImageActionParamsField config")
                         return@saveImageActionItem
                     }
 
@@ -574,7 +570,6 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
                                     superclass()
                                 }?.self
                         if (notifyResultMethod == null) {
-                            YLog.error("$TAG: notifyResultMethod is null, hookInfo will lack notifyResultMethod config")
                             return@commentImageSaveHelper
                         }
 
@@ -622,7 +617,6 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
                             parameters(String::class)
                         }?.self
                     if (md5HexFieldMethod == null) {
-                        YLog.error("$TAG: md5HexFieldMethod is null, hookInfo will lack md5HexFieldMethod config")
                         return@digestUtils
                     }
 
@@ -685,7 +679,6 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
                             parameterCount = 5
                         }?.self
                     if (copyFileMethod == null || getStorageDirMethod == null || getExternalStorageDirectoryMethod == null || getImageUriMethod == null) {
-                        YLog.error("$TAG: copyFileMethod or getStorageDirMethod or getExternalStorageDirectoryMethod or getImageUriMethod is null, hookInfo will lack copyFileMethod or getStorageDirMethod or getExternalStorageDirectoryMethod or getImageUriMethod config")
                         return@uGFileUtilsKt
                     }
 
