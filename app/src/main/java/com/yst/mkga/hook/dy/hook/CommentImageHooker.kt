@@ -15,7 +15,7 @@ object CommentImageHooker : YukiBaseHooker() {
 
     override fun onHook() {
         withProcess(mainProcessName) {
-            val packageInstance=DouyinPackage.instance
+            val packageInstance = DouyinPackage.instance
 
             packageInstance.commentImageStruct.selfClass?.resolve()?.firstMethodOrNull {
                 name = packageInstance.commentImageStruct.getDownloadUrl().name
@@ -26,7 +26,7 @@ object CommentImageHooker : YukiBaseHooker() {
                         result = originUrl
                     }
                 }
-            }?:run{
+            } ?: run {
                 YLog.warn("$TAG: Target method not found, watermark-free comment image download is not active")
             }
         }

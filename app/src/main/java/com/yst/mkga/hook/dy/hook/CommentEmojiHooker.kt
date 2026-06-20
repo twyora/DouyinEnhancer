@@ -32,7 +32,6 @@ import com.yst.mkga.hook.dy.hook.utils.invokeStaticMethod
 import com.yst.mkga.hook.dy.hook.utils.setField
 
 
-
 object CommentEmojiHooker : YukiBaseHooker() {
     private val TAG = this::class.simpleName
 
@@ -187,7 +186,9 @@ object CommentEmojiHooker : YukiBaseHooker() {
                 }
 
                 // Downloaded file save path
-                val sourcePath = downloadInfo.invokeMethod<String?>(DouyinPackage.instance.downloadInfo.getTargetFilePath()) ?:return@before
+                val sourcePath =
+                    downloadInfo.invokeMethod<String?>(DouyinPackage.instance.downloadInfo.getTargetFilePath())
+                        ?: return@before
                 val sourceMimeType = FileTypeDetector.detect(sourcePath).mimeType
                 YLog.info("$TAG: Source MIME type: $sourceMimeType")
 
@@ -232,16 +233,17 @@ object CommentEmojiHooker : YukiBaseHooker() {
 
                 // Copy to album
                 val saveFilePath = "${
-                        DouyinPackage.instance.ugFileUtils.selfClass?.invokeStaticMethod<String>(
-                            DouyinPackage.instance.ugFileUtils.getExternalStorageDir(),
-                            "/douyin/comment", false
-                        )
-                    }${File.separator}${saveFilePrefix}.${saveFileExt}"
+                    DouyinPackage.instance.ugFileUtils.selfClass?.invokeStaticMethod<String>(
+                        DouyinPackage.instance.ugFileUtils.getExternalStorageDir(),
+                        "/douyin/comment", false
+                    )
+                }${File.separator}${saveFilePrefix}.${saveFileExt}"
 
                 val cpRet = DouyinPackage.instance.ugFileUtils.selfClass?.invokeStaticMethod<Boolean>(
                     DouyinPackage.instance.ugFileUtils.copyFile(),
                     fileToSave, saveFilePath,
-                    DouyinPackage.instance.tokenCert.selfClass?.getConstructor(String::class.java)?.newInstance("bpea-comment_save_image_to_album")
+                    DouyinPackage.instance.tokenCert.selfClass?.getConstructor(String::class.java)
+                        ?.newInstance("bpea-comment_save_image_to_album")
                 )
 
                 // shows success dialog
@@ -291,7 +293,12 @@ object CommentEmojiHooker : YukiBaseHooker() {
             name = "createUri"
             returnType = android.net.Uri::class
             modifiers(Modifiers.PUBLIC, Modifiers.STATIC, Modifiers.FINAL)
-            parameters(String::class, Boolean::class, Array<android.net.Uri>::class, DouyinPackage.instance.tokenCert.selfClass!!)
+            parameters(
+                String::class,
+                Boolean::class,
+                Array<android.net.Uri>::class,
+                DouyinPackage.instance.tokenCert.selfClass!!
+            )
             parameterCount = 4
         }?.hook {
             after {
@@ -321,7 +328,9 @@ object CommentEmojiHooker : YukiBaseHooker() {
                 // Ensure the virtual path has no leading '/' but strictly retains a trailing '/'.
                 val fileRelPath = filePath.substring(1, filePath.lastIndexOf(File.separator) + 1)
 
-                val context = DouyinPackage.instance.ugFileUtils.selfClass?.getStaticField<Context>(DouyinPackage.instance.ugFileUtils.context())?:return@after
+                val context =
+                    DouyinPackage.instance.ugFileUtils.selfClass?.getStaticField<Context>(DouyinPackage.instance.ugFileUtils.context())
+                        ?: return@after
                 val tokenCert = args[3]
 
                 val finalUri = DouyinPackage.instance.ugFileUtils.selfClass?.invokeStaticMethod<android.net.Uri>(
@@ -406,7 +415,8 @@ object CommentEmojiHooker : YukiBaseHooker() {
 
     // Sets a new image index on the save-image action, returns the previous one
     private fun overrideImageIndex(actionItem: Any, index: Int): Int {
-        val params = actionItem.getField<Any>(DouyinPackage.instance.saveImageActionItem.saveImageActionParams()) ?: return -1
+        val params =
+            actionItem.getField<Any>(DouyinPackage.instance.saveImageActionItem.saveImageActionParams()) ?: return -1
         val originImageIndex = params.getField<Int>(DouyinPackage.instance.commentActionParams.imageIndex())!!
         params.setField(DouyinPackage.instance.commentActionParams.imageIndex(), index)
         return originImageIndex
