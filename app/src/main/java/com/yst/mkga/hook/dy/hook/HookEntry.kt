@@ -38,10 +38,13 @@ object HookEntry : IYukiHookXposedInit {
                 parameters(Application::class)
             }.hook {
                 before {
-                    val context = args[0] as Context
+                    val context = args[0] as? Context ?: return@before
 
-                    // Skip plugins added by the host app itself (not our main APK)
-                    if (appInfo.sourceDir != context.applicationInfo.sourceDir) {
+                    // Hook main process only; skip plugin sub-processes and cases
+                    // where processName resolves to "android" unexpectedly (root cause unknown)
+                    if ((appInfo.sourceDir != context.applicationInfo.sourceDir)
+                        || processName != context.packageName
+                    ) {
                         return@before
                     }
 
