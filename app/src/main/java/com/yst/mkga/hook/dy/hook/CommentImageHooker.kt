@@ -8,6 +8,8 @@ import com.highcapable.yukihookapi.hook.entity.YukiBaseHooker
 import com.highcapable.yukihookapi.hook.log.YLog
 import org.luckypray.dexkit.DexKitBridge
 
+import com.yst.mkga.hook.dy.hook.utils.getField
+
 object CommentImageHooker : YukiBaseHooker() {
     private val TAG = this::class.simpleName
 
@@ -19,9 +21,7 @@ object CommentImageHooker : YukiBaseHooker() {
                 name = packageInstance.commentImageStruct.getDownloadUrl().name
             }?.hook {
                 before {
-                    val originUrl = instance.asResolver().firstFieldOrNull {
-                        name = packageInstance.commentImageStruct.originUrl().name
-                    }?.get()
+                    val originUrl = instance.getField<Any?>(packageInstance.commentImageStruct.originUrl())
                     if (originUrl != null) {
                         result = originUrl
                     }

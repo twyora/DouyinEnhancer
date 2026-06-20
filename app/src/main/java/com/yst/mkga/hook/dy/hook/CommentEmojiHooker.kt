@@ -8,9 +8,6 @@ import android.media.MediaMetadataRetriever
 import android.os.Build
 import android.webkit.MimeTypeMap
 import java.io.File
-import java.lang.reflect.Field
-import java.lang.reflect.Method
-import java.lang.reflect.Modifier
 import kotlinx.io.buffered
 import kotlinx.io.files.Path
 import kotlinx.io.files.SystemFileSystem
@@ -28,7 +25,13 @@ import org.luckypray.dexkit.DexKitBridge
 
 import com.yst.mkga.hook.dy.hook.utils.HookTransaction
 import com.yst.mkga.hook.dy.hook.utils.FileTypeDetector
-import com.yst.mkga.hook.dy.hook.utils.toClassIfPrimitiveElseString
+import com.yst.mkga.hook.dy.hook.utils.getField
+import com.yst.mkga.hook.dy.hook.utils.getStaticField
+import com.yst.mkga.hook.dy.hook.utils.invokeMethod
+import com.yst.mkga.hook.dy.hook.utils.invokeStaticMethod
+import com.yst.mkga.hook.dy.hook.utils.setField
+
+
 
 object CommentEmojiHooker : YukiBaseHooker() {
     private val TAG = this::class.simpleName
@@ -123,9 +126,7 @@ object CommentEmojiHooker : YukiBaseHooker() {
 
                 // temporarily install emoji URLs so the downloader sees them
                 // save original state to be restored in after{}
-                originImageUrlList = comment.asResolver().firstFieldOrNull {
-                    name = DouyinPackage.instance.comment.imageList().name
-                }?.get<List<*>>()
+                originImageUrlList = comment.getField<List<*>>(DouyinPackage.instance.comment.imageList())
                 originImageIndex = overrideImageIndex(actionItem, 0) // target the first (just-injected) image
                 savedActionItem = actionItem
                 savedComment = comment
@@ -137,9 +138,7 @@ object CommentEmojiHooker : YukiBaseHooker() {
             // undo temporary edits — restore comment.imageList and actionItem.imageIndex
             after {
                 savedComment?.let { c ->
-                    c.asResolver().firstFieldOrNull {
-                        name = DouyinPackage.instance.comment.imageList().name
-                    }?.set(originImageUrlList)
+                    c.setField(DouyinPackage.instance.comment.imageList(), originImageUrlList)
                     if (originImageIndex >= 0) {
                         savedActionItem?.let {
                             overrideImageIndex(it, originImageIndex)
@@ -181,29 +180,22 @@ object CommentEmojiHooker : YukiBaseHooker() {
             before {
                 val downloadInfo = args[0] ?: return@before
 
-                val dlUrl = downloadInfo.asResolver().firstFieldOrNull {
-                    name = DouyinPackage.instance.downloadInfo.url().name
-                }?.get<String>() ?: return@before
+                val dlUrl = downloadInfo.getField<String>(DouyinPackage.instance.downloadInfo.url()) ?: return@before
                 // Emoji animateUrl file extension is always .heif
                 if (!dlUrl.contains(".heif")) {
                     return@before
                 }
 
                 // Downloaded file save path
-                val sourcePath = downloadInfo.asResolver().firstMethodOrNull {
-                    val downloadInfoMethod = DouyinPackage.instance.downloadInfo.getTargetFilePath()
-                    name = downloadInfoMethod.name
-                    parameters(*downloadInfoMethod.parameters.toClassIfPrimitiveElseString())
-                }?.invoke<String>() ?: return@before
+                val sourcePath = downloadInfo.invokeMethod<String?>(DouyinPackage.instance.downloadInfo.getTargetFilePath()) ?:return@before
                 val sourceMimeType = FileTypeDetector.detect(sourcePath).mimeType
                 YLog.info("$TAG: Source MIME type: $sourceMimeType")
 
                 val saveFilePrefix = "comment_${
-                    DouyinPackage.instance.digestUtils.selfClass?.resolve()?.firstMethodOrNull{
-                        val md5HexMethod=DouyinPackage.instance.digestUtils.md5Hex()
-                        name=md5HexMethod.name
-                        parameters(*md5HexMethod.parameters.toClassIfPrimitiveElseString())
-                    }?.invoke<String>( dlUrl + System.currentTimeMillis().toString())
+                    DouyinPackage.instance.digestUtils.selfClass?.invokeStaticMethod<String>(
+                        DouyinPackage.instance.digestUtils.md5Hex(),
+                        dlUrl + System.currentTimeMillis().toString()
+                    )
                 }"
 
                 // Prepare file to save
@@ -223,11 +215,10 @@ object CommentEmojiHooker : YukiBaseHooker() {
                     YLog.info("$TAG: Source MIME type is video, converting to GIF")
 
                     val gifTempPath = "${
-                        DouyinPackage.instance.ugFileUtils.selfClass?.resolve()?.firstMethodOrNull{
-                            val getStorageDirMethod=DouyinPackage.instance.ugFileUtils.getStorageDir()
-                            name=getStorageDirMethod.name
-                            parameters(*getStorageDirMethod.parameters.toClassIfPrimitiveElseString())
-                        }?.invoke<String>( "/comment/images", false)!!
+                        DouyinPackage.instance.ugFileUtils.selfClass?.invokeStaticMethod<String>(
+                            DouyinPackage.instance.ugFileUtils.getStorageDir(),
+                            "/comment/images", false
+                        )
                     }${File.separator}${saveFilePrefix}.gif"
 
                     if (convertMedia2Gif(sourcePath, gifTempPath)) {
@@ -241,18 +232,17 @@ object CommentEmojiHooker : YukiBaseHooker() {
 
                 // Copy to album
                 val saveFilePath = "${
-                    DouyinPackage.instance.ugFileUtils.selfClass?.resolve()?.firstMethodOrNull{
-                        val getExternalStorageDirMethod=DouyinPackage.instance.ugFileUtils.getExternalStorageDir()
-                        name=getExternalStorageDirMethod.name
-                        parameters(*getExternalStorageDirMethod.parameters.toClassIfPrimitiveElseString())
-                    }?.invoke<String>("/douyin/comment", false)
-                }${File.separator}${saveFilePrefix}.${saveFileExt}"
+                        DouyinPackage.instance.ugFileUtils.selfClass?.invokeStaticMethod<String>(
+                            DouyinPackage.instance.ugFileUtils.getExternalStorageDir(),
+                            "/douyin/comment", false
+                        )
+                    }${File.separator}${saveFilePrefix}.${saveFileExt}"
 
-                val cpRet = DouyinPackage.instance.ugFileUtils.selfClass?.resolve()?.firstMethodOrNull{
-                    val copyFileMethod=DouyinPackage.instance.ugFileUtils.copyFile()
-                    name=copyFileMethod.name
-                    parameters(*copyFileMethod.parameters.toClassIfPrimitiveElseString())
-                }?.invoke<Boolean>(fileToSave, saveFilePath, DouyinPackage.instance.tokenCert.selfClass?.getConstructor(String::class.java)?.newInstance("bpea-comment_save_image_to_album"))
+                val cpRet = DouyinPackage.instance.ugFileUtils.selfClass?.invokeStaticMethod<Boolean>(
+                    DouyinPackage.instance.ugFileUtils.copyFile(),
+                    fileToSave, saveFilePath,
+                    DouyinPackage.instance.tokenCert.selfClass?.getConstructor(String::class.java)?.newInstance("bpea-comment_save_image_to_album")
+                )
 
                 // shows success dialog
                 val context =
@@ -260,12 +250,10 @@ object CommentEmojiHooker : YukiBaseHooker() {
                         type = Context::class.java
                     }?.get<Context?>()
 
-                instance.asResolver().firstMethodOrNull{
-                    val notifyResultMethod=DouyinPackage.instance.commentImageSaveHelper.notifyResult()
-                    name=notifyResultMethod.name
-                    parameters(*notifyResultMethod.parameters.toClassIfPrimitiveElseString())
-                    superclass()
-                }?.invoke(context,cpRet)
+                instance.invokeMethod<Any?>(
+                    DouyinPackage.instance.commentImageSaveHelper.notifyResult(),
+                    context, cpRet
+                )
 
                 if (hasTempFile) {
                     File(fileToSave).delete()
@@ -333,16 +321,13 @@ object CommentEmojiHooker : YukiBaseHooker() {
                 // Ensure the virtual path has no leading '/' but strictly retains a trailing '/'.
                 val fileRelPath = filePath.substring(1, filePath.lastIndexOf(File.separator) + 1)
 
-                val context = DouyinPackage.instance.ugFileUtils.selfClass?.resolve()?.firstFieldOrNull{
-                    name= DouyinPackage.instance.ugFileUtils.context().name
-                }?.get<Context>()?:return@after
+                val context = DouyinPackage.instance.ugFileUtils.selfClass?.getStaticField<Context>(DouyinPackage.instance.ugFileUtils.context())?:return@after
                 val tokenCert = args[3]
 
-                val finalUri = DouyinPackage.instance.ugFileUtils.selfClass?.resolve()?.firstMethodOrNull{
-                    val getImageUriMethod=DouyinPackage.instance.ugFileUtils.getImageUri()
-                    name=getImageUriMethod.name
-                    parameters(*getImageUriMethod.parameters.toClassIfPrimitiveElseString())
-                }?.invoke<android.net.Uri>(context, fileName, fileMimeType, fileRelPath, tokenCert)  ?: return@after
+                val finalUri = DouyinPackage.instance.ugFileUtils.selfClass?.invokeStaticMethod<android.net.Uri>(
+                    DouyinPackage.instance.ugFileUtils.getImageUri(),
+                    context, fileName, fileMimeType, fileRelPath, tokenCert
+                ) ?: return@after
                 // replace the hook's return value with the URI we just created
                 result = finalUri
 
@@ -372,63 +357,42 @@ object CommentEmojiHooker : YukiBaseHooker() {
 
     // Gets CommentActionParams held by a long-press menu item
     private fun extractActionParams(actionItem: Any): Any? {
-        return actionItem.asResolver().firstFieldOrNull {
-            name = DouyinPackage.instance.commentLongPressItemModel.commentActionParams().name
-            superclass()
-        }?.get()
+        return actionItem.getField(DouyinPackage.instance.commentLongPressItemModel.commentActionParams())
     }
 
     // Gets the Comment from a long-press menu item
     private fun extractComment(actionItem: Any): Any? {
         val params = extractActionParams(actionItem) ?: return null
-        return params.asResolver().firstFieldOrNull {
-            name = DouyinPackage.instance.commentActionParams.comment().name
-        }?.get()
+        return params.getField(DouyinPackage.instance.commentActionParams.comment())
     }
 
     // Gets emoji download URLs from comment.emoji.animateUrl.urlList
     private fun extractEmojiUrls(comment: Any): List<String>? {
         return runCatching {
-            val emoji = comment.asResolver().firstFieldOrNull {
-                name = DouyinPackage.instance.comment.emoji().name
-            }?.get() ?: return@runCatching null
-            val animateUrl = emoji.asResolver().firstFieldOrNull {
-                name = DouyinPackage.instance.emoji.animateUrl().name
-            }?.get() ?: return@runCatching null
-            animateUrl.asResolver().firstFieldOrNull {
-                name = DouyinPackage.instance.urlModel.urlList().name
-            }?.get<List<String>>()
+            val emoji = comment.getField<Any>(DouyinPackage.instance.comment.emoji()) ?: return@runCatching null
+            val animateUrl = emoji.getField<Any>(DouyinPackage.instance.emoji.animateUrl()) ?: return@runCatching null
+            animateUrl.getField<List<String>>(DouyinPackage.instance.urlModel.urlList())
         }.getOrNull()
     }
 
     // Writes emoji URLs into comment.imageList[0].downloadUrl.urlList, optionally prepended to existing URLs
     private fun injectEmojiUrls(comment: Any, emojiUrls: List<String>, prepend: Boolean = true) {
-        var imageList = comment.asResolver().firstFieldOrNull {
-            name = DouyinPackage.instance.comment.imageList().name
-        }?.get<List<*>>()
+        var imageList = comment.getField<List<*>>(DouyinPackage.instance.comment.imageList())
         if (imageList.isNullOrEmpty()) {
             val newStruct = DouyinPackage.instance.commentImageStruct.selfClass?.getConstructor()?.newInstance()
             imageList = listOf(newStruct)
-            comment.asResolver().firstFieldOrNull {
-                name = DouyinPackage.instance.comment.imageList().name
-            }?.set(imageList)
+            comment.setField(DouyinPackage.instance.comment.imageList(), imageList)
         }
 
         val targetStruct = imageList[0]
-        var urlModel = targetStruct?.asResolver()?.firstFieldOrNull {
-            name = DouyinPackage.instance.commentImageStruct.downloadUrl().name
-        }?.get()
+        var urlModel = targetStruct?.getField<Any>(DouyinPackage.instance.commentImageStruct.downloadUrl())
         if (urlModel == null) {
             urlModel = DouyinPackage.instance.urlModel.selfClass?.getConstructor()?.newInstance()
-            targetStruct?.asResolver()?.firstFieldOrNull {
-                name = DouyinPackage.instance.commentImageStruct.downloadUrl().name
-            }?.set(urlModel)
+            targetStruct?.setField(DouyinPackage.instance.commentImageStruct.downloadUrl(), urlModel)
         }
 
         var finalUrls: List<String>? = if (prepend) {
-            val imageUrls = urlModel?.asResolver()?.firstFieldOrNull {
-                name = DouyinPackage.instance.urlModel.urlList().name
-            }?.get<List<String>>()
+            val imageUrls = urlModel?.getField<List<String>>(DouyinPackage.instance.urlModel.urlList())
             if (imageUrls.isNullOrEmpty()) {
                 emojiUrls
             } else {
@@ -437,22 +401,14 @@ object CommentEmojiHooker : YukiBaseHooker() {
         } else {
             emojiUrls
         }
-        urlModel?.asResolver()?.firstFieldOrNull {
-            name = DouyinPackage.instance.urlModel.urlList().name
-            }?.set(finalUrls)
+        urlModel?.setField(DouyinPackage.instance.urlModel.urlList(), finalUrls)
     }
 
     // Sets a new image index on the save-image action, returns the previous one
     private fun overrideImageIndex(actionItem: Any, index: Int): Int {
-        val params = actionItem.asResolver().firstFieldOrNull {
-            name = DouyinPackage.instance.saveImageActionItem.saveImageActionParams().name
-        }?.get() ?: return -1
-        val originImageIndex = params.asResolver().firstFieldOrNull {
-            name = DouyinPackage.instance.commentActionParams.imageIndex().name
-        }?.get<Int>()!!
-        params.asResolver().firstFieldOrNull {
-            name = DouyinPackage.instance.commentActionParams.imageIndex().name
-        }?.set(index)
+        val params = actionItem.getField<Any>(DouyinPackage.instance.saveImageActionItem.saveImageActionParams()) ?: return -1
+        val originImageIndex = params.getField<Int>(DouyinPackage.instance.commentActionParams.imageIndex())!!
+        params.setField(DouyinPackage.instance.commentActionParams.imageIndex(), index)
         return originImageIndex
     }
 

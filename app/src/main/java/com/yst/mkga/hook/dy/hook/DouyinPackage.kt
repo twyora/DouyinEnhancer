@@ -22,37 +22,35 @@ import org.luckypray.dexkit.DexKitBridge
 import com.yst.mkga.hook.dy.generated.AppProperties
 import com.yst.mkga.hook.dy.hook.utils.weak
 
-val Configs.Class.orNull
+val Configs.Class.nameOrNull
     get() = if (hasName()) {
         name
     } else {
         null
     }
 
-val Configs.Method.orNull
+val Configs.Field.nameOrNull
     get() = if (hasName()) {
         name
     } else {
         null
     }
 
-val Configs.Field.orNull
+val Configs.Method.nameOrNull
     get() = if (hasName()) {
         name
     } else {
         null
     }
 
-val Configs.Method.Parameters
-    get() = if (hasParameters()) {
-        parameters
-    } else {
+val Configs.Method.Parameters.valuesListOrNull
+    get() = valuesList.ifEmpty {
         null
     }
 
 class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
-    data class Method(val name: String, val parameters: List<String>)
-    data class Field(val name: String)
+    data class Field(val name: String?)
+    data class Method(val name: String?, val parameters: List<String>?)
 
     init {
         instance = this
@@ -87,169 +85,169 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
 
     inner class CommentImageStructModule {
         val selfClass by weak {
-            hookInfo.commentImageStruct.class_.name.toClass(classLoader)
+            hookInfo.commentImageStruct.class_.nameOrNull?.toClass(classLoader)
         }
 
-        fun originUrl() = Field(hookInfo.commentImageStruct.originUrl.name)
-        fun downloadUrl() = Field(hookInfo.commentImageStruct.downloadUrl.name)
+        fun originUrl() = Field(hookInfo.commentImageStruct.originUrl.nameOrNull)
+        fun downloadUrl() = Field(hookInfo.commentImageStruct.downloadUrl.nameOrNull)
         fun getDownloadUrl() = Method(
-            hookInfo.commentImageStruct.getDownloadUrl.name,
-            hookInfo.commentImageStruct.getDownloadUrl.parameters.valuesList
+            hookInfo.commentImageStruct.getDownloadUrl.nameOrNull,
+            hookInfo.commentImageStruct.getDownloadUrl.parameters.valuesListOrNull
         )
     }
 
     inner class UrlModelModule {
         val selfClass by weak {
-            hookInfo.urlModel.class_.name.toClass(classLoader)
+            hookInfo.urlModel.class_.nameOrNull?.toClass(classLoader)
         }
 
-        fun urlList() = Field(hookInfo.urlModel.urlList.name)
+        fun urlList() = Field(hookInfo.urlModel.urlList.nameOrNull)
     }
 
     inner class CommentModule {
         val selfClass by weak {
-            hookInfo.comment.class_.name.toClass(classLoader)
+            hookInfo.comment.class_.nameOrNull?.toClass(classLoader)
         }
 
-        fun emoji() = Field(hookInfo.comment.emoji.name)
-        fun imageList() = Field(hookInfo.comment.imageList.name)
+        fun emoji() = Field(hookInfo.comment.emoji.nameOrNull)
+        fun imageList() = Field(hookInfo.comment.imageList.nameOrNull)
     }
 
     inner class EmojiModule {
         val selfClass by weak {
-            hookInfo.emoji.class_.name.toClass(classLoader)
+            hookInfo.emoji.class_.nameOrNull?.toClass(classLoader)
         }
 
-        fun animateUrl() = Field(hookInfo.emoji.animateUrl.name)
+        fun animateUrl() = Field(hookInfo.emoji.animateUrl.nameOrNull)
     }
 
     inner class CommentActionParamsModule {
         val selfClass by weak {
-            hookInfo.commentActionParams.class_.name.toClass(classLoader)
+            hookInfo.commentActionParams.class_.nameOrNull?.toClass(classLoader)
         }
 
-        fun comment() = Field(hookInfo.commentActionParams.comment.name)
-        fun imageIndex() = Field(hookInfo.commentActionParams.imageIndex.name)
+        fun comment() = Field(hookInfo.commentActionParams.comment.nameOrNull)
+        fun imageIndex() = Field(hookInfo.commentActionParams.imageIndex.nameOrNull)
     }
 
     inner class CommentLongPressItemModelModule {
         val selfClass by weak {
-            hookInfo.commentLongPressItemModel.class_.name.toClass(classLoader)
+            hookInfo.commentLongPressItemModel.class_.nameOrNull?.toClass(classLoader)
         }
 
         fun commentActionParams() =
-            Field(hookInfo.commentLongPressItemModel.commentActionParams.name)
+            Field(hookInfo.commentLongPressItemModel.commentActionParams.nameOrNull)
     }
 
     inner class SaveImageActionItemModule {
         val selfClass by weak {
-            hookInfo.saveImageActionItem.class_.name.toClass(classLoader)
+            hookInfo.saveImageActionItem.class_.nameOrNull?.toClass(classLoader)
         }
 
-        fun commentActionParams() = Field(hookInfo.saveImageActionItem.cmtActionParams.name)
-        fun saveImageActionParams() = Field(hookInfo.saveImageActionItem.saveImgActionParams.name)
+        fun commentActionParams() = Field(hookInfo.saveImageActionItem.cmtActionParams.nameOrNull)
+        fun saveImageActionParams() = Field(hookInfo.saveImageActionItem.saveImgActionParams.nameOrNull)
     }
 
     inner class CommentExtensionsKtModule {
         val selfClass by weak {
-            hookInfo.cmtSaveToAlbumBtnVisibility.class_.name.toClass(classLoader)
+            hookInfo.cmtSaveToAlbumBtnVisibility.class_.nameOrNull?.toClass(classLoader)
         }
 
         fun saveToAlbumVisibility() = Method(
-            hookInfo.cmtSaveToAlbumBtnVisibility.checkVisibility.name,
-            hookInfo.cmtSaveToAlbumBtnVisibility.checkVisibility.parameters.valuesList
+            hookInfo.cmtSaveToAlbumBtnVisibility.checkVisibility.nameOrNull,
+            hookInfo.cmtSaveToAlbumBtnVisibility.checkVisibility.parameters.valuesListOrNull
         )
     }
 
     inner class CommentSaveToAlbumButtonClickModule {
         val selfClass by weak {
-            hookInfo.cmtSaveToAlbumBtnClickedCallback.class_.name.toClass(classLoader)
+            hookInfo.cmtSaveToAlbumBtnClickedCallback.class_.nameOrNull?.toClass(classLoader)
         }
 
         fun onClicked() = Method(
-            hookInfo.cmtSaveToAlbumBtnClickedCallback.clickedCallback.name,
-            hookInfo.cmtSaveToAlbumBtnClickedCallback.clickedCallback.parameters.valuesList
+            hookInfo.cmtSaveToAlbumBtnClickedCallback.clickedCallback.nameOrNull,
+            hookInfo.cmtSaveToAlbumBtnClickedCallback.clickedCallback.parameters.valuesListOrNull
         )
     }
 
     inner class CommentImageSaveHelperModule {
         val selfClass by weak {
-            hookInfo.commentImageSaveHelper.class_.name.toClass(classLoader)
+            hookInfo.commentImageSaveHelper.class_.nameOrNull?.toClass(classLoader)
         }
 
 
         fun onSuccessed() = Method(
-            hookInfo.commentImageSaveHelper.onSuccessed.name,
-            hookInfo.commentImageSaveHelper.onSuccessed.parameters.valuesList
+            hookInfo.commentImageSaveHelper.onSuccessed.nameOrNull,
+            hookInfo.commentImageSaveHelper.onSuccessed.parameters.valuesListOrNull
         )
 
         fun notifyResult() = Method(
-            hookInfo.commentImageSaveHelper.notifyResult.name,
-            hookInfo.commentImageSaveHelper.notifyResult.parameters.valuesList
+            hookInfo.commentImageSaveHelper.notifyResult.nameOrNull,
+            hookInfo.commentImageSaveHelper.notifyResult.parameters.valuesListOrNull
         )
     }
 
     inner class DownloadInfoModule {
         val selfClass by weak {
-            hookInfo.downloadInfo.class_.name.toClass(classLoader)
+            hookInfo.downloadInfo.class_.nameOrNull?.toClass(classLoader)
         }
 
-        fun url() = Field(hookInfo.downloadInfo.url.name)
+        fun url() = Field(hookInfo.downloadInfo.url.nameOrNull)
         fun getTargetFilePath() = Method(
-            hookInfo.downloadInfo.getTargetFilePath.name,
-            hookInfo.downloadInfo.getTargetFilePath.parameters.valuesList
+            hookInfo.downloadInfo.getTargetFilePath.nameOrNull,
+            hookInfo.downloadInfo.getTargetFilePath.parameters.valuesListOrNull
         )
     }
 
     inner class DigestUtilsModule {
         val selfClass by weak {
-            hookInfo.digestUtils.class_.name.toClass(classLoader)
+            hookInfo.digestUtils.class_.nameOrNull?.toClass(classLoader)
         }
 
         fun md5Hex() = Method(
-            hookInfo.digestUtils.md5Hex.name,
-            hookInfo.digestUtils.md5Hex.parameters.valuesList
+            hookInfo.digestUtils.md5Hex.nameOrNull,
+            hookInfo.digestUtils.md5Hex.parameters.valuesListOrNull
         )
     }
 
     inner class UGFileUiltsKtModule {
         val selfClass by weak {
-            hookInfo.ugFileUtils.class_.name.toClass(classLoader)
+            hookInfo.ugFileUtils.class_.nameOrNull?.toClass(classLoader)
         }
 
-        fun context() = Field(hookInfo.ugFileUtils.context.name)
+        fun context() = Field(hookInfo.ugFileUtils.context.nameOrNull)
         fun copyFile() = Method(
-            hookInfo.ugFileUtils.copyFile.name,
-            hookInfo.ugFileUtils.copyFile.parameters.valuesList
+            hookInfo.ugFileUtils.copyFile.nameOrNull,
+            hookInfo.ugFileUtils.copyFile.parameters.valuesListOrNull
         )
 
         fun getStorageDir() =
             Method(
-                hookInfo.ugFileUtils.getStorageDir.name,
-                hookInfo.ugFileUtils.getStorageDir.parameters.valuesList
+                hookInfo.ugFileUtils.getStorageDir.nameOrNull,
+                hookInfo.ugFileUtils.getStorageDir.parameters.valuesListOrNull
             )
 
         fun getExternalStorageDir() = Method(
-            hookInfo.ugFileUtils.getExternalStorageDir.name,
-            hookInfo.ugFileUtils.getExternalStorageDir.parameters.valuesList
+            hookInfo.ugFileUtils.getExternalStorageDir.nameOrNull,
+            hookInfo.ugFileUtils.getExternalStorageDir.parameters.valuesListOrNull
         )
 
         fun getImageUri() =
             Method(
-                hookInfo.ugFileUtils.getImageUri.name,
-                hookInfo.ugFileUtils.getImageUri.parameters.valuesList
+                hookInfo.ugFileUtils.getImageUri.nameOrNull,
+                hookInfo.ugFileUtils.getImageUri.parameters.valuesListOrNull
             )
 
         fun createUri() =
             Method(
-                hookInfo.ugFileUtils.createUri.name,
-                hookInfo.ugFileUtils.createUri.parameters.valuesList
+                hookInfo.ugFileUtils.createUri.nameOrNull,
+                hookInfo.ugFileUtils.createUri.parameters.valuesListOrNull
             )
     }
 
     inner class TokenCertModule {
         val selfClass by weak {
-            hookInfo.tokenCert.class_.name.toClass(classLoader)
+            hookInfo.tokenCert.class_.nameOrNull?.toClass(classLoader)
         }
     }
 
