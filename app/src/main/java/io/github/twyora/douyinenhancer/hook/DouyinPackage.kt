@@ -84,7 +84,7 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
     val commentImageSaveHelper = CommentImageSaveHelperModule()
     val downloadInfo = DownloadInfoModule()
     val digestUtils = DigestUtilsModule()
-    val ugFileUtils = UGFileUiltsKtModule()
+    val ugFileUtils = UGFileUtilsKtModule()
     val tokenCert = TokenCertModule()
 
     inner class CommentImageStructModule {
@@ -231,7 +231,7 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
         )
     }
 
-    inner class UGFileUiltsKtModule {
+    inner class UGFileUtilsKtModule {
         val selfClass by weak {
             hookInfo.ugFileUtils.class_.nameOrNull
                 ?.toClass(classLoader)
