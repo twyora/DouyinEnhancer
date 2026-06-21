@@ -2,7 +2,7 @@
  * Referenced from [BiliRoaming](https://github.com/yujincheng08/BiliRoaming/blob/master/app/src/main/java/me/iacn/biliroaming/BiliBiliPackage.kt)
  */
 
-package com.yst.mkga.hook.dy.hook
+package io.github.twyora.douyinenhancer.hook
 
 import android.app.AndroidAppHelper
 import android.content.Context
@@ -19,8 +19,8 @@ import com.highcapable.kavaref.extension.toClass
 import com.highcapable.yukihookapi.hook.log.YLog
 import org.luckypray.dexkit.DexKitBridge
 
-import com.yst.mkga.hook.dy.generated.AppProperties
-import com.yst.mkga.hook.dy.hook.utils.weak
+import io.github.twyora.douyinenhancer.generated.AppProperties
+import io.github.twyora.douyinenhancer.hook.utils.weak
 
 val Configs.Class.nameOrNull
     get() = if (hasName()) {

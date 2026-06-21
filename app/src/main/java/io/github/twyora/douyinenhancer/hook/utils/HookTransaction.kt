@@ -1,4 +1,4 @@
-package com.yst.mkga.hook.dy.hook.utils
+package io.github.twyora.douyinenhancer.hook.utils
 
 import com.highcapable.yukihookapi.hook.core.YukiMemberHookCreator.MemberHookCreator
 import com.highcapable.yukihookapi.hook.log.YLog

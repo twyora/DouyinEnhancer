@@ -1,12 +1,10 @@
-package com.yst.mkga.hook.dy.hook
-
-import java.lang.reflect.Field
+package io.github.twyora.douyinenhancer.hook
 
 import com.highcapable.kavaref.KavaRef.Companion.resolve
 import com.highcapable.yukihookapi.hook.entity.YukiBaseHooker
 import com.highcapable.yukihookapi.hook.log.YLog
 
-import com.yst.mkga.hook.dy.hook.utils.getField
+import io.github.twyora.douyinenhancer.hook.utils.getField
 
 object CommentImageHooker : YukiBaseHooker() {
     private val TAG = this::class.simpleName
