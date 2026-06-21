@@ -3,11 +3,7 @@ package io.github.twyora.douyinenhancer.hook.utils
 import java.io.File
 
 object FileTypeDetector {
-    data class FileTypeInfo(
-        val mimeType: String,
-        val extensions: List<String>,
-        val description: String
-    )
+    data class FileTypeInfo(val mimeType: String, val extensions: List<String>, val description: String)
 
     object MimeTypes {
         // Images
@@ -43,13 +39,20 @@ object FileTypeDetector {
         val AVI = FileTypeInfo("video/avi", listOf("avi"), "AVI Video")
         val FLV = FileTypeInfo("video/x-flv", listOf("flv"), "Flash Video")
         val MPEG_PS = FileTypeInfo("video/mpeg", listOf("mpg", "mpeg"), "MPEG-PS Video")
-        val MATROSKA = FileTypeInfo("video/x-matroska", listOf("mkv", "webm"), "Matroska/WebM Media")
-        val REALMEDIA = FileTypeInfo("application/vnd.rn-realmedia", listOf("rm", "rmvb"), "RealMedia Video")
+        val MATROSKA =
+            FileTypeInfo("video/x-matroska", listOf("mkv", "webm"), "Matroska/WebM Media")
+        val REALMEDIA =
+            FileTypeInfo("application/vnd.rn-realmedia", listOf("rm", "rmvb"), "RealMedia Video")
 
         // Documents & Archives
         val PDF = FileTypeInfo("application/pdf", listOf("pdf"), "PDF Document")
         val RTF = FileTypeInfo("application/rtf", listOf("rtf"), "Rich Text Format")
-        val ZIP = FileTypeInfo("application/zip", listOf("zip", "apk", "docx", "xlsx", "jar"), "Zip Archive")
+        val ZIP =
+            FileTypeInfo(
+                "application/zip",
+                listOf("zip", "apk", "docx", "xlsx", "jar"),
+                "Zip Archive"
+            )
         val ZIP_EMPTY = FileTypeInfo("application/zip", listOf("zip"), "Zip Archive (Empty)")
         val RAR = FileTypeInfo("application/vnd.rar", listOf("rar"), "RAR Archive")
         val RAR5 = FileTypeInfo("application/vnd.rar", listOf("rar"), "RAR5 Archive")
@@ -65,8 +68,14 @@ object FileTypeDetector {
         val SWF = FileTypeInfo("application/x-shockwave-flash", listOf("swf"), "Flash SWF")
         val WASM = FileTypeInfo("application/wasm", listOf("wasm"), "WebAssembly Binary")
         val JAVA_CLASS = FileTypeInfo("application/java-vm", listOf("class"), "Java Class File")
-        val SQLITE = FileTypeInfo("application/x-sqlite3", listOf("db", "sqlite"), "SQLite Database")
-        val OLE2 = FileTypeInfo("application/x-ole-storage", listOf("doc", "xls", "ppt"), "OLE2 Compound Document")
+        val SQLITE =
+            FileTypeInfo("application/x-sqlite3", listOf("db", "sqlite"), "SQLite Database")
+        val OLE2 =
+            FileTypeInfo(
+                "application/x-ole-storage",
+                listOf("doc", "xls", "ppt"),
+                "OLE2 Compound Document"
+            )
         val DEX = FileTypeInfo("application/vnd.android.dex", listOf("dex"), "Android DEX")
         val ODEX = FileTypeInfo("application/vnd.android.odex", listOf("odex"), "Android ODEX")
 
@@ -78,11 +87,7 @@ object FileTypeDetector {
         fun match(bytes: ByteArray): FileTypeInfo?
     }
 
-    class ExactMatchRule(
-        private val offset: Int,
-        private val magic: ByteArray,
-        val info: FileTypeInfo
-    ) : DetectionRule {
+    class ExactMatchRule(private val offset: Int, private val magic: ByteArray, val info: FileTypeInfo) : DetectionRule {
         override fun match(bytes: ByteArray): FileTypeInfo? {
             if (bytes.size < offset + magic.size) {
                 return null
@@ -96,18 +101,15 @@ object FileTypeDetector {
         }
     }
 
-    data class MaskedMatchRule(
-        val offset: Int,
-        val magic: ByteArray,
-        val mask: ByteArray,
-        val info: FileTypeInfo
-    ) : DetectionRule {
+    data class MaskedMatchRule(val offset: Int, val magic: ByteArray, val mask: ByteArray, val info: FileTypeInfo) : DetectionRule {
         override fun match(bytes: ByteArray): FileTypeInfo? {
             if (bytes.size < offset + magic.size) {
                 return null
             }
             for (i in magic.indices) {
-                if ((bytes[offset + i].toInt() and mask[i].toInt()) != (magic[i].toInt() and mask[i].toInt())) {
+                if ((bytes[offset + i].toInt() and mask[i].toInt()) !=
+                    (magic[i].toInt() and mask[i].toInt())
+                ) {
                     return null
                 }
             }
@@ -125,13 +127,30 @@ object FileTypeDetector {
             }
 
             return when (val brand = String(bytes, 8, 4, Charsets.US_ASCII)) {
-                "heic", "hevc", "hevx", "heim", "heis" -> MimeTypes.HEIC
-                "mif1" -> MimeTypes.HEIF
-                "avif", "avis" -> MimeTypes.AVIF
-                "M4A ", "M4B ", "mp4a" -> MimeTypes.M4A
-                "qt  " -> MimeTypes.QUICKTIME
+                "heic", "hevc", "hevx", "heim", "heis" -> {
+                    MimeTypes.HEIC
+                }
+
+                "mif1" -> {
+                    MimeTypes.HEIF
+                }
+
+                "avif", "avis" -> {
+                    MimeTypes.AVIF
+                }
+
+                "M4A ", "M4B ", "mp4a" -> {
+                    MimeTypes.M4A
+                }
+
+                "qt  " -> {
+                    MimeTypes.QUICKTIME
+                }
+
                 else -> {
-                    if (brand.startsWith("3gp") || brand.startsWith("3gr") || brand.startsWith("3gs")) {
+                    if (brand.startsWith("3gp") || brand.startsWith("3gr") ||
+                        brand.startsWith("3gs")
+                    ) {
                         MimeTypes.V_3GPP
                     } else if (brand.startsWith("3g2")) {
                         MimeTypes.V_3GPP2
@@ -163,133 +182,138 @@ object FileTypeDetector {
         }
     }
 
-    private val DEFAULT_RULES: List<DetectionRule> = buildList {
-        add(FtypContainerRule())
-        add(RiffContainerRule())
+    private val DEFAULT_RULES: List<DetectionRule> =
+        buildList {
+            add(FtypContainerRule())
+            add(RiffContainerRule())
 
-        // --- Images ---
-        add(
-            ExactMatchRule(
-                0,
-                byteArrayOf(0xFF.toByte(), 0xD8.toByte(), 0xFF.toByte()),
-                FileTypeInfo("image/jpeg", listOf("jpg", "jpeg"), "JPEG Image")
+            // --- Images ---
+            add(
+                ExactMatchRule(
+                    0,
+                    byteArrayOf(0xFF.toByte(), 0xD8.toByte(), 0xFF.toByte()),
+                    FileTypeInfo("image/jpeg", listOf("jpg", "jpeg"), "JPEG Image")
+                )
             )
-        )
-        add(
-            ExactMatchRule(
-                0,
-                byteArrayOf(0x89.toByte(), 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A),
-                FileTypeInfo("image/png", listOf("png"), "PNG Image")
+            add(
+                ExactMatchRule(
+                    0,
+                    byteArrayOf(0x89.toByte(), 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A),
+                    FileTypeInfo("image/png", listOf("png"), "PNG Image")
+                )
             )
-        )
-        add(
-            ExactMatchRule(
-                0,
-                "GIF8".toByteArray(Charsets.US_ASCII),
-                FileTypeInfo("image/gif", listOf("gif"), "GIF Image")
+            add(
+                ExactMatchRule(
+                    0,
+                    "GIF8".toByteArray(Charsets.US_ASCII),
+                    FileTypeInfo("image/gif", listOf("gif"), "GIF Image")
+                )
             )
-        )
-        add(
-            ExactMatchRule(
-                0,
-                "BM".toByteArray(Charsets.US_ASCII),
-                FileTypeInfo("image/bmp", listOf("bmp"), "BMP Image")
+            add(
+                ExactMatchRule(
+                    0,
+                    "BM".toByteArray(Charsets.US_ASCII),
+                    FileTypeInfo("image/bmp", listOf("bmp"), "BMP Image")
+                )
             )
-        )
 
-        // --- Audio ---
-        add(
-            ExactMatchRule(
-                0,
-                "ID3".toByteArray(Charsets.US_ASCII),
-                FileTypeInfo("audio/mpeg", listOf("mp3", "mpga"), "MPEG Audio (ID3)")
+            // --- Audio ---
+            add(
+                ExactMatchRule(
+                    0,
+                    "ID3".toByteArray(Charsets.US_ASCII),
+                    FileTypeInfo("audio/mpeg", listOf("mp3", "mpga"), "MPEG Audio (ID3)")
+                )
             )
-        )
-        add(
-            ExactMatchRule(
-                0,
-                "fLaC".toByteArray(Charsets.US_ASCII),
-                FileTypeInfo("audio/flac", listOf("flac"), "FLAC Audio")
+            add(
+                ExactMatchRule(
+                    0,
+                    "fLaC".toByteArray(Charsets.US_ASCII),
+                    FileTypeInfo("audio/flac", listOf("flac"), "FLAC Audio")
+                )
             )
-        )
-        add(
-            ExactMatchRule(
-                0,
-                "OggS".toByteArray(Charsets.US_ASCII),
-                FileTypeInfo("audio/ogg", listOf("ogg", "oga"), "Ogg Audio")
+            add(
+                ExactMatchRule(
+                    0,
+                    "OggS".toByteArray(Charsets.US_ASCII),
+                    FileTypeInfo("audio/ogg", listOf("ogg", "oga"), "Ogg Audio")
+                )
             )
-        )
-        add(
-            MaskedMatchRule(
-                0,
-                byteArrayOf(0xFF.toByte(), 0xE0.toByte()),
-                byteArrayOf(0xFF.toByte(), 0xE0.toByte()),
-                FileTypeInfo("audio/mpeg", listOf("mp3"), "MPEG Audio (Raw Frame)")
+            add(
+                MaskedMatchRule(
+                    0,
+                    byteArrayOf(0xFF.toByte(), 0xE0.toByte()),
+                    byteArrayOf(0xFF.toByte(), 0xE0.toByte()),
+                    FileTypeInfo("audio/mpeg", listOf("mp3"), "MPEG Audio (Raw Frame)")
+                )
             )
-        )
 
-        // --- Video ---
-        add(
-            ExactMatchRule(
-                0,
-                "FLV".toByteArray(Charsets.US_ASCII),
-                FileTypeInfo("video/x-flv", listOf("flv"), "Flash Video")
+            // --- Video ---
+            add(
+                ExactMatchRule(
+                    0,
+                    "FLV".toByteArray(Charsets.US_ASCII),
+                    FileTypeInfo("video/x-flv", listOf("flv"), "Flash Video")
+                )
             )
-        )
-        add(
-            ExactMatchRule(
-                0,
-                byteArrayOf(0x1A.toByte(), 0x45.toByte(), 0xDF.toByte(), 0xA3.toByte()),
-                FileTypeInfo("video/x-matroska", listOf("mkv", "webm"), "Matroska/WebM")
+            add(
+                ExactMatchRule(
+                    0,
+                    byteArrayOf(0x1A.toByte(), 0x45.toByte(), 0xDF.toByte(), 0xA3.toByte()),
+                    FileTypeInfo("video/x-matroska", listOf("mkv", "webm"), "Matroska/WebM")
+                )
             )
-        )
 
-        // --- Documents & Archives ---
-        add(
-            ExactMatchRule(
-                0,
-                "%PDF".toByteArray(Charsets.US_ASCII),
-                FileTypeInfo("application/pdf", listOf("pdf"), "PDF Document")
+            // --- Documents & Archives ---
+            add(
+                ExactMatchRule(
+                    0,
+                    "%PDF".toByteArray(Charsets.US_ASCII),
+                    FileTypeInfo("application/pdf", listOf("pdf"), "PDF Document")
+                )
             )
-        )
-        add(
-            ExactMatchRule(
-                0,
-                byteArrayOf(0x50, 0x4B, 0x03, 0x04),
-                FileTypeInfo("application/zip", listOf("zip", "apk", "docx", "xlsx"), "Zip Archive")
+            add(
+                ExactMatchRule(
+                    0,
+                    byteArrayOf(0x50, 0x4B, 0x03, 0x04),
+                    FileTypeInfo(
+                        "application/zip",
+                        listOf("zip", "apk", "docx", "xlsx"),
+                        "Zip Archive"
+                    )
+                )
             )
-        )
-        add(
-            ExactMatchRule(
-                0,
-                "Rar!\u001A\u0007\u0000".toByteArray(Charsets.US_ASCII),
-                FileTypeInfo("application/vnd.rar", listOf("rar"), "RAR Archive")
+            add(
+                ExactMatchRule(
+                    0,
+                    "Rar!\u001A\u0007\u0000".toByteArray(Charsets.US_ASCII),
+                    FileTypeInfo("application/vnd.rar", listOf("rar"), "RAR Archive")
+                )
             )
-        )
-        add(
-            ExactMatchRule(
-                0,
-                byteArrayOf(0x37, 0x7A, 0xBC.toByte(), 0xAF.toByte(), 0x27, 0x1C),
-                FileTypeInfo("application/x-7z-compressed", listOf("7z"), "7-Zip Archive")
+            add(
+                ExactMatchRule(
+                    0,
+                    byteArrayOf(0x37, 0x7A, 0xBC.toByte(), 0xAF.toByte(), 0x27, 0x1C),
+                    FileTypeInfo("application/x-7z-compressed", listOf("7z"), "7-Zip Archive")
+                )
             )
-        )
 
-        // --- Android Specific ---
-        add(
-            ExactMatchRule(
-                0,
-                "dex\n".toByteArray(Charsets.US_ASCII),
-                FileTypeInfo("application/vnd.android.dex", listOf("dex"), "Android DEX")
+            // --- Android Specific ---
+            add(
+                ExactMatchRule(
+                    0,
+                    "dex\n".toByteArray(Charsets.US_ASCII),
+                    FileTypeInfo("application/vnd.android.dex", listOf("dex"), "Android DEX")
+                )
             )
-        )
-        add(
-            ExactMatchRule(
-                0,
-                "dey\n".toByteArray(Charsets.US_ASCII),
-                FileTypeInfo("application/vnd.android.odex", listOf("odex"), "Android ODEX")
+            add(
+                ExactMatchRule(
+                    0,
+                    "dey\n".toByteArray(Charsets.US_ASCII),
+                    FileTypeInfo("application/vnd.android.odex", listOf("odex"), "Android ODEX")
+                )
             )
-        )
-    }
+        }
 
     fun detect(bytes: ByteArray): FileTypeInfo {
         if (bytes.isEmpty()) {
@@ -324,7 +348,6 @@ object FileTypeDetector {
             }
         }
     }
-
 
     fun detect(filePath: String, headerSize: Int = 32): FileTypeInfo = detect(File(filePath))
 }

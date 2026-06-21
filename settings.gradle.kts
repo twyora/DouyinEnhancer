@@ -50,4 +50,3 @@ gropify {
 
 rootProject.name = "DouyinEnhancer"
 include(":app")
- 

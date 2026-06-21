@@ -3,7 +3,6 @@ package io.github.twyora.douyinenhancer.hook
 import android.app.Application
 import android.app.Instrumentation
 import android.content.Context
-
 import com.highcapable.kavaref.KavaRef.Companion.resolve
 import com.highcapable.yukihookapi.YukiHookAPI
 import com.highcapable.yukihookapi.annotation.xposed.InjectYukiHookWithXposed
@@ -31,26 +30,28 @@ object HookEntry : IYukiHookXposedInit {
 
         // Load cached HookInfo and run hooks when app context is available
         withProcess(mainProcessName) {
-            Instrumentation::class.resolve().firstMethod {
-                name = "callApplicationOnCreate"
-                parameters(Application::class)
-            }.hook {
-                before {
-                    val context = args[0] as? Context ?: return@before
+            Instrumentation::class
+                .resolve()
+                .firstMethod {
+                    name = "callApplicationOnCreate"
+                    parameters(Application::class)
+                }.hook {
+                    before {
+                        val context = args[0] as? Context ?: return@before
 
-                    // Hook main process only; skip plugin sub-processes and cases
-                    // where processName resolves to "android" unexpectedly (root cause unknown)
-                    if ((appInfo.sourceDir != context.applicationInfo.sourceDir)
-                        || processName != context.packageName
-                    ) {
-                        return@before
+                        // Hook main process only; skip plugin sub-processes and cases
+                        // where processName resolves to "android" unexpectedly (root cause unknown)
+                        if ((appInfo.sourceDir != context.applicationInfo.sourceDir) ||
+                            processName != context.packageName
+                        ) {
+                            return@before
+                        }
+
+                        DouyinPackage(appClassLoader!!, context)
+                        loadApp(hooker = CommentImageHooker)
+                        loadApp(hooker = CommentEmojiHooker)
                     }
-
-                    DouyinPackage(appClassLoader!!, context)
-                    loadApp(hooker = CommentImageHooker)
-                    loadApp(hooker = CommentEmojiHooker)
                 }
-            }
         }
     }
 }
