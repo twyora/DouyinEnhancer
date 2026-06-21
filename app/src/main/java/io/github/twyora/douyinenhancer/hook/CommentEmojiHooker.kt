@@ -69,7 +69,7 @@ object CommentEmojiHooker : YukiBaseHooker() {
         packageInstance.commentExtensionsKt.selfClass
             ?.resolve()
             ?.firstMethod {
-                name = packageInstance.commentExtensionsKt.saveToAlbumVisibility().name
+                name = packageInstance.commentExtensionsKt.hasValidImageUrl().name
             }?.hook {
                 before {
                     val comment = args[0] ?: return@before
@@ -106,10 +106,10 @@ object CommentEmojiHooker : YukiBaseHooker() {
 
         val packageInstance = DouyinPackage.instance
 
-        packageInstance.commentSaveToAlbumButtonClick.selfClass
+        packageInstance.saveImageActionItem.onClickExecutor.selfClass
             ?.resolve()
             ?.firstMethodOrNull {
-                name = packageInstance.commentSaveToAlbumButtonClick.onClicked().name
+                name = packageInstance.saveImageActionItem.onClickExecutor.onClick().name
             }?.hook {
                 var savedComment: Any? = null
                 var savedActionItem: Any? = null
