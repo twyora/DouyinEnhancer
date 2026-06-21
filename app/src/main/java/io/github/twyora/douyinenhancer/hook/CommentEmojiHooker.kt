@@ -8,8 +8,6 @@ import android.media.MediaMetadataRetriever
 import android.os.Build
 import android.webkit.MimeTypeMap
 import com.highcapable.kavaref.KavaRef.Companion.asResolver
-import com.highcapable.kavaref.KavaRef.Companion.resolve
-import com.highcapable.kavaref.condition.type.Modifiers
 import com.highcapable.yukihookapi.hook.core.YukiMemberHookCreator
 import com.highcapable.yukihookapi.hook.entity.YukiBaseHooker
 import com.highcapable.yukihookapi.hook.log.YLog
@@ -20,6 +18,7 @@ import io.github.twyora.douyinenhancer.hook.utils.getField
 import io.github.twyora.douyinenhancer.hook.utils.getStaticField
 import io.github.twyora.douyinenhancer.hook.utils.invokeMethod
 import io.github.twyora.douyinenhancer.hook.utils.invokeStaticMethod
+import io.github.twyora.douyinenhancer.hook.utils.resolveMethod
 import io.github.twyora.douyinenhancer.hook.utils.setField
 import java.io.File
 import kotlin.time.Duration.Companion.milliseconds
@@ -67,10 +66,7 @@ object CommentEmojiHooker : YukiBaseHooker() {
         val packageInstance = DouyinPackage.instance
 
         packageInstance.commentExtensionsKt.selfClass
-            ?.resolve()
-            ?.firstMethod {
-                name = packageInstance.commentExtensionsKt.hasValidImageUrl().name
-            }?.hook {
+            ?.resolveMethod(packageInstance.commentExtensionsKt.hasValidImageUrl())?.hook {
                 before {
                     val comment = args[0] ?: return@before
                     val emojiUrls = extractEmojiUrls(comment)
@@ -107,10 +103,7 @@ object CommentEmojiHooker : YukiBaseHooker() {
         val packageInstance = DouyinPackage.instance
 
         packageInstance.saveImageActionItem.onClickExecutor.selfClass
-            ?.resolve()
-            ?.firstMethodOrNull {
-                name = packageInstance.saveImageActionItem.onClickExecutor.onClick().name
-            }?.hook {
+            ?.resolveMethod(packageInstance.saveImageActionItem.onClickExecutor.onClick())?.hook {
                 var savedComment: Any? = null
                 var savedActionItem: Any? = null
                 var originImageUrlList: List<*>? = null
@@ -183,10 +176,7 @@ object CommentEmojiHooker : YukiBaseHooker() {
         val packageInstance = DouyinPackage.instance
 
         packageInstance.commentImageSaveHelper.selfClass
-            ?.resolve()
-            ?.firstMethodOrNull {
-                name = packageInstance.commentImageSaveHelper.onSuccessed().name
-            }?.hook {
+            ?.resolveMethod(packageInstance.commentImageSaveHelper.onSuccessed())?.hook {
                 before {
                     val downloadInfo = args[0] ?: return@before
 
@@ -325,19 +315,7 @@ object CommentEmojiHooker : YukiBaseHooker() {
         val packageInstance = DouyinPackage.instance
 
         packageInstance.ugFileUtils.selfClass
-            ?.resolve()
-            ?.firstMethodOrNull {
-                name = "createUri"
-                returnType = android.net.Uri::class
-                modifiers(Modifiers.PUBLIC, Modifiers.STATIC, Modifiers.FINAL)
-                parameters(
-                    String::class,
-                    Boolean::class,
-                    Array<android.net.Uri>::class,
-                    DouyinPackage.instance.tokenCert.selfClass!!
-                )
-                parameterCount = 4
-            }?.hook {
+            ?.resolveMethod(packageInstance.ugFileUtils.createUri())?.hook {
                 after {
                     val uriRet = result as? android.net.Uri
                     // original createUri succeeded — nothing to fix
