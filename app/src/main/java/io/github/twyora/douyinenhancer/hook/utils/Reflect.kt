@@ -49,6 +49,11 @@ fun List<String>.toClassIfPrimitiveElseString(): Array<Any> = Array(size) {
 }
 
 inline fun <reified T> Any.invokeMethod(method: DouyinPackage.Method, vararg args: Any?): T? {
+    if (method.name.isNullOrBlank()) {
+        YLog.error("Cannot determine which method to invoke, name is null or blank")
+        return null
+    }
+
     val methodResolver =
         runCatching {
             this.asResolver().firstMethodOrNull {
@@ -74,6 +79,11 @@ inline fun <reified T> Any.invokeMethod(method: DouyinPackage.Method, vararg arg
 }
 
 inline fun <reified T> Class<*>.invokeStaticMethod(method: DouyinPackage.Method, vararg args: Any?): T? {
+    if (method.name.isNullOrBlank()) {
+        YLog.error("Cannot determine which method to invoke, name is null or blank")
+        return null
+    }
+
     val methodResolver =
         runCatching {
             this.resolve().firstMethodOrNull {
@@ -97,6 +107,11 @@ inline fun <reified T> Class<*>.invokeStaticMethod(method: DouyinPackage.Method,
 }
 
 inline fun <reified T> Any.getField(field: DouyinPackage.Field): T? {
+    if (field.name.isNullOrBlank()) {
+        YLog.error("Cannot determine which field to access, name is null or blank")
+        return null
+    }
+
     val fieldResolver =
         runCatching {
             this.asResolver().firstField {
@@ -116,6 +131,11 @@ inline fun <reified T> Any.getField(field: DouyinPackage.Field): T? {
 }
 
 fun <T> Any.setField(field: DouyinPackage.Field, value: T?) {
+    if (field.name.isNullOrBlank()) {
+        YLog.error("Cannot determine which field to access, name is null or blank")
+        return
+    }
+
     val fieldResolver =
         runCatching {
             this.asResolver().firstField {
@@ -135,6 +155,11 @@ fun <T> Any.setField(field: DouyinPackage.Field, value: T?) {
 }
 
 inline fun <reified T> Class<*>.getStaticField(field: DouyinPackage.Field): T? {
+    if (field.name.isNullOrBlank()) {
+        YLog.error("Cannot determine which field to access, name is null or blank")
+        return null
+    }
+
     val fieldResolver =
         runCatching {
             this.resolve().firstField {
@@ -154,6 +179,11 @@ inline fun <reified T> Class<*>.getStaticField(field: DouyinPackage.Field): T? {
 }
 
 fun <T> Class<*>.setStaticField(field: DouyinPackage.Field, value: T?) {
+    if (field.name.isNullOrBlank()) {
+        YLog.error("Cannot determine which field to access, name is null or blank")
+        return
+    }
+
     val fieldResolver =
         runCatching {
             this.resolve().firstField {
