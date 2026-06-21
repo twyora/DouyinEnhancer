@@ -842,8 +842,20 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
                                         )
                                         parameterCount = 5
                                     }?.self
+                            val createUriMethod = ugFileUtilsClsName.toClass(hostAppClassLoader).resolve().firstMethodOrNull {
+                                name = "createUri"
+                                returnType = android.net.Uri::class
+                                modifiers(Modifiers.PUBLIC, Modifiers.STATIC, Modifiers.FINAL)
+                                parameters(
+                                    String::class,
+                                    Boolean::class,
+                                    Array<android.net.Uri>::class,
+                                    "com.bytedance.bpea.cert.token.TokenCert"
+                                )
+                                parameterCount = 4
+                            }?.self
                             if (copyFileMethod == null || getStorageDirMethod == null || getExternalStorageDirectoryMethod == null ||
-                                getImageUriMethod == null
+                                getImageUriMethod == null || createUriMethod == null
                             ) {
                                 YLog.error(
                                     "$TAG: Unable to populate ${this::class.simpleName} config, possibly due to unfound obfuscated methods"
@@ -903,6 +915,16 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
                                             }
                                         }
                                 }
+                            createUri = method {
+                                name = createUriMethod.name
+                                parameters =
+                                    MethodKt.parameters {
+                                        values.clear()
+                                        createUriMethod.parameterTypes.forEach { paramType ->
+                                            values.add(paramType.name)
+                                        }
+                                    }
+                            }
                         }.onFailure {
                             YLog.error("$TAG: Unable to populate config", it)
                         }
