@@ -2,7 +2,7 @@
  * Referenced from [BiliRoaming](https://github.com/yujincheng08/BiliRoaming/blob/master/app/src/main/java/me/iacn/biliroaming/utils/Utils.kt)
  */
 
-package com.yst.mkga.hook.dy.hook.utils
+package io.github.twyora.douyinenhancer.hook.utils
 
 import java.lang.ref.WeakReference
 import kotlin.reflect.KProperty

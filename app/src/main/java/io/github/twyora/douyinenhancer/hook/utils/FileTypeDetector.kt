@@ -1,4 +1,4 @@
-package com.yst.mkga.hook.dy.hook.utils
+package io.github.twyora.douyinenhancer.hook.utils
 
 import java.io.File
 

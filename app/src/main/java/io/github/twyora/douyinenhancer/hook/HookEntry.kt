@@ -1,4 +1,4 @@
-package com.yst.mkga.hook.dy.hook
+package io.github.twyora.douyinenhancer.hook
 
 import android.app.Application
 import android.app.Instrumentation

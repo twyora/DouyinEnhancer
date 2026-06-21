@@ -1,4 +1,4 @@
-package com.yst.mkga.hook.dy.hook
+package io.github.twyora.douyinenhancer.hook
 
 import android.content.Context
 import android.graphics.Bitmap
@@ -23,14 +23,13 @@ import com.highcapable.yukihookapi.hook.log.YLog
 import com.shakster.gifkt.GifEncoder
 import org.luckypray.dexkit.DexKitBridge
 
-import com.yst.mkga.hook.dy.hook.utils.HookTransaction
-import com.yst.mkga.hook.dy.hook.utils.FileTypeDetector
-import com.yst.mkga.hook.dy.hook.utils.getField
-import com.yst.mkga.hook.dy.hook.utils.getStaticField
-import com.yst.mkga.hook.dy.hook.utils.invokeMethod
-import com.yst.mkga.hook.dy.hook.utils.invokeStaticMethod
-import com.yst.mkga.hook.dy.hook.utils.setField
-
+import io.github.twyora.douyinenhancer.hook.utils.HookTransaction
+import io.github.twyora.douyinenhancer.hook.utils.FileTypeDetector
+import io.github.twyora.douyinenhancer.hook.utils.getField
+import io.github.twyora.douyinenhancer.hook.utils.getStaticField
+import io.github.twyora.douyinenhancer.hook.utils.invokeMethod
+import io.github.twyora.douyinenhancer.hook.utils.invokeStaticMethod
+import io.github.twyora.douyinenhancer.hook.utils.setField
 
 object CommentEmojiHooker : YukiBaseHooker() {
     private val TAG = this::class.simpleName
@@ -240,11 +239,11 @@ object CommentEmojiHooker : YukiBaseHooker() {
                 }${File.separator}${saveFilePrefix}.${saveFileExt}"
 
                 val cpRet = DouyinPackage.instance.ugFileUtils.selfClass?.invokeStaticMethod<Boolean>(
-                    DouyinPackage.instance.ugFileUtils.copyFile(),
-                    fileToSave, saveFilePath,
-                    DouyinPackage.instance.tokenCert.selfClass?.getConstructor(String::class.java)
-                        ?.newInstance("bpea-comment_save_image_to_album")
-                )
+                        DouyinPackage.instance.ugFileUtils.copyFile(),
+                        fileToSave, saveFilePath,
+                        DouyinPackage.instance.tokenCert.selfClass?.getConstructor(String::class.java)
+                            ?.newInstance("bpea-comment_save_image_to_album")
+                    )
 
                 // shows success dialog
                 val context =
@@ -334,9 +333,9 @@ object CommentEmojiHooker : YukiBaseHooker() {
                 val tokenCert = args[3]
 
                 val finalUri = DouyinPackage.instance.ugFileUtils.selfClass?.invokeStaticMethod<android.net.Uri>(
-                    DouyinPackage.instance.ugFileUtils.getImageUri(),
-                    context, fileName, fileMimeType, fileRelPath, tokenCert
-                ) ?: return@after
+                        DouyinPackage.instance.ugFileUtils.getImageUri(),
+                        context, fileName, fileMimeType, fileRelPath, tokenCert
+                    ) ?: return@after
                 // replace the hook's return value with the URI we just created
                 result = finalUri
 

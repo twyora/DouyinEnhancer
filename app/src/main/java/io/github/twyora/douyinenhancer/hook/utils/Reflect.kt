@@ -1,10 +1,10 @@
-package com.yst.mkga.hook.dy.hook.utils
+package io.github.twyora.douyinenhancer.hook.utils
 
 import com.highcapable.kavaref.KavaRef.Companion.asResolver
 import com.highcapable.kavaref.KavaRef.Companion.resolve
 import com.highcapable.yukihookapi.hook.log.YLog
-import com.yst.mkga.hook.dy.hook.DouyinPackage
 
+import io.github.twyora.douyinenhancer.hook.DouyinPackage
 
 /**
  * Resolves a type name string into a format directly recognizable by reflection systems like KavaRef.
