@@ -285,7 +285,7 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
                     Settings.Secure.ANDROID_ID
                 ) ?: "unknown"
             val hookInfoFileName =
-                "${AppProperties.PROJECT_NAMESPACE}-${androidId.hashCode().toUInt()}"
+                "${AppProperties.PROJECT_APPLICATION_ID}-${androidId.hashCode().toUInt()}"
                     .hashCode().toHexString()
             YLog.debug("$TAG: hookInfoFileName: $hookInfoFileName")
 
