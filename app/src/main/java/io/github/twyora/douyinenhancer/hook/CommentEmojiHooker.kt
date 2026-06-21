@@ -27,7 +27,6 @@ import kotlinx.io.Sink
 import kotlinx.io.buffered
 import kotlinx.io.files.Path
 import kotlinx.io.files.SystemFileSystem
-import org.luckypray.dexkit.DexKitBridge
 
 object CommentEmojiHooker : YukiBaseHooker() {
     private val TAG = this::class.simpleName
@@ -35,36 +34,34 @@ object CommentEmojiHooker : YukiBaseHooker() {
     override fun onHook() {
         withProcess(mainProcessName) {
             val transaction = HookTransaction(TAG)
-            DexKitBridge.create(this.appInfo.sourceDir).use { bridge ->
-                // Force "save to album" button visible for emoji comments.
-                transaction.add(::installSaveEmojiToAlbumButtonHook.name) {
-                    installSaveEmojiToAlbumButtonHook(bridge)
-                }
-                // Before the save button's download callback fires, inject emoji URLs into
-                // comment.imageList[0].downloadUrl so the downloader picks them up.
-                // Without it: the downloader fetches nothing because imageList is empty.
-                transaction.add(::installClickSaveEmojiToAlbumButtonCallbackHook.name) {
-                    installClickSaveEmojiToAlbumButtonCallbackHook(bridge)
-                }
-                // Intercept emoji download completion: detect real file type, convert video
-                // to GIF if needed, copy to album, show result toast, skip original handler
-                // — otherwise every downloaded emoji is saved as .png with MIME image/png.
-                transaction.add(::installEmojiDownloadedCallbackHook.name) {
-                    installEmojiDownloadedCallbackHook(bridge)
-                }
-                // Fix MediaStore URI creation for converted GIF files: internal logic has a
-                // file-extension whitelist, so non-whitelisted extensions (e.g. gif) fail
-                // createUri and cannot be saved to external storage — this hook falls back
-                // to getImageUri manually and writes into output array.
-                transaction.add(::installCreateUriHook.name) {
-                    installCreateUriHook(bridge)
-                }
-                transaction.commit()
+            // Force "save to album" button visible for emoji comments.
+            transaction.add(::installSaveEmojiToAlbumButtonHook.name) {
+                installSaveEmojiToAlbumButtonHook()
             }
+            // Before the save button's download callback fires, inject emoji URLs into
+            // comment.imageList[0].downloadUrl so the downloader picks them up.
+            // Without it: the downloader fetches nothing because imageList is empty.
+            transaction.add(::installClickSaveEmojiToAlbumButtonCallbackHook.name) {
+                installClickSaveEmojiToAlbumButtonCallbackHook()
+            }
+            // Intercept emoji download completion: detect real file type, convert video
+            // to GIF if needed, copy to album, show result toast, skip original handler
+            // — otherwise every downloaded emoji is saved as .png with MIME image/png.
+            transaction.add(::installEmojiDownloadedCallbackHook.name) {
+                installEmojiDownloadedCallbackHook()
+            }
+            // Fix MediaStore URI creation for converted GIF files: internal logic has a
+            // file-extension whitelist, so non-whitelisted extensions (e.g. gif) fail
+            // createUri and cannot be saved to external storage — this hook falls back
+            // to getImageUri manually and writes into output array.
+            transaction.add(::installCreateUriHook.name) {
+                installCreateUriHook()
+            }
+            transaction.commit()
         }
     }
 
-    private fun installSaveEmojiToAlbumButtonHook(bridge: DexKitBridge): YukiMemberHookCreator.MemberHookCreator.Result? {
+    private fun installSaveEmojiToAlbumButtonHook(): YukiMemberHookCreator.MemberHookCreator.Result? {
         var ret: YukiMemberHookCreator.MemberHookCreator.Result? = null
 
         val packageInstance = DouyinPackage.instance
@@ -72,7 +69,7 @@ object CommentEmojiHooker : YukiBaseHooker() {
         packageInstance.commentExtensionsKt.selfClass
             ?.resolve()
             ?.firstMethod {
-                name = packageInstance.commentExtensionsKt.saveToAlbumVisibility().name
+                name = packageInstance.commentExtensionsKt.hasValidImageUrl().name
             }?.hook {
                 before {
                     val comment = args[0] ?: return@before
@@ -104,15 +101,15 @@ object CommentEmojiHooker : YukiBaseHooker() {
         return ret
     }
 
-    private fun installClickSaveEmojiToAlbumButtonCallbackHook(bridge: DexKitBridge): YukiMemberHookCreator.MemberHookCreator.Result? {
+    private fun installClickSaveEmojiToAlbumButtonCallbackHook(): YukiMemberHookCreator.MemberHookCreator.Result? {
         var ret: YukiMemberHookCreator.MemberHookCreator.Result? = null
 
         val packageInstance = DouyinPackage.instance
 
-        packageInstance.commentSaveToAlbumButtonClick.selfClass
+        packageInstance.saveImageActionItem.onClickExecutor.selfClass
             ?.resolve()
             ?.firstMethodOrNull {
-                name = packageInstance.commentSaveToAlbumButtonClick.onClicked().name
+                name = packageInstance.saveImageActionItem.onClickExecutor.onClick().name
             }?.hook {
                 var savedComment: Any? = null
                 var savedActionItem: Any? = null
@@ -180,7 +177,7 @@ object CommentEmojiHooker : YukiBaseHooker() {
         return ret
     }
 
-    private fun installEmojiDownloadedCallbackHook(bridge: DexKitBridge): YukiMemberHookCreator.MemberHookCreator.Result? {
+    private fun installEmojiDownloadedCallbackHook(): YukiMemberHookCreator.MemberHookCreator.Result? {
         var ret: YukiMemberHookCreator.MemberHookCreator.Result? = null
 
         val packageInstance = DouyinPackage.instance
@@ -322,8 +319,7 @@ object CommentEmojiHooker : YukiBaseHooker() {
         return ret
     }
 
-    @Suppress("UNUSED_PARAMETER")
-    private fun installCreateUriHook(unused: DexKitBridge): YukiMemberHookCreator.MemberHookCreator.Result? {
+    private fun installCreateUriHook(): YukiMemberHookCreator.MemberHookCreator.Result? {
         var ret: YukiMemberHookCreator.MemberHookCreator.Result? = null
 
         val packageInstance = DouyinPackage.instance
@@ -360,11 +356,7 @@ object CommentEmojiHooker : YukiBaseHooker() {
                     if (fileMimeType == null) {
                         YLog.error("$TAG: createUri failed, unable to resolve MIME type")
                         return@after
-                    } else if (!(
-                            fileMimeType.startsWith("image/") ||
-                                fileMimeType.startsWith("video/")
-                            )
-                    ) {
+                    } else if (!(fileMimeType.startsWith("image/") || fileMimeType.startsWith("video/"))) {
                         YLog.error(
                             "$TAG: createUri is not allowed for restricted MIME type. mimeType=$fileMimeType"
                         )
@@ -569,13 +561,10 @@ object CommentEmojiHooker : YukiBaseHooker() {
                     if (i + 1 < timestampsUs.size) {
                         timestampsUs[i + 1]
                     } else {
-                        if (i >
-                            0
-                        ) {
+                        if (i > 0) {
                             timestampsUs[i] + (timestampsUs[i] - timestampsUs[i - 1])
                         } else {
-                            currentUs +
-                                100_000L
+                            currentUs + 100_000L
                         }
                     }
 

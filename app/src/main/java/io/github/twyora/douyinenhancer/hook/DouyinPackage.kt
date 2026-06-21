@@ -81,7 +81,6 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
     val commentLongPressItemModel = CommentLongPressItemModelModule()
     val saveImageActionItem = SaveImageActionItemModule()
     val commentExtensionsKt = CommentExtensionsKtModule()
-    val commentSaveToAlbumButtonClick = CommentSaveToAlbumButtonClickModule()
     val commentImageSaveHelper = CommentImageSaveHelperModule()
     val downloadInfo = DownloadInfoModule()
     val digestUtils = DigestUtilsModule()
@@ -162,29 +161,30 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
         fun commentActionParams() = Field(hookInfo.saveImageActionItem.cmtActionParams.nameOrNull)
 
         fun saveImageActionParams() = Field(hookInfo.saveImageActionItem.saveImgActionParams.nameOrNull)
+
+        inner class OnClickExecutorModule {
+            val selfClass by weak {
+                hookInfo.saveImageActionItem.onClickExecutor.class_.nameOrNull?.toClass(classLoader)
+            }
+
+            fun onClick() = Method(
+                hookInfo.saveImageActionItem.onClickExecutor.onClick.nameOrNull,
+                hookInfo.saveImageActionItem.onClickExecutor.onClick.parameters.valuesListOrNull
+            )
+        }
+
+        val onClickExecutor = OnClickExecutorModule()
     }
 
     inner class CommentExtensionsKtModule {
         val selfClass by weak {
-            hookInfo.cmtSaveToAlbumBtnVisibility.class_.nameOrNull
+            hookInfo.commentExtensionKt.class_.nameOrNull
                 ?.toClass(classLoader)
         }
 
-        fun saveToAlbumVisibility() = Method(
-            hookInfo.cmtSaveToAlbumBtnVisibility.checkVisibility.nameOrNull,
-            hookInfo.cmtSaveToAlbumBtnVisibility.checkVisibility.parameters.valuesListOrNull
-        )
-    }
-
-    inner class CommentSaveToAlbumButtonClickModule {
-        val selfClass by weak {
-            hookInfo.cmtSaveToAlbumBtnClickedCallback.class_.nameOrNull
-                ?.toClass(classLoader)
-        }
-
-        fun onClicked() = Method(
-            hookInfo.cmtSaveToAlbumBtnClickedCallback.clickedCallback.nameOrNull,
-            hookInfo.cmtSaveToAlbumBtnClickedCallback.clickedCallback.parameters.valuesListOrNull
+        fun hasValidImageUrl() = Method(
+            hookInfo.commentExtensionKt.hasValidImageUrl.nameOrNull,
+            hookInfo.commentExtensionKt.hasValidImageUrl.parameters.valuesListOrNull
         )
     }
 
@@ -285,7 +285,7 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
                     Settings.Secure.ANDROID_ID
                 ) ?: "unknown"
             val hookInfoFileName =
-                "${AppProperties.PROJECT_NAMESPACE}-${androidId.hashCode().toUInt()}"
+                "${AppProperties.PROJECT_APPLICATION_ID}-${androidId.hashCode().toUInt()}"
                     .hashCode().toHexString()
             YLog.debug("$TAG: hookInfoFileName: $hookInfoFileName")
 
@@ -557,7 +557,18 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
                                         type = "com.ss.android.ugc.aweme.comment.CommentActionParams"
                                     }?.self
                                     ?.name
-                            if (cmtActionParamsFieldName == null || saveImageActionParamsFieldName == null) {
+                            val onClickMethodData = bridge
+                                .findMethod {
+                                    matcher {
+                                        modifiers = Modifier.STATIC + Modifier.FINAL + Modifier.PUBLIC
+                                        returnType = "java.lang.Object"
+                                        params {
+                                            count = 1
+                                        }
+                                        addUsingString("bpea-comment_save_image_to_album")
+                                    }
+                                }.singleOrNull()
+                            if (cmtActionParamsFieldName == null || saveImageActionParamsFieldName == null || onClickMethodData == null) {
                                 YLog.error(
                                     "$TAG: Unable to populate ${this::class.simpleName} config, possibly due to unfound obfuscated methods"
                                 )
@@ -576,99 +587,71 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
                                 field {
                                     name = saveImageActionParamsFieldName
                                 }
+                            onClickExecutor = saveImageActionItemOnClickExecutor {
+                                class_ = class_ {
+                                    name = onClickMethodData.className
+                                }
+                                onClick = method {
+                                    name = onClickMethodData.methodName
+                                    parameters = MethodKt.parameters {
+                                        values.clear()
+                                        values.addAll(onClickMethodData.paramTypeNames)
+                                    }
+                                }
+                            }
                         }.onFailure {
                             YLog.error("$TAG: Unable to populate config", it)
                         }
                     }
 
-                cmtSaveToAlbumBtnVisibility =
-                    cmtSaveToAlbumBtnVisibility {
-                        runCatching {
-                            bridge
-                                .findMethod {
-                                    matcher {
-                                        modifiers = Modifier.STATIC
-                                        params {
-                                            add("com.ss.android.ugc.aweme.comment.model.Comment")
-                                            add("int")
+                commentExtensionKt = commentExtensionKt {
+                    runCatching {
+                        bridge.findMethod {
+                            matcher {
+                                modifiers = Modifier.PUBLIC or Modifier.STATIC or Modifier.FINAL
+                                declaredClass = "com.ss.android.ugc.aweme.comment.util.CommentExtensionsKt"
+                                returnType = "boolean"
+                                params {
+                                    add("com.ss.android.ugc.aweme.comment.model.Comment")
+                                    add("int")
+                                }
+                                invokeMethods {
+                                    add {
+                                        declaredClass =
+                                            "com.ss.android.ugc.aweme.comment.model.CommentImageStruct"
+                                        returnType = "com.ss.android.ugc.aweme.base.model.UrlModel"
+                                        paramCount = 0
+                                        addUsingField {
+                                            name = "downloadUrl"
                                         }
-                                        returnType = "boolean"
-                                        invokeMethods {
-                                            add {
-                                                declaredClass =
-                                                    "com.ss.android.ugc.aweme.comment.model.CommentImageStruct"
-                                                returnType = "com.ss.android.ugc.aweme.base.model.UrlModel"
-                                                paramCount = 0
-                                                addUsingField {
-                                                    name = "downloadUrl"
-                                                }
+                                    }
+                                }
+                            }
+                        }.singleOrNull()
+                            ?.also { match ->
+                                class_ =
+                                    class_ {
+                                        name = match.className
+                                    }
+                                hasValidImageUrl =
+                                    method {
+                                        name = match.methodName
+                                        parameters =
+                                            MethodKt.parameters {
+                                                values.clear()
+                                                values.addAll(match.paramTypeNames)
                                             }
-                                        }
                                     }
-                                }.singleOrNull()
-                                ?.also { match ->
-                                    class_ =
-                                        class_ {
-                                            name = match.className
-                                        }
-                                    checkVisibility =
-                                        method {
-                                            name = match.methodName
-                                            parameters =
-                                                MethodKt.parameters {
-                                                    values.clear()
-                                                    values.addAll(match.paramTypeNames)
-                                                }
-                                        }
-                                } ?: run {
-                                YLog.error(
-                                    "$TAG: Unable to populate ${this::class.simpleName} config, possibly due to unfound obfuscated methods"
-                                )
-                                return@cmtSaveToAlbumBtnVisibility
-                            }
-                        }.onFailure {
-                            YLog.error("$TAG: Unable to populate config", it)
+                            } ?: run {
+                            YLog.error(
+                                "$TAG: Unable to populate ${this::class.simpleName} config, possibly due to unfound obfuscated methods"
+                            )
+                            return@commentExtensionKt
                         }
+                    }.onFailure {
+                        YLog.error("$TAG: Unable to populate config", it)
                     }
-
-                cmtSaveToAlbumBtnClickedCallback =
-                    cmtSaveToAlbumBtnClickedCallback {
-                        runCatching {
-                            bridge
-                                .findMethod {
-                                    matcher {
-                                        modifiers = Modifier.STATIC + Modifier.FINAL + Modifier.PUBLIC
-                                        returnType = "java.lang.Object"
-                                        params {
-                                            count = 1
-                                        }
-                                        addUsingString("bpea-comment_save_image_to_album")
-                                    }
-                                }.singleOrNull()
-                                ?.also { match ->
-                                    class_ =
-                                        class_ {
-                                            name = match.className
-                                        }
-                                    clickedCallback =
-                                        method {
-                                            name = match.methodName
-                                            parameters =
-                                                MethodKt.parameters {
-                                                    values.clear()
-                                                    values.addAll(match.paramTypeNames)
-                                                }
-                                        }
-                                } ?: run {
-                                YLog.error(
-                                    "$TAG: Unable to populate ${this::class.simpleName} config, possibly due to unfound obfuscated methods"
-                                )
-                                return@cmtSaveToAlbumBtnClickedCallback
-                            }
-                        }.onFailure {
-                            YLog.error("$TAG: Unable to populate config", it)
-                        }
-                    }
+                }
 
                 commentImageSaveHelper =
                     commentImageSaveHelper {

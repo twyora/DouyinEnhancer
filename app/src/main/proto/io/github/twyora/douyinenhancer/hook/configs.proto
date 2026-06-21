@@ -57,10 +57,16 @@ message CommentLongPressItemModel {
   optional Field comment_action_params = 2;
 }
 
+message SaveImageActionItemOnClickExecutor{
+  optional Class  class    = 1;
+  optional Method on_click = 2;
+}
+
 message SaveImageActionItem {
-  optional Class class                  = 1;
-  optional Field cmt_action_params      = 2;
-  optional Field save_img_action_params = 3;
+  optional Class                              class                  = 1;
+  optional Field                              cmt_action_params      = 2;
+  optional Field                              save_img_action_params = 3;
+  optional SaveImageActionItemOnClickExecutor on_click_executor      = 4;
 }
 
 message TokenCert{
@@ -88,9 +94,9 @@ message UGFileUtilsKt {
   optional Method create_uri               = 7;
 }
 
-message CmtSaveToAlbumBtnVisibility{
-  optional Class  class            = 1;
-  optional Method check_visibility = 2;
+message CommentExtensionKt{
+  optional Class  class               = 1;
+  optional Method has_valid_image_url = 2;
 }
 
 message CmtSaveToAlbumBtnClickedCallback{
@@ -111,18 +117,17 @@ message HookInfo {
   uint32 host_version_code   = 4;
   uint32 generation          = 5;
 
-  optional CommentImageStruct               comment_image_struct                   = 6;
-  optional UrlModel                         url_model                              = 7;
-  optional Comment                          comment                                = 8;
-  optional Emoji                            emoji                                  = 9;
-  optional CommentActionParams              comment_action_params                  = 10;
-  optional CommentLongPressItemModel        comment_long_press_item_model          = 11;
-  optional SaveImageActionItem              save_image_action_item                 = 12;
-  optional CmtSaveToAlbumBtnVisibility      cmt_save_to_album_btn_visibility       = 13;
-  optional CmtSaveToAlbumBtnClickedCallback cmt_save_to_album_btn_clicked_callback = 14;
-  optional CommentImageSaveHelper           comment_image_save_helper              = 15;
-  optional DownloadInfo                     download_info                          = 16;
-  optional DigestUtils                      digest_utils                           = 17;
-  optional UGFileUtilsKt                    ug_file_utils                          = 18;
-  optional TokenCert                        token_cert                             = 19;
+  optional CommentImageStruct        comment_image_struct          = 6;
+  optional UrlModel                  url_model                     = 7;
+  optional Comment                   comment                       = 8;
+  optional Emoji                     emoji                         = 9;
+  optional CommentActionParams       comment_action_params         = 10;
+  optional CommentLongPressItemModel comment_long_press_item_model = 11;
+  optional SaveImageActionItem       save_image_action_item        = 12;
+  optional CommentExtensionKt        comment_extension_kt          = 13;
+  optional CommentImageSaveHelper    comment_image_save_helper     = 14;
+  optional DownloadInfo              download_info                 = 15;
+  optional DigestUtils               digest_utils                  = 16;
+  optional UGFileUtilsKt             ug_file_utils                 = 17;
+  optional TokenCert                 token_cert                    = 18;
 }
