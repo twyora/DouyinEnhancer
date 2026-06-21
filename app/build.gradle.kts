@@ -1,5 +1,7 @@
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+@file:Suppress("ktlint:standard:no-wildcard-imports")
+
 import com.google.protobuf.gradle.*
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.android.application)
@@ -30,7 +32,8 @@ android {
      * Thanks to [GSWXXN](https://github.com/GSWXXN)
      */
     val isKeyStoreAvailable = try {
-        gropify.keystore.path.isNotBlank() && gropify.keystore.password.isNotBlank() && gropify.key.alias.isNotBlank() && gropify.key.password.isNotBlank()
+        gropify.keystore.path.isNotBlank() && gropify.keystore.password.isNotBlank() && gropify.key.alias.isNotBlank() &&
+            gropify.key.password.isNotBlank()
     } catch (_: Exception) {
         false
     }
@@ -103,7 +106,6 @@ android {
         sourceCompatibility = JavaVersion.VERSION_21
         targetCompatibility = JavaVersion.VERSION_21
     }
-
 }
 
 androidComponents {
@@ -112,7 +114,7 @@ androidComponents {
         val vn: String = flavorVN ?: android.defaultConfig.versionName ?: ""
         val buildTypeSuffix = if (variant.buildType == "debug") "-debug" else ""
         variant.outputs.forEach { output ->
-            output.outputFileName.set("DouyinEnhancer_${vn}${buildTypeSuffix}.apk")
+            output.outputFileName.set("DouyinEnhancer_${vn}$buildTypeSuffix.apk")
         }
     }
 }

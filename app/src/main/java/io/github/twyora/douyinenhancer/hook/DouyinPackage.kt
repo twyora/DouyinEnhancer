@@ -7,64 +7,69 @@ package io.github.twyora.douyinenhancer.hook
 import android.app.AndroidAppHelper
 import android.content.Context
 import android.provider.Settings
+import com.highcapable.kavaref.KavaRef.Companion.resolve
+import com.highcapable.kavaref.condition.type.Modifiers
+import com.highcapable.kavaref.extension.toClass
+import com.highcapable.yukihookapi.hook.log.YLog
+import io.github.twyora.douyinenhancer.generated.AppProperties
+import io.github.twyora.douyinenhancer.hook.utils.weak
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.lang.reflect.Modifier
 import kotlin.time.measureTimedValue
-
-import com.highcapable.kavaref.KavaRef.Companion.resolve
-import com.highcapable.kavaref.condition.type.Modifiers
-import com.highcapable.kavaref.extension.toClass
-import com.highcapable.yukihookapi.hook.log.YLog
 import org.luckypray.dexkit.DexKitBridge
 
-import io.github.twyora.douyinenhancer.generated.AppProperties
-import io.github.twyora.douyinenhancer.hook.utils.weak
-
 val Configs.Class.nameOrNull
-    get() = if (hasName()) {
-        name
-    } else {
-        null
-    }
+    get() =
+        if (hasName()) {
+            name
+        } else {
+            null
+        }
 
 val Configs.Field.nameOrNull
-    get() = if (hasName()) {
-        name
-    } else {
-        null
-    }
+    get() =
+        if (hasName()) {
+            name
+        } else {
+            null
+        }
 
 val Configs.Method.nameOrNull
-    get() = if (hasName()) {
-        name
-    } else {
-        null
-    }
+    get() =
+        if (hasName()) {
+            name
+        } else {
+            null
+        }
 
 val Configs.Method.Parameters.valuesListOrNull
-    get() = valuesList.ifEmpty {
-        null
-    }
+    get() =
+        valuesList.ifEmpty {
+            null
+        }
 
 class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
     data class Field(val name: String?)
+
     data class Method(val name: String?, val parameters: List<String>?)
 
     init {
         instance = this
     }
 
-    private val hookInfo: Configs.HookInfo = run {
-        val (result, time) = measureTimedValue {
-            readHookInfo(context)
-        }
-        YLog.debug("$TAG: load hookInfo time: $time")
-        YLog.info("$TAG: hookInfo: $result")
+    private val hookInfo: Configs.HookInfo =
+        run {
+            val (result, time) =
+                measureTimedValue {
+                    readHookInfo(context)
+                }
+            YLog.debug("$TAG: load hookInfo time: $time")
+            YLog.info("$TAG: hookInfo: $result")
 
-        result
-    }
+            result
+        }
 
     fun hostVersionCode() = hookInfo.hostVersionCode
 
@@ -85,11 +90,14 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
 
     inner class CommentImageStructModule {
         val selfClass by weak {
-            hookInfo.commentImageStruct.class_.nameOrNull?.toClass(classLoader)
+            hookInfo.commentImageStruct.class_.nameOrNull
+                ?.toClass(classLoader)
         }
 
         fun originUrl() = Field(hookInfo.commentImageStruct.originUrl.nameOrNull)
+
         fun downloadUrl() = Field(hookInfo.commentImageStruct.downloadUrl.nameOrNull)
+
         fun getDownloadUrl() = Method(
             hookInfo.commentImageStruct.getDownloadUrl.nameOrNull,
             hookInfo.commentImageStruct.getDownloadUrl.parameters.valuesListOrNull
@@ -98,7 +106,8 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
 
     inner class UrlModelModule {
         val selfClass by weak {
-            hookInfo.urlModel.class_.nameOrNull?.toClass(classLoader)
+            hookInfo.urlModel.class_.nameOrNull
+                ?.toClass(classLoader)
         }
 
         fun urlList() = Field(hookInfo.urlModel.urlList.nameOrNull)
@@ -106,16 +115,19 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
 
     inner class CommentModule {
         val selfClass by weak {
-            hookInfo.comment.class_.nameOrNull?.toClass(classLoader)
+            hookInfo.comment.class_.nameOrNull
+                ?.toClass(classLoader)
         }
 
         fun emoji() = Field(hookInfo.comment.emoji.nameOrNull)
+
         fun imageList() = Field(hookInfo.comment.imageList.nameOrNull)
     }
 
     inner class EmojiModule {
         val selfClass by weak {
-            hookInfo.emoji.class_.nameOrNull?.toClass(classLoader)
+            hookInfo.emoji.class_.nameOrNull
+                ?.toClass(classLoader)
         }
 
         fun animateUrl() = Field(hookInfo.emoji.animateUrl.nameOrNull)
@@ -123,34 +135,39 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
 
     inner class CommentActionParamsModule {
         val selfClass by weak {
-            hookInfo.commentActionParams.class_.nameOrNull?.toClass(classLoader)
+            hookInfo.commentActionParams.class_.nameOrNull
+                ?.toClass(classLoader)
         }
 
         fun comment() = Field(hookInfo.commentActionParams.comment.nameOrNull)
+
         fun imageIndex() = Field(hookInfo.commentActionParams.imageIndex.nameOrNull)
     }
 
     inner class CommentLongPressItemModelModule {
         val selfClass by weak {
-            hookInfo.commentLongPressItemModel.class_.nameOrNull?.toClass(classLoader)
+            hookInfo.commentLongPressItemModel.class_.nameOrNull
+                ?.toClass(classLoader)
         }
 
-        fun commentActionParams() =
-            Field(hookInfo.commentLongPressItemModel.commentActionParams.nameOrNull)
+        fun commentActionParams() = Field(hookInfo.commentLongPressItemModel.commentActionParams.nameOrNull)
     }
 
     inner class SaveImageActionItemModule {
         val selfClass by weak {
-            hookInfo.saveImageActionItem.class_.nameOrNull?.toClass(classLoader)
+            hookInfo.saveImageActionItem.class_.nameOrNull
+                ?.toClass(classLoader)
         }
 
         fun commentActionParams() = Field(hookInfo.saveImageActionItem.cmtActionParams.nameOrNull)
+
         fun saveImageActionParams() = Field(hookInfo.saveImageActionItem.saveImgActionParams.nameOrNull)
     }
 
     inner class CommentExtensionsKtModule {
         val selfClass by weak {
-            hookInfo.cmtSaveToAlbumBtnVisibility.class_.nameOrNull?.toClass(classLoader)
+            hookInfo.cmtSaveToAlbumBtnVisibility.class_.nameOrNull
+                ?.toClass(classLoader)
         }
 
         fun saveToAlbumVisibility() = Method(
@@ -161,7 +178,8 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
 
     inner class CommentSaveToAlbumButtonClickModule {
         val selfClass by weak {
-            hookInfo.cmtSaveToAlbumBtnClickedCallback.class_.nameOrNull?.toClass(classLoader)
+            hookInfo.cmtSaveToAlbumBtnClickedCallback.class_.nameOrNull
+                ?.toClass(classLoader)
         }
 
         fun onClicked() = Method(
@@ -172,9 +190,9 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
 
     inner class CommentImageSaveHelperModule {
         val selfClass by weak {
-            hookInfo.commentImageSaveHelper.class_.nameOrNull?.toClass(classLoader)
+            hookInfo.commentImageSaveHelper.class_.nameOrNull
+                ?.toClass(classLoader)
         }
-
 
         fun onSuccessed() = Method(
             hookInfo.commentImageSaveHelper.onSuccessed.nameOrNull,
@@ -189,10 +207,12 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
 
     inner class DownloadInfoModule {
         val selfClass by weak {
-            hookInfo.downloadInfo.class_.nameOrNull?.toClass(classLoader)
+            hookInfo.downloadInfo.class_.nameOrNull
+                ?.toClass(classLoader)
         }
 
         fun url() = Field(hookInfo.downloadInfo.url.nameOrNull)
+
         fun getTargetFilePath() = Method(
             hookInfo.downloadInfo.getTargetFilePath.nameOrNull,
             hookInfo.downloadInfo.getTargetFilePath.parameters.valuesListOrNull
@@ -201,7 +221,8 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
 
     inner class DigestUtilsModule {
         val selfClass by weak {
-            hookInfo.digestUtils.class_.nameOrNull?.toClass(classLoader)
+            hookInfo.digestUtils.class_.nameOrNull
+                ?.toClass(classLoader)
         }
 
         fun md5Hex() = Method(
@@ -212,42 +233,42 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
 
     inner class UGFileUiltsKtModule {
         val selfClass by weak {
-            hookInfo.ugFileUtils.class_.nameOrNull?.toClass(classLoader)
+            hookInfo.ugFileUtils.class_.nameOrNull
+                ?.toClass(classLoader)
         }
 
         fun context() = Field(hookInfo.ugFileUtils.context.nameOrNull)
+
         fun copyFile() = Method(
             hookInfo.ugFileUtils.copyFile.nameOrNull,
             hookInfo.ugFileUtils.copyFile.parameters.valuesListOrNull
         )
 
-        fun getStorageDir() =
-            Method(
-                hookInfo.ugFileUtils.getStorageDir.nameOrNull,
-                hookInfo.ugFileUtils.getStorageDir.parameters.valuesListOrNull
-            )
+        fun getStorageDir() = Method(
+            hookInfo.ugFileUtils.getStorageDir.nameOrNull,
+            hookInfo.ugFileUtils.getStorageDir.parameters.valuesListOrNull
+        )
 
         fun getExternalStorageDir() = Method(
             hookInfo.ugFileUtils.getExternalStorageDir.nameOrNull,
             hookInfo.ugFileUtils.getExternalStorageDir.parameters.valuesListOrNull
         )
 
-        fun getImageUri() =
-            Method(
-                hookInfo.ugFileUtils.getImageUri.nameOrNull,
-                hookInfo.ugFileUtils.getImageUri.parameters.valuesListOrNull
-            )
+        fun getImageUri() = Method(
+            hookInfo.ugFileUtils.getImageUri.nameOrNull,
+            hookInfo.ugFileUtils.getImageUri.parameters.valuesListOrNull
+        )
 
-        fun createUri() =
-            Method(
-                hookInfo.ugFileUtils.createUri.nameOrNull,
-                hookInfo.ugFileUtils.createUri.parameters.valuesListOrNull
-            )
+        fun createUri() = Method(
+            hookInfo.ugFileUtils.createUri.nameOrNull,
+            hookInfo.ugFileUtils.createUri.parameters.valuesListOrNull
+        )
     }
 
     inner class TokenCertModule {
         val selfClass by weak {
-            hookInfo.tokenCert.class_.nameOrNull?.toClass(classLoader)
+            hookInfo.tokenCert.class_.nameOrNull
+                ?.toClass(classLoader)
         }
     }
 
@@ -258,12 +279,14 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
         lateinit var instance: DouyinPackage
 
         private fun readHookInfo(context: Context): Configs.HookInfo {
-            val androidId = Settings.Secure.getString(
-                context.contentResolver,
-                Settings.Secure.ANDROID_ID
-            ) ?: "unknown"
+            val androidId =
+                Settings.Secure.getString(
+                    context.contentResolver,
+                    Settings.Secure.ANDROID_ID
+                ) ?: "unknown"
             val hookInfoFileName =
-                "${AppProperties.PROJECT_NAMESPACE}-${androidId.hashCode().toUInt()}".hashCode().toHexString()
+                "${AppProperties.PROJECT_NAMESPACE}-${androidId.hashCode().toUInt()}"
+                    .hashCode().toHexString()
             YLog.debug("$TAG: hookInfoFileName: $hookInfoFileName")
 
             runCatching {
@@ -273,31 +296,35 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
                     return@runCatching null
                 }
 
-                val hostAppPackageInfo = context.packageManager.getPackageInfo(
-                    AndroidAppHelper.currentPackageName(),
-                    0
-                )
+                val hostAppPackageInfo =
+                    context.packageManager.getPackageInfo(
+                        AndroidAppHelper.currentPackageName(),
+                        0
+                    )
                 val hostAppLastUpdateTime = hostAppPackageInfo.lastUpdateTime
                 val hostAppVersionCode = hostAppPackageInfo.versionCode
 
-                val moduleLastUpdateTime = runCatching {
-                    context.packageManager.getPackageInfo(
-                        AppProperties.PROJECT_NAMESPACE,
-                        0
-                    ).lastUpdateTime
-                }.getOrDefault(hostAppLastUpdateTime)
-
-                val hookInfo = FileInputStream(hookInfoFile).use {
+                val moduleLastUpdateTime =
                     runCatching {
-                        Configs.HookInfo.parseFrom(it)
-                    }.getOrNull() ?: Configs.HookInfo.newBuilder().build()
-                }
+                        context.packageManager
+                            .getPackageInfo(
+                                AppProperties.PROJECT_NAMESPACE,
+                                0
+                            ).lastUpdateTime
+                    }.getOrDefault(hostAppLastUpdateTime)
 
-                if (hookInfo.lastUpdateTime >= moduleLastUpdateTime
-                    && hookInfo.lastUpdateTime >= hostAppLastUpdateTime
-                    && hookInfo.hostVersionCode == hostAppVersionCode
-                    && hookInfo.moduleVersionCode == AppProperties.PROJECT_VERSION_CODE
-                    && hookInfo.moduleVersionName == AppProperties.PROJECT_VERSION_NAME
+                val hookInfo =
+                    FileInputStream(hookInfoFile).use {
+                        runCatching {
+                            Configs.HookInfo.parseFrom(it)
+                        }.getOrNull() ?: Configs.HookInfo.newBuilder().build()
+                    }
+
+                if (hookInfo.lastUpdateTime >= moduleLastUpdateTime &&
+                    hookInfo.lastUpdateTime >= hostAppLastUpdateTime &&
+                    hookInfo.hostVersionCode == hostAppVersionCode &&
+                    hookInfo.moduleVersionCode == AppProperties.PROJECT_VERSION_CODE &&
+                    hookInfo.moduleVersionName == AppProperties.PROJECT_VERSION_NAME
                 ) {
                     return hookInfo
                 } else {
@@ -320,417 +347,522 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
 
         private fun initHookInfo(context: Context) = hookInfo {
             val hostAppClassLoader = context.classLoader
-            val hostAppPackageInfo = context.packageManager.getPackageInfo(
-                AndroidAppHelper.currentPackageName(),
-                0
-            )
+            val hostAppPackageInfo =
+                context.packageManager.getPackageInfo(
+                    AndroidAppHelper.currentPackageName(),
+                    0
+                )
 
-            lastUpdateTime = maxOf(
-                hostAppPackageInfo.lastUpdateTime,
-                runCatching {
-                    context.packageManager.getPackageInfo(
-                        AppProperties.PROJECT_NAMESPACE,
-                        0
-                    ).lastUpdateTime
-                }.getOrDefault(hostAppPackageInfo.lastUpdateTime)
-            )
+            lastUpdateTime =
+                maxOf(
+                    hostAppPackageInfo.lastUpdateTime,
+                    runCatching {
+                        context.packageManager
+                            .getPackageInfo(
+                                AppProperties.PROJECT_NAMESPACE,
+                                0
+                            ).lastUpdateTime
+                    }.getOrDefault(hostAppPackageInfo.lastUpdateTime)
+                )
             moduleVersionCode = AppProperties.PROJECT_VERSION_CODE
             moduleVersionName = AppProperties.PROJECT_VERSION_NAME
             hostVersionCode = hostAppPackageInfo.versionCode
             generation = 0
 
             DexKitBridge.create(context.applicationInfo.sourceDir).use { bridge ->
-                commentImageStruct = commentImageStruct {
-                    val cmtImgClsName = "com.ss.android.ugc.aweme.comment.model.CommentImageStruct"
-                    val originUrlFieldName = "originUrl"
-                    val downloadUrlFieldName = "downloadUrl"
-                    val getDownloadUrlMethodData = bridge.findMethod {
-                        matcher {
-                            declaredClass =
-                                "com.ss.android.ugc.aweme.comment.model.CommentImageStruct"
-                            returnType = "com.ss.android.ugc.aweme.base.model.UrlModel"
-                            paramCount = 0
-                            addUsingField {
-                                name = "downloadUrl"
+                commentImageStruct =
+                    commentImageStruct {
+                        val cmtImgClsName =
+                            "com.ss.android.ugc.aweme.comment.model.CommentImageStruct"
+                        val originUrlFieldName = "originUrl"
+                        val downloadUrlFieldName = "downloadUrl"
+                        val getDownloadUrlMethodData =
+                            bridge
+                                .findMethod {
+                                    matcher {
+                                        declaredClass =
+                                            "com.ss.android.ugc.aweme.comment.model.CommentImageStruct"
+                                        returnType = "com.ss.android.ugc.aweme.base.model.UrlModel"
+                                        paramCount = 0
+                                        addUsingField {
+                                            name = "downloadUrl"
+                                        }
+                                    }
+                                }.singleOrNull() ?: run {
+                                return@commentImageStruct
                             }
-                        }
-                    }.singleOrNull() ?: run {
-                        return@commentImageStruct
-                    }
 
-                    class_ = class_ {
-                        name = cmtImgClsName
-                    }
-                    originUrl = field {
-                        name = originUrlFieldName
-                    }
-                    downloadUrl = field {
-                        name = downloadUrlFieldName
-                    }
-                    getDownloadUrl = method {
-                        name = getDownloadUrlMethodData.methodName
-                        parameters = MethodKt.parameters {
-                            values.clear()
-                            values.addAll(getDownloadUrlMethodData.paramTypeNames)
-                        }
-                    }
-                }
-
-                urlModel = urlModel {
-                    class_ = class_ {
-                        name = "com.ss.android.ugc.aweme.base.model.UrlModel"
-                    }
-                    urlList = field {
-                        name = "urlList"
-                    }
-                }
-
-                comment = comment {
-                    class_ = class_ {
-                        name = "com.ss.android.ugc.aweme.comment.model.Comment"
-                    }
-                    emoji = field {
-                        name = "emoji"
-                    }
-                    imageList = field {
-                        name = "imageList"
-                    }
-                }
-
-                emoji = emoji {
-                    class_ = class_ {
-                        name = "com.ss.android.ugc.aweme.emoji.model.Emoji"
-                    }
-                    animateUrl = method {
-                        name = "animateUrl"
-                    }
-                }
-
-                commentActionParams = commentActionParams {
-                    val cmtActionParamsClsName =
-                        "com.ss.android.ugc.aweme.comment.CommentActionParams"
-                    val commentFieldName =
-                        cmtActionParamsClsName.toClass(hostAppClassLoader).resolve()
-                            .firstFieldOrNull {
-                                type = "com.ss.android.ugc.aweme.comment.model.Comment"
-                            }?.self?.name
-                    val imageFieldName =
-                        cmtActionParamsClsName.toClass(hostAppClassLoader).resolve()
-                            .firstFieldOrNull {
-                                type = Int::class
-                            }?.self?.name
-                    if (commentFieldName == null || imageFieldName == null) {
-                        return@commentActionParams
-                    }
-
-                    class_ = class_ {
-                        name = cmtActionParamsClsName
-                    }
-                    comment = field {
-                        name = commentFieldName
-                    }
-                    imageIndex = field {
-                        name = imageFieldName
-                    }
-                }
-
-                commentLongPressItemModel = commentLongPressItemModel {
-                    val commentLongPressItemModelClsName =
-                        "com.ss.android.ugc.aweme.comment.ui.longpress.CommentLongPressItemModel"
-                    val commentActionParamsFieldName =
-                        commentLongPressItemModelClsName.toClass(hostAppClassLoader).resolve()
-                            .firstFieldOrNull {
-                                type = "com.ss.android.ugc.aweme.comment.CommentActionParams"
-                            }?.self?.name
-
-                    if (commentActionParamsFieldName == null) {
-                        return@commentLongPressItemModel
-                    }
-
-                    class_ = class_ {
-                        name = commentLongPressItemModelClsName
-                    }
-                    commentActionParams = field {
-                        name = commentActionParamsFieldName
-                    }
-                }
-
-                saveImageActionItem = saveImageActionItem {
-                    val saveImageActionItemClsName =
-                        "com.ss.android.ugc.aweme.comment.manager.longclickaction.actions.SaveImageActionItem"
-                    // SaveImageActionItem extends CommentLongPressItemModel, ensure commentLongPressItemModel is populated first!
-                    val cmtActionParamsFieldName =
-                        this@hookInfo.commentLongPressItemModel.commentActionParams?.name
-                    val saveImageActionParamsFieldName =
-                        saveImageActionItemClsName.toClass(hostAppClassLoader).resolve()
-                            .firstFieldOrNull {
-                                type = "com.ss.android.ugc.aweme.comment.CommentActionParams"
-                            }?.self?.name
-                    if (cmtActionParamsFieldName == null || saveImageActionParamsFieldName == null) {
-                        return@saveImageActionItem
-                    }
-
-                    class_ = class_ {
-                        name = saveImageActionItemClsName
-                    }
-                    cmtActionParams = field {
-                        name = cmtActionParamsFieldName
-                    }
-                    saveImgActionParams = field {
-                        name = saveImageActionParamsFieldName
-                    }
-                }
-
-                cmtSaveToAlbumBtnVisibility = cmtSaveToAlbumBtnVisibility {
-                    bridge.findMethod {
-                        matcher {
-                            modifiers = Modifier.STATIC
-                            params {
-                                add("com.ss.android.ugc.aweme.comment.model.Comment")
-                                add("int")
+                        class_ =
+                            class_ {
+                                name = cmtImgClsName
                             }
-                            returnType = "boolean"
-                            invokeMethods {
-                                add {
-                                    declaredClass =
-                                        "com.ss.android.ugc.aweme.comment.model.CommentImageStruct"
-                                    returnType = "com.ss.android.ugc.aweme.base.model.UrlModel"
-                                    paramCount = 0
-                                    addUsingField {
-                                        name = "downloadUrl"
+                        originUrl =
+                            field {
+                                name = originUrlFieldName
+                            }
+                        downloadUrl =
+                            field {
+                                name = downloadUrlFieldName
+                            }
+                        getDownloadUrl =
+                            method {
+                                name = getDownloadUrlMethodData.methodName
+                                parameters =
+                                    MethodKt.parameters {
+                                        values.clear()
+                                        values.addAll(getDownloadUrlMethodData.paramTypeNames)
+                                    }
+                            }
+                    }
+
+                urlModel =
+                    urlModel {
+                        class_ =
+                            class_ {
+                                name = "com.ss.android.ugc.aweme.base.model.UrlModel"
+                            }
+                        urlList =
+                            field {
+                                name = "urlList"
+                            }
+                    }
+
+                comment =
+                    comment {
+                        class_ =
+                            class_ {
+                                name = "com.ss.android.ugc.aweme.comment.model.Comment"
+                            }
+                        emoji =
+                            field {
+                                name = "emoji"
+                            }
+                        imageList =
+                            field {
+                                name = "imageList"
+                            }
+                    }
+
+                emoji =
+                    emoji {
+                        class_ =
+                            class_ {
+                                name = "com.ss.android.ugc.aweme.emoji.model.Emoji"
+                            }
+                        animateUrl =
+                            method {
+                                name = "animateUrl"
+                            }
+                    }
+
+                commentActionParams =
+                    commentActionParams {
+                        val cmtActionParamsClsName =
+                            "com.ss.android.ugc.aweme.comment.CommentActionParams"
+                        val commentFieldName =
+                            cmtActionParamsClsName
+                                .toClass(hostAppClassLoader)
+                                .resolve()
+                                .firstFieldOrNull {
+                                    type = "com.ss.android.ugc.aweme.comment.model.Comment"
+                                }?.self
+                                ?.name
+                        val imageFieldName =
+                            cmtActionParamsClsName
+                                .toClass(hostAppClassLoader)
+                                .resolve()
+                                .firstFieldOrNull {
+                                    type = Int::class
+                                }?.self
+                                ?.name
+                        if (commentFieldName == null || imageFieldName == null) {
+                            return@commentActionParams
+                        }
+
+                        class_ =
+                            class_ {
+                                name = cmtActionParamsClsName
+                            }
+                        comment =
+                            field {
+                                name = commentFieldName
+                            }
+                        imageIndex =
+                            field {
+                                name = imageFieldName
+                            }
+                    }
+
+                commentLongPressItemModel =
+                    commentLongPressItemModel {
+                        val commentLongPressItemModelClsName =
+                            "com.ss.android.ugc.aweme.comment.ui.longpress.CommentLongPressItemModel"
+                        val commentActionParamsFieldName =
+                            commentLongPressItemModelClsName
+                                .toClass(hostAppClassLoader)
+                                .resolve()
+                                .firstFieldOrNull {
+                                    type = "com.ss.android.ugc.aweme.comment.CommentActionParams"
+                                }?.self
+                                ?.name
+
+                        if (commentActionParamsFieldName == null) {
+                            return@commentLongPressItemModel
+                        }
+
+                        class_ =
+                            class_ {
+                                name = commentLongPressItemModelClsName
+                            }
+                        commentActionParams =
+                            field {
+                                name = commentActionParamsFieldName
+                            }
+                    }
+
+                saveImageActionItem =
+                    saveImageActionItem {
+                        val saveImageActionItemClsName =
+                            "com.ss.android.ugc.aweme.comment.manager.longclickaction.actions.SaveImageActionItem"
+                        // SaveImageActionItem extends CommentLongPressItemModel, ensure commentLongPressItemModel is populated first!
+                        val cmtActionParamsFieldName =
+                            this@hookInfo.commentLongPressItemModel.commentActionParams?.name
+                        val saveImageActionParamsFieldName =
+                            saveImageActionItemClsName
+                                .toClass(hostAppClassLoader)
+                                .resolve()
+                                .firstFieldOrNull {
+                                    type = "com.ss.android.ugc.aweme.comment.CommentActionParams"
+                                }?.self
+                                ?.name
+                        if (cmtActionParamsFieldName == null || saveImageActionParamsFieldName == null) {
+                            return@saveImageActionItem
+                        }
+
+                        class_ =
+                            class_ {
+                                name = saveImageActionItemClsName
+                            }
+                        cmtActionParams =
+                            field {
+                                name = cmtActionParamsFieldName
+                            }
+                        saveImgActionParams =
+                            field {
+                                name = saveImageActionParamsFieldName
+                            }
+                    }
+
+                cmtSaveToAlbumBtnVisibility =
+                    cmtSaveToAlbumBtnVisibility {
+                        bridge
+                            .findMethod {
+                                matcher {
+                                    modifiers = Modifier.STATIC
+                                    params {
+                                        add("com.ss.android.ugc.aweme.comment.model.Comment")
+                                        add("int")
+                                    }
+                                    returnType = "boolean"
+                                    invokeMethods {
+                                        add {
+                                            declaredClass =
+                                                "com.ss.android.ugc.aweme.comment.model.CommentImageStruct"
+                                            returnType = "com.ss.android.ugc.aweme.base.model.UrlModel"
+                                            paramCount = 0
+                                            addUsingField {
+                                                name = "downloadUrl"
+                                            }
+                                        }
                                     }
                                 }
+                            }.singleOrNull()
+                            ?.also { match ->
+                                class_ =
+                                    class_ {
+                                        name = match.className
+                                    }
+                                checkVisibility =
+                                    method {
+                                        name = match.methodName
+                                        parameters =
+                                            MethodKt.parameters {
+                                                values.clear()
+                                                values.addAll(match.paramTypeNames)
+                                            }
+                                    }
                             }
-                        }
-                    }.singleOrNull()?.also { match ->
-                        class_ = class_ {
-                            name = match.className
-                        }
-                        checkVisibility = method {
-                            name = match.methodName
-                            parameters = MethodKt.parameters {
-                                values.clear()
-                                values.addAll(match.paramTypeNames)
-                            }
-                        }
                     }
-                }
 
-                cmtSaveToAlbumBtnClickedCallback = cmtSaveToAlbumBtnClickedCallback {
-                    bridge.findMethod {
-                        matcher {
-                            modifiers = Modifier.STATIC + Modifier.FINAL + Modifier.PUBLIC
-                            returnType = "java.lang.Object"
-                            params {
-                                count = 1
-                            }
-                            addUsingString("bpea-comment_save_image_to_album")
-                        }
-                    }.singleOrNull()?.also { match ->
-                        class_ = class_ {
-                            name = match.className
-                        }
-                        clickedCallback = method {
-                            name = match.methodName
-                            parameters = MethodKt.parameters {
-                                values.clear()
-                                values.addAll(match.paramTypeNames)
-                            }
-                        }
-                    }
-                }
-
-                commentImageSaveHelper = commentImageSaveHelper {
-                    bridge.findMethod {
-                        matcher {
-                            name = "onSuccessed"
-                            modifiers = Modifier.FINAL + Modifier.PUBLIC
-                            returnType = "void"
-                            params {
-                                add("com.ss.android.socialbase.downloader.model.DownloadInfo")
-                            }
-                            usingStrings {
-                                add("/douyin/comment")
-                                add("comment_")
-                            }
-                            invokeMethods {
-                                add {
-                                    descriptor =
-                                        "Lcom/bytedance/android/ug/UGFileUtilsKt;->copyFile(Ljava/lang/String;Ljava/lang/String;Lcom/bytedance/bpea/cert/token/TokenCert;)Z"
+                cmtSaveToAlbumBtnClickedCallback =
+                    cmtSaveToAlbumBtnClickedCallback {
+                        bridge
+                            .findMethod {
+                                matcher {
+                                    modifiers = Modifier.STATIC + Modifier.FINAL + Modifier.PUBLIC
+                                    returnType = "java.lang.Object"
+                                    params {
+                                        count = 1
+                                    }
+                                    addUsingString("bpea-comment_save_image_to_album")
                                 }
+                            }.singleOrNull()
+                            ?.also { match ->
+                                class_ =
+                                    class_ {
+                                        name = match.className
+                                    }
+                                clickedCallback =
+                                    method {
+                                        name = match.methodName
+                                        parameters =
+                                            MethodKt.parameters {
+                                                values.clear()
+                                                values.addAll(match.paramTypeNames)
+                                            }
+                                    }
                             }
-                        }
-                    }.singleOrNull()?.also { match ->
-                        val notifyResultMethod =
-                            match.className.toClass(hostAppClassLoader).resolve()
+                    }
+
+                commentImageSaveHelper =
+                    commentImageSaveHelper {
+                        bridge
+                            .findMethod {
+                                matcher {
+                                    name = "onSuccessed"
+                                    modifiers = Modifier.FINAL + Modifier.PUBLIC
+                                    returnType = "void"
+                                    params {
+                                        add("com.ss.android.socialbase.downloader.model.DownloadInfo")
+                                    }
+                                    usingStrings {
+                                        add("/douyin/comment")
+                                        add("comment_")
+                                    }
+                                    invokeMethods {
+                                        add {
+                                            descriptor =
+                                                "Lcom/bytedance/android/ug/UGFileUtilsKt;->copyFile(Ljava/lang/String;Ljava/lang/String;Lcom/bytedance/bpea/cert/token/TokenCert;)Z"
+                                        }
+                                    }
+                                }
+                            }.singleOrNull()
+                            ?.also { match ->
+                                val notifyResultMethod =
+                                    match.className
+                                        .toClass(hostAppClassLoader)
+                                        .resolve()
+                                        .firstMethodOrNull {
+                                            modifiers(Modifiers.PUBLIC, Modifiers.FINAL)
+                                            parameters(Context::class, Boolean::class)
+                                            parameterCount = 2
+                                            superclass()
+                                        }?.self
+                                if (notifyResultMethod == null) {
+                                    return@commentImageSaveHelper
+                                }
+
+                                class_ =
+                                    class_ {
+                                        name = match.className
+                                    }
+                                onSuccessed =
+                                    method {
+                                        name = match.methodName
+                                        parameters =
+                                            MethodKt.parameters {
+                                                values.clear()
+                                                values.addAll(match.paramTypeNames)
+                                            }
+                                    }
+                                notifyResult =
+                                    method {
+                                        name = notifyResultMethod.name
+                                        parameters =
+                                            MethodKt.parameters {
+                                                values.clear()
+                                                notifyResultMethod.parameterTypes.forEach { paramType ->
+                                                    values.add(paramType.name)
+                                                }
+                                            }
+                                    }
+                            }
+                    }
+
+                downloadInfo =
+                    downloadInfo {
+                        class_ =
+                            class_ {
+                                name = "com.ss.android.socialbase.downloader.model.DownloadInfo"
+                            }
+                        url =
+                            field {
+                                name = "url"
+                            }
+                        getTargetFilePath =
+                            method {
+                                name = "getTargetFilePath"
+                            }
+                    }
+
+                digestUtils =
+                    digestUtils {
+                        val digestUtilsClsName = "com.bytedance.common.utility.DigestUtils"
+                        val md5HexFieldMethod =
+                            digestUtilsClsName
+                                .toClass(hostAppClassLoader)
+                                .resolve()
                                 .firstMethodOrNull {
-                                    modifiers(Modifiers.PUBLIC, Modifiers.FINAL)
-                                    parameters(Context::class, Boolean::class)
-                                    parameterCount = 2
-                                    superclass()
+                                    name = "md5Hex"
+                                    returnType = String::class
+                                    modifiers(Modifiers.PUBLIC, Modifiers.STATIC)
+                                    parameters(String::class)
                                 }?.self
-                        if (notifyResultMethod == null) {
-                            return@commentImageSaveHelper
+                        if (md5HexFieldMethod == null) {
+                            return@digestUtils
                         }
 
-                        class_ = class_ {
-                            name = match.className
-                        }
-                        onSuccessed = method {
-                            name = match.methodName
-                            parameters = MethodKt.parameters {
-                                values.clear()
-                                values.addAll(match.paramTypeNames)
+                        class_ =
+                            class_ {
+                                name = digestUtilsClsName
                             }
-                        }
-                        notifyResult = method {
-                            name = notifyResultMethod.name
-                            parameters = MethodKt.parameters {
-                                values.clear()
-                                notifyResultMethod.parameterTypes.forEach { paramType ->
-                                    values.add(paramType.name)
-                                }
+                        md5Hex =
+                            method {
+                                name = md5HexFieldMethod.name
+                                parameters =
+                                    MethodKt.parameters {
+                                        values.clear()
+                                        md5HexFieldMethod.parameterTypes.forEach { paramType ->
+                                            values.add(paramType.name)
+                                        }
+                                    }
                             }
-                        }
-                    }
-                }
-
-                downloadInfo = downloadInfo {
-                    class_ = class_ {
-                        name = "com.ss.android.socialbase.downloader.model.DownloadInfo"
-                    }
-                    url = field {
-                        name = "url"
-                    }
-                    getTargetFilePath = method {
-                        name = "getTargetFilePath"
-                    }
-                }
-
-                digestUtils = digestUtils {
-                    val digestUtilsClsName = "com.bytedance.common.utility.DigestUtils"
-                    val md5HexFieldMethod =
-                        digestUtilsClsName.toClass(hostAppClassLoader).resolve().firstMethodOrNull {
-                            name = "md5Hex"
-                            returnType = String::class
-                            modifiers(Modifiers.PUBLIC, Modifiers.STATIC)
-                            parameters(String::class)
-                        }?.self
-                    if (md5HexFieldMethod == null) {
-                        return@digestUtils
                     }
 
-                    class_ = class_ {
-                        name = digestUtilsClsName
-                    }
-                    md5Hex = method {
-                        name = md5HexFieldMethod.name
-                        parameters = MethodKt.parameters {
-                            values.clear()
-                            md5HexFieldMethod.parameterTypes.forEach { paramType ->
-                                values.add(paramType.name)
-                            }
+                ugFileUtils =
+                    uGFileUtilsKt {
+                        val ugFileUtilsClsName = "com.bytedance.android.ug.UGFileUtilsKt"
+                        val copyFileMethod =
+                            ugFileUtilsClsName
+                                .toClass(hostAppClassLoader)
+                                .resolve()
+                                .firstMethodOrNull {
+                                    name = "copyFile"
+                                    returnType = Boolean::class
+                                    modifiers(Modifiers.PUBLIC, Modifiers.STATIC, Modifiers.FINAL)
+                                    parameters(
+                                        String::class,
+                                        String::class,
+                                        "com.bytedance.bpea.cert.token.TokenCert"
+                                    )
+                                    parameterCount = 3
+                                }?.self
+                        val getStorageDirMethod =
+                            ugFileUtilsClsName
+                                .toClass(hostAppClassLoader)
+                                .resolve()
+                                .firstMethodOrNull {
+                                    name = "getStorageDir"
+                                    returnType = String::class
+                                    modifiers(Modifiers.PUBLIC, Modifiers.STATIC, Modifiers.FINAL)
+                                    parameters(String::class, Boolean::class)
+                                    parameterCount = 2
+                                }?.self
+                        val getExternalStorageDirectoryMethod =
+                            ugFileUtilsClsName
+                                .toClass(hostAppClassLoader)
+                                .resolve()
+                                .firstMethodOrNull {
+                                    name = "getExternalStorageDirectory"
+                                    returnType = String::class
+                                    modifiers(Modifiers.PUBLIC, Modifiers.STATIC, Modifiers.FINAL)
+                                    parameters(String::class, Boolean::class)
+                                    parameterCount = 2
+                                }?.self
+                        val getImageUriMethod =
+                            ugFileUtilsClsName
+                                .toClass(hostAppClassLoader)
+                                .resolve()
+                                .firstMethodOrNull {
+                                    name = "getImageUri"
+                                    returnType = android.net.Uri::class
+                                    modifiers(Modifiers.PUBLIC, Modifiers.STATIC, Modifiers.FINAL)
+                                    parameters(
+                                        android.content.Context::class,
+                                        String::class,
+                                        String::class,
+                                        String::class,
+                                        "com.bytedance.bpea.cert.token.TokenCert"
+                                    )
+                                    parameterCount = 5
+                                }?.self
+                        if (copyFileMethod == null || getStorageDirMethod == null || getExternalStorageDirectoryMethod == null ||
+                            getImageUriMethod == null
+                        ) {
+                            return@uGFileUtilsKt
                         }
-                    }
-                }
 
-                ugFileUtils = uGFileUtilsKt {
-                    val ugFileUtilsClsName = "com.bytedance.android.ug.UGFileUtilsKt"
-                    val copyFileMethod =
-                        ugFileUtilsClsName.toClass(hostAppClassLoader).resolve().firstMethodOrNull {
-                            name = "copyFile"
-                            returnType = Boolean::class
-                            modifiers(Modifiers.PUBLIC, Modifiers.STATIC, Modifiers.FINAL)
-                            parameters(
-                                String::class,
-                                String::class,
-                                "com.bytedance.bpea.cert.token.TokenCert"
-                            )
-                            parameterCount = 3
-                        }?.self
-                    val getStorageDirMethod =
-                        ugFileUtilsClsName.toClass(hostAppClassLoader).resolve().firstMethodOrNull {
-                            name = "getStorageDir"
-                            returnType = String::class
-                            modifiers(Modifiers.PUBLIC, Modifiers.STATIC, Modifiers.FINAL)
-                            parameters(String::class, Boolean::class)
-                            parameterCount = 2
-                        }?.self
-                    val getExternalStorageDirectoryMethod =
-                        ugFileUtilsClsName.toClass(hostAppClassLoader).resolve().firstMethodOrNull {
-                            name = "getExternalStorageDirectory"
-                            returnType = String::class
-                            modifiers(Modifiers.PUBLIC, Modifiers.STATIC, Modifiers.FINAL)
-                            parameters(String::class, Boolean::class)
-                            parameterCount = 2
-                        }?.self
-                    val getImageUriMethod =
-                        ugFileUtilsClsName.toClass(hostAppClassLoader).resolve().firstMethodOrNull {
-                            name = "getImageUri"
-                            returnType = android.net.Uri::class
-                            modifiers(Modifiers.PUBLIC, Modifiers.STATIC, Modifiers.FINAL)
-                            parameters(
-                                android.content.Context::class,
-                                String::class,
-                                String::class,
-                                String::class,
-                                "com.bytedance.bpea.cert.token.TokenCert"
-                            )
-                            parameterCount = 5
-                        }?.self
-                    if (copyFileMethod == null || getStorageDirMethod == null || getExternalStorageDirectoryMethod == null || getImageUriMethod == null) {
-                        return@uGFileUtilsKt
+                        class_ =
+                            class_ {
+                                name = ugFileUtilsClsName
+                            }
+                        this.context =
+                            field {
+                                name = "context"
+                            }
+                        copyFile =
+                            method {
+                                name = copyFileMethod.name
+                                parameters =
+                                    MethodKt.parameters {
+                                        values.clear()
+                                        copyFileMethod.parameterTypes.forEach { paramType ->
+                                            values.add(paramType.name)
+                                        }
+                                    }
+                            }
+                        getStorageDir =
+                            method {
+                                name = getStorageDirMethod.name
+                                parameters =
+                                    MethodKt.parameters {
+                                        values.clear()
+                                        getStorageDirMethod.parameterTypes.forEach { paramType ->
+                                            values.add(paramType.name)
+                                        }
+                                    }
+                            }
+                        getExternalStorageDir =
+                            method {
+                                name = getExternalStorageDirectoryMethod.name
+                                parameters =
+                                    MethodKt.parameters {
+                                        values.clear()
+                                        getExternalStorageDirectoryMethod.parameterTypes.forEach { paramType ->
+                                            values.add(paramType.name)
+                                        }
+                                    }
+                            }
+                        getImageUri =
+                            method {
+                                name = getImageUriMethod.name
+                                parameters =
+                                    MethodKt.parameters {
+                                        values.clear()
+                                        getImageUriMethod.parameterTypes.forEach { paramType ->
+                                            values.add(paramType.name)
+                                        }
+                                    }
+                            }
                     }
 
-                    class_ = class_ {
-                        name = ugFileUtilsClsName
-                    }
-                    this.context = field {
-                        name = "context"
-                    }
-                    copyFile = method {
-                        name = copyFileMethod.name
-                        parameters = MethodKt.parameters {
-                            values.clear()
-                            copyFileMethod.parameterTypes.forEach { paramType ->
-                                values.add(paramType.name)
+                tokenCert =
+                    tokenCert {
+                        class_ =
+                            class_ {
+                                name = "com.bytedance.bpea.cert.token.TokenCert"
                             }
-                        }
                     }
-                    getStorageDir = method {
-                        name = getStorageDirMethod.name
-                        parameters = MethodKt.parameters {
-                            values.clear()
-                            getStorageDirMethod.parameterTypes.forEach { paramType ->
-                                values.add(paramType.name)
-                            }
-                        }
-                    }
-                    getExternalStorageDir = method {
-                        name = getExternalStorageDirectoryMethod.name
-                        parameters = MethodKt.parameters {
-                            values.clear()
-                            getExternalStorageDirectoryMethod.parameterTypes.forEach { paramType ->
-                                values.add(paramType.name)
-                            }
-                        }
-                    }
-                    getImageUri = method {
-                        name = getImageUriMethod.name
-                        parameters = MethodKt.parameters {
-                            values.clear()
-                            getImageUriMethod.parameterTypes.forEach { paramType ->
-                                values.add(paramType.name)
-                            }
-                        }
-                    }
-                }
-
-                tokenCert = tokenCert {
-                    class_ = class_ {
-                        name = "com.bytedance.bpea.cert.token.TokenCert"
-                    }
-                }
             }
         }
     }

@@ -42,7 +42,9 @@ class HookTransaction(private val tag: String?) {
                     hookResult.add(it)
                 } ?: run {
                     hasFailure = true
-                    YLog.error("$tag: $name returned null, considered as hook failed. The remaining hooks will not be executed and rollback will be performed.")
+                    YLog.error(
+                        "$tag: $name returned null, considered as hook failed. The remaining hooks will not be executed and rollback will be performed."
+                    )
                 }
             } catch (e: Exception) {
                 hasFailure = true
