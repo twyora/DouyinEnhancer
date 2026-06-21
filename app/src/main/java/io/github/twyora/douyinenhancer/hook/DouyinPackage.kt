@@ -372,47 +372,54 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
             DexKitBridge.create(context.applicationInfo.sourceDir).use { bridge ->
                 commentImageStruct =
                     commentImageStruct {
-                        val cmtImgClsName =
-                            "com.ss.android.ugc.aweme.comment.model.CommentImageStruct"
-                        val originUrlFieldName = "originUrl"
-                        val downloadUrlFieldName = "downloadUrl"
-                        val getDownloadUrlMethodData =
-                            bridge
-                                .findMethod {
-                                    matcher {
-                                        declaredClass =
-                                            "com.ss.android.ugc.aweme.comment.model.CommentImageStruct"
-                                        returnType = "com.ss.android.ugc.aweme.base.model.UrlModel"
-                                        paramCount = 0
-                                        addUsingField {
-                                            name = "downloadUrl"
+                        runCatching {
+                            val cmtImgClsName =
+                                "com.ss.android.ugc.aweme.comment.model.CommentImageStruct"
+                            val originUrlFieldName = "originUrl"
+                            val downloadUrlFieldName = "downloadUrl"
+                            val getDownloadUrlMethodData =
+                                bridge
+                                    .findMethod {
+                                        matcher {
+                                            declaredClass =
+                                                "com.ss.android.ugc.aweme.comment.model.CommentImageStruct"
+                                            returnType = "com.ss.android.ugc.aweme.base.model.UrlModel"
+                                            paramCount = 0
+                                            addUsingField {
+                                                name = "downloadUrl"
+                                            }
                                         }
-                                    }
-                                }.singleOrNull() ?: run {
-                                return@commentImageStruct
-                            }
+                                    }.singleOrNull() ?: run {
+                                    YLog.error(
+                                        "$TAG: Unable to populate ${this::class.simpleName} config, possibly due to unfound obfuscated methods"
+                                    )
+                                    return@commentImageStruct
+                                }
 
-                        class_ =
-                            class_ {
-                                name = cmtImgClsName
-                            }
-                        originUrl =
-                            field {
-                                name = originUrlFieldName
-                            }
-                        downloadUrl =
-                            field {
-                                name = downloadUrlFieldName
-                            }
-                        getDownloadUrl =
-                            method {
-                                name = getDownloadUrlMethodData.methodName
-                                parameters =
-                                    MethodKt.parameters {
-                                        values.clear()
-                                        values.addAll(getDownloadUrlMethodData.paramTypeNames)
-                                    }
-                            }
+                            class_ =
+                                class_ {
+                                    name = cmtImgClsName
+                                }
+                            originUrl =
+                                field {
+                                    name = originUrlFieldName
+                                }
+                            downloadUrl =
+                                field {
+                                    name = downloadUrlFieldName
+                                }
+                            getDownloadUrl =
+                                method {
+                                    name = getDownloadUrlMethodData.methodName
+                                    parameters =
+                                        MethodKt.parameters {
+                                            values.clear()
+                                            values.addAll(getDownloadUrlMethodData.paramTypeNames)
+                                        }
+                                }
+                        }.onFailure {
+                            YLog.error("$TAG: Unable to populate config", it)
+                        }
                     }
 
                 urlModel =
@@ -457,236 +464,284 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
 
                 commentActionParams =
                     commentActionParams {
-                        val cmtActionParamsClsName =
-                            "com.ss.android.ugc.aweme.comment.CommentActionParams"
-                        val commentFieldName =
-                            cmtActionParamsClsName
-                                .toClass(hostAppClassLoader)
-                                .resolve()
-                                .firstFieldOrNull {
-                                    type = "com.ss.android.ugc.aweme.comment.model.Comment"
-                                }?.self
-                                ?.name
-                        val imageFieldName =
-                            cmtActionParamsClsName
-                                .toClass(hostAppClassLoader)
-                                .resolve()
-                                .firstFieldOrNull {
-                                    type = Int::class
-                                }?.self
-                                ?.name
-                        if (commentFieldName == null || imageFieldName == null) {
-                            return@commentActionParams
-                        }
+                        runCatching {
+                            val cmtActionParamsClsName =
+                                "com.ss.android.ugc.aweme.comment.CommentActionParams"
+                            val commentFieldName =
+                                cmtActionParamsClsName
+                                    .toClass(hostAppClassLoader)
+                                    .resolve()
+                                    .firstFieldOrNull {
+                                        type = "com.ss.android.ugc.aweme.comment.model.Comment"
+                                    }?.self
+                                    ?.name
+                            val imageFieldName =
+                                cmtActionParamsClsName
+                                    .toClass(hostAppClassLoader)
+                                    .resolve()
+                                    .firstFieldOrNull {
+                                        type = Int::class
+                                    }?.self
+                                    ?.name
+                            if (commentFieldName == null || imageFieldName == null) {
+                                YLog.error(
+                                    "$TAG: Unable to populate ${this::class.simpleName} config, possibly due to unfound obfuscated methods"
+                                )
+                                return@commentActionParams
+                            }
 
-                        class_ =
-                            class_ {
-                                name = cmtActionParamsClsName
-                            }
-                        comment =
-                            field {
-                                name = commentFieldName
-                            }
-                        imageIndex =
-                            field {
-                                name = imageFieldName
-                            }
+                            class_ =
+                                class_ {
+                                    name = cmtActionParamsClsName
+                                }
+                            comment =
+                                field {
+                                    name = commentFieldName
+                                }
+                            imageIndex =
+                                field {
+                                    name = imageFieldName
+                                }
+                        }.onFailure {
+                            YLog.error("$TAG: Unable to populate config", it)
+                        }
                     }
 
                 commentLongPressItemModel =
                     commentLongPressItemModel {
-                        val commentLongPressItemModelClsName =
-                            "com.ss.android.ugc.aweme.comment.ui.longpress.CommentLongPressItemModel"
-                        val commentActionParamsFieldName =
-                            commentLongPressItemModelClsName
-                                .toClass(hostAppClassLoader)
-                                .resolve()
-                                .firstFieldOrNull {
-                                    type = "com.ss.android.ugc.aweme.comment.CommentActionParams"
-                                }?.self
-                                ?.name
+                        runCatching {
+                            val commentLongPressItemModelClsName =
+                                "com.ss.android.ugc.aweme.comment.ui.longpress.CommentLongPressItemModel"
+                            val commentActionParamsFieldName =
+                                commentLongPressItemModelClsName
+                                    .toClass(hostAppClassLoader)
+                                    .resolve()
+                                    .firstFieldOrNull {
+                                        type = "com.ss.android.ugc.aweme.comment.CommentActionParams"
+                                    }?.self
+                                    ?.name
 
-                        if (commentActionParamsFieldName == null) {
-                            return@commentLongPressItemModel
+                            if (commentActionParamsFieldName == null) {
+                                YLog.error(
+                                    "$TAG: Unable to populate ${this::class.simpleName} config, possibly due to unfound obfuscated methods"
+                                )
+                                return@commentLongPressItemModel
+                            }
+
+                            class_ =
+                                class_ {
+                                    name = commentLongPressItemModelClsName
+                                }
+                            commentActionParams =
+                                field {
+                                    name = commentActionParamsFieldName
+                                }
+                        }.onFailure {
+                            YLog.error("$TAG: Unable to populate config", it)
                         }
-
-                        class_ =
-                            class_ {
-                                name = commentLongPressItemModelClsName
-                            }
-                        commentActionParams =
-                            field {
-                                name = commentActionParamsFieldName
-                            }
                     }
 
                 saveImageActionItem =
                     saveImageActionItem {
-                        val saveImageActionItemClsName =
-                            "com.ss.android.ugc.aweme.comment.manager.longclickaction.actions.SaveImageActionItem"
-                        // SaveImageActionItem extends CommentLongPressItemModel, ensure commentLongPressItemModel is populated first!
-                        val cmtActionParamsFieldName =
-                            this@hookInfo.commentLongPressItemModel.commentActionParams?.name
-                        val saveImageActionParamsFieldName =
-                            saveImageActionItemClsName
-                                .toClass(hostAppClassLoader)
-                                .resolve()
-                                .firstFieldOrNull {
-                                    type = "com.ss.android.ugc.aweme.comment.CommentActionParams"
-                                }?.self
-                                ?.name
-                        if (cmtActionParamsFieldName == null || saveImageActionParamsFieldName == null) {
-                            return@saveImageActionItem
-                        }
+                        runCatching {
+                            val saveImageActionItemClsName =
+                                "com.ss.android.ugc.aweme.comment.manager.longclickaction.actions.SaveImageActionItem"
+                            // SaveImageActionItem extends CommentLongPressItemModel, ensure commentLongPressItemModel is populated first!
+                            val cmtActionParamsFieldName =
+                                this@hookInfo.commentLongPressItemModel.commentActionParams?.name
+                            val saveImageActionParamsFieldName =
+                                saveImageActionItemClsName
+                                    .toClass(hostAppClassLoader)
+                                    .resolve()
+                                    .firstFieldOrNull {
+                                        type = "com.ss.android.ugc.aweme.comment.CommentActionParams"
+                                    }?.self
+                                    ?.name
+                            if (cmtActionParamsFieldName == null || saveImageActionParamsFieldName == null) {
+                                YLog.error(
+                                    "$TAG: Unable to populate ${this::class.simpleName} config, possibly due to unfound obfuscated methods"
+                                )
+                                return@saveImageActionItem
+                            }
 
-                        class_ =
-                            class_ {
-                                name = saveImageActionItemClsName
-                            }
-                        cmtActionParams =
-                            field {
-                                name = cmtActionParamsFieldName
-                            }
-                        saveImgActionParams =
-                            field {
-                                name = saveImageActionParamsFieldName
-                            }
+                            class_ =
+                                class_ {
+                                    name = saveImageActionItemClsName
+                                }
+                            cmtActionParams =
+                                field {
+                                    name = cmtActionParamsFieldName
+                                }
+                            saveImgActionParams =
+                                field {
+                                    name = saveImageActionParamsFieldName
+                                }
+                        }.onFailure {
+                            YLog.error("$TAG: Unable to populate config", it)
+                        }
                     }
 
                 cmtSaveToAlbumBtnVisibility =
                     cmtSaveToAlbumBtnVisibility {
-                        bridge
-                            .findMethod {
-                                matcher {
-                                    modifiers = Modifier.STATIC
-                                    params {
-                                        add("com.ss.android.ugc.aweme.comment.model.Comment")
-                                        add("int")
-                                    }
-                                    returnType = "boolean"
-                                    invokeMethods {
-                                        add {
-                                            declaredClass =
-                                                "com.ss.android.ugc.aweme.comment.model.CommentImageStruct"
-                                            returnType = "com.ss.android.ugc.aweme.base.model.UrlModel"
-                                            paramCount = 0
-                                            addUsingField {
-                                                name = "downloadUrl"
+                        runCatching {
+                            bridge
+                                .findMethod {
+                                    matcher {
+                                        modifiers = Modifier.STATIC
+                                        params {
+                                            add("com.ss.android.ugc.aweme.comment.model.Comment")
+                                            add("int")
+                                        }
+                                        returnType = "boolean"
+                                        invokeMethods {
+                                            add {
+                                                declaredClass =
+                                                    "com.ss.android.ugc.aweme.comment.model.CommentImageStruct"
+                                                returnType = "com.ss.android.ugc.aweme.base.model.UrlModel"
+                                                paramCount = 0
+                                                addUsingField {
+                                                    name = "downloadUrl"
+                                                }
                                             }
                                         }
                                     }
-                                }
-                            }.singleOrNull()
-                            ?.also { match ->
-                                class_ =
-                                    class_ {
-                                        name = match.className
-                                    }
-                                checkVisibility =
-                                    method {
-                                        name = match.methodName
-                                        parameters =
-                                            MethodKt.parameters {
-                                                values.clear()
-                                                values.addAll(match.paramTypeNames)
-                                            }
-                                    }
+                                }.singleOrNull()
+                                ?.also { match ->
+                                    class_ =
+                                        class_ {
+                                            name = match.className
+                                        }
+                                    checkVisibility =
+                                        method {
+                                            name = match.methodName
+                                            parameters =
+                                                MethodKt.parameters {
+                                                    values.clear()
+                                                    values.addAll(match.paramTypeNames)
+                                                }
+                                        }
+                                } ?: run {
+                                YLog.error(
+                                    "$TAG: Unable to populate ${this::class.simpleName} config, possibly due to unfound obfuscated methods"
+                                )
+                                return@cmtSaveToAlbumBtnVisibility
                             }
+                        }.onFailure {
+                            YLog.error("$TAG: Unable to populate config", it)
+                        }
                     }
 
                 cmtSaveToAlbumBtnClickedCallback =
                     cmtSaveToAlbumBtnClickedCallback {
-                        bridge
-                            .findMethod {
-                                matcher {
-                                    modifiers = Modifier.STATIC + Modifier.FINAL + Modifier.PUBLIC
-                                    returnType = "java.lang.Object"
-                                    params {
-                                        count = 1
+                        runCatching {
+                            bridge
+                                .findMethod {
+                                    matcher {
+                                        modifiers = Modifier.STATIC + Modifier.FINAL + Modifier.PUBLIC
+                                        returnType = "java.lang.Object"
+                                        params {
+                                            count = 1
+                                        }
+                                        addUsingString("bpea-comment_save_image_to_album")
                                     }
-                                    addUsingString("bpea-comment_save_image_to_album")
-                                }
-                            }.singleOrNull()
-                            ?.also { match ->
-                                class_ =
-                                    class_ {
-                                        name = match.className
-                                    }
-                                clickedCallback =
-                                    method {
-                                        name = match.methodName
-                                        parameters =
-                                            MethodKt.parameters {
-                                                values.clear()
-                                                values.addAll(match.paramTypeNames)
-                                            }
-                                    }
+                                }.singleOrNull()
+                                ?.also { match ->
+                                    class_ =
+                                        class_ {
+                                            name = match.className
+                                        }
+                                    clickedCallback =
+                                        method {
+                                            name = match.methodName
+                                            parameters =
+                                                MethodKt.parameters {
+                                                    values.clear()
+                                                    values.addAll(match.paramTypeNames)
+                                                }
+                                        }
+                                } ?: run {
+                                YLog.error(
+                                    "$TAG: Unable to populate ${this::class.simpleName} config, possibly due to unfound obfuscated methods"
+                                )
+                                return@cmtSaveToAlbumBtnClickedCallback
                             }
+                        }.onFailure {
+                            YLog.error("$TAG: Unable to populate config", it)
+                        }
                     }
 
                 commentImageSaveHelper =
                     commentImageSaveHelper {
-                        bridge
-                            .findMethod {
-                                matcher {
-                                    name = "onSuccessed"
-                                    modifiers = Modifier.FINAL + Modifier.PUBLIC
-                                    returnType = "void"
-                                    params {
-                                        add("com.ss.android.socialbase.downloader.model.DownloadInfo")
-                                    }
-                                    usingStrings {
-                                        add("/douyin/comment")
-                                        add("comment_")
-                                    }
-                                    invokeMethods {
-                                        add {
-                                            descriptor =
-                                                "Lcom/bytedance/android/ug/UGFileUtilsKt;->copyFile(Ljava/lang/String;Ljava/lang/String;Lcom/bytedance/bpea/cert/token/TokenCert;)Z"
+                        runCatching {
+                            bridge
+                                .findMethod {
+                                    matcher {
+                                        name = "onSuccessed"
+                                        modifiers = Modifier.FINAL + Modifier.PUBLIC
+                                        returnType = "void"
+                                        params {
+                                            add("com.ss.android.socialbase.downloader.model.DownloadInfo")
+                                        }
+                                        usingStrings {
+                                            add("/douyin/comment")
+                                            add("comment_")
+                                        }
+                                        invokeMethods {
+                                            add {
+                                                descriptor =
+                                                    "Lcom/bytedance/android/ug/UGFileUtilsKt;->copyFile(Ljava/lang/String;Ljava/lang/String;Lcom/bytedance/bpea/cert/token/TokenCert;)Z"
+                                            }
                                         }
                                     }
-                                }
-                            }.singleOrNull()
-                            ?.also { match ->
-                                val notifyResultMethod =
-                                    match.className
-                                        .toClass(hostAppClassLoader)
-                                        .resolve()
-                                        .firstMethodOrNull {
-                                            modifiers(Modifiers.PUBLIC, Modifiers.FINAL)
-                                            parameters(Context::class, Boolean::class)
-                                            parameterCount = 2
-                                            superclass()
-                                        }?.self
-                                if (notifyResultMethod == null) {
-                                    return@commentImageSaveHelper
-                                }
+                                }.singleOrNull()
+                                ?.also { match ->
+                                    val notifyResultMethod =
+                                        match.className
+                                            .toClass(hostAppClassLoader)
+                                            .resolve()
+                                            .firstMethodOrNull {
+                                                modifiers(Modifiers.PUBLIC, Modifiers.FINAL)
+                                                parameters(Context::class, Boolean::class)
+                                                parameterCount = 2
+                                                superclass()
+                                            }?.self
+                                    if (notifyResultMethod == null) {
+                                        return@commentImageSaveHelper
+                                    }
 
-                                class_ =
-                                    class_ {
-                                        name = match.className
-                                    }
-                                onSuccessed =
-                                    method {
-                                        name = match.methodName
-                                        parameters =
-                                            MethodKt.parameters {
-                                                values.clear()
-                                                values.addAll(match.paramTypeNames)
-                                            }
-                                    }
-                                notifyResult =
-                                    method {
-                                        name = notifyResultMethod.name
-                                        parameters =
-                                            MethodKt.parameters {
-                                                values.clear()
-                                                notifyResultMethod.parameterTypes.forEach { paramType ->
-                                                    values.add(paramType.name)
+                                    class_ =
+                                        class_ {
+                                            name = match.className
+                                        }
+                                    onSuccessed =
+                                        method {
+                                            name = match.methodName
+                                            parameters =
+                                                MethodKt.parameters {
+                                                    values.clear()
+                                                    values.addAll(match.paramTypeNames)
                                                 }
-                                            }
-                                    }
+                                        }
+                                    notifyResult =
+                                        method {
+                                            name = notifyResultMethod.name
+                                            parameters =
+                                                MethodKt.parameters {
+                                                    values.clear()
+                                                    notifyResultMethod.parameterTypes.forEach { paramType ->
+                                                        values.add(paramType.name)
+                                                    }
+                                                }
+                                        }
+                                } ?: run {
+                                YLog.error(
+                                    "$TAG: Unable to populate ${this::class.simpleName} config, possibly due to unfound obfuscated methods"
+                                )
                             }
+                            return@commentImageSaveHelper
+                        }.onFailure {
+                            YLog.error("$TAG: Unable to populate config", it)
+                        }
                     }
 
                 downloadInfo =
@@ -707,153 +762,167 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
 
                 digestUtils =
                     digestUtils {
-                        val digestUtilsClsName = "com.bytedance.common.utility.DigestUtils"
-                        val md5HexFieldMethod =
-                            digestUtilsClsName
-                                .toClass(hostAppClassLoader)
-                                .resolve()
-                                .firstMethodOrNull {
-                                    name = "md5Hex"
-                                    returnType = String::class
-                                    modifiers(Modifiers.PUBLIC, Modifiers.STATIC)
-                                    parameters(String::class)
-                                }?.self
-                        if (md5HexFieldMethod == null) {
-                            return@digestUtils
-                        }
+                        runCatching {
+                            val digestUtilsClsName = "com.bytedance.common.utility.DigestUtils"
+                            val md5HexFieldMethod =
+                                digestUtilsClsName
+                                    .toClass(hostAppClassLoader)
+                                    .resolve()
+                                    .firstMethodOrNull {
+                                        name = "md5Hex"
+                                        returnType = String::class
+                                        modifiers(Modifiers.PUBLIC, Modifiers.STATIC)
+                                        parameters(String::class)
+                                    }?.self
+                            if (md5HexFieldMethod == null) {
+                                YLog.error(
+                                    "$TAG: Unable to populate ${this::class.simpleName} config, possibly due to unfound obfuscated methods"
+                                )
+                                return@digestUtils
+                            }
 
-                        class_ =
-                            class_ {
-                                name = digestUtilsClsName
-                            }
-                        md5Hex =
-                            method {
-                                name = md5HexFieldMethod.name
-                                parameters =
-                                    MethodKt.parameters {
-                                        values.clear()
-                                        md5HexFieldMethod.parameterTypes.forEach { paramType ->
-                                            values.add(paramType.name)
+                            class_ =
+                                class_ {
+                                    name = digestUtilsClsName
+                                }
+                            md5Hex =
+                                method {
+                                    name = md5HexFieldMethod.name
+                                    parameters =
+                                        MethodKt.parameters {
+                                            values.clear()
+                                            md5HexFieldMethod.parameterTypes.forEach { paramType ->
+                                                values.add(paramType.name)
+                                            }
                                         }
-                                    }
-                            }
+                                }
+                        }.onFailure {
+                            YLog.error("$TAG: Unable to populate config", it)
+                        }
                     }
 
                 ugFileUtils =
                     uGFileUtilsKt {
-                        val ugFileUtilsClsName = "com.bytedance.android.ug.UGFileUtilsKt"
-                        val copyFileMethod =
-                            ugFileUtilsClsName
-                                .toClass(hostAppClassLoader)
-                                .resolve()
-                                .firstMethodOrNull {
-                                    name = "copyFile"
-                                    returnType = Boolean::class
-                                    modifiers(Modifiers.PUBLIC, Modifiers.STATIC, Modifiers.FINAL)
-                                    parameters(
-                                        String::class,
-                                        String::class,
-                                        "com.bytedance.bpea.cert.token.TokenCert"
-                                    )
-                                    parameterCount = 3
-                                }?.self
-                        val getStorageDirMethod =
-                            ugFileUtilsClsName
-                                .toClass(hostAppClassLoader)
-                                .resolve()
-                                .firstMethodOrNull {
-                                    name = "getStorageDir"
-                                    returnType = String::class
-                                    modifiers(Modifiers.PUBLIC, Modifiers.STATIC, Modifiers.FINAL)
-                                    parameters(String::class, Boolean::class)
-                                    parameterCount = 2
-                                }?.self
-                        val getExternalStorageDirectoryMethod =
-                            ugFileUtilsClsName
-                                .toClass(hostAppClassLoader)
-                                .resolve()
-                                .firstMethodOrNull {
-                                    name = "getExternalStorageDirectory"
-                                    returnType = String::class
-                                    modifiers(Modifiers.PUBLIC, Modifiers.STATIC, Modifiers.FINAL)
-                                    parameters(String::class, Boolean::class)
-                                    parameterCount = 2
-                                }?.self
-                        val getImageUriMethod =
-                            ugFileUtilsClsName
-                                .toClass(hostAppClassLoader)
-                                .resolve()
-                                .firstMethodOrNull {
-                                    name = "getImageUri"
-                                    returnType = android.net.Uri::class
-                                    modifiers(Modifiers.PUBLIC, Modifiers.STATIC, Modifiers.FINAL)
-                                    parameters(
-                                        android.content.Context::class,
-                                        String::class,
-                                        String::class,
-                                        String::class,
-                                        "com.bytedance.bpea.cert.token.TokenCert"
-                                    )
-                                    parameterCount = 5
-                                }?.self
-                        if (copyFileMethod == null || getStorageDirMethod == null || getExternalStorageDirectoryMethod == null ||
-                            getImageUriMethod == null
-                        ) {
-                            return@uGFileUtilsKt
-                        }
+                        runCatching {
+                            val ugFileUtilsClsName = "com.bytedance.android.ug.UGFileUtilsKt"
+                            val copyFileMethod =
+                                ugFileUtilsClsName
+                                    .toClass(hostAppClassLoader)
+                                    .resolve()
+                                    .firstMethodOrNull {
+                                        name = "copyFile"
+                                        returnType = Boolean::class
+                                        modifiers(Modifiers.PUBLIC, Modifiers.STATIC, Modifiers.FINAL)
+                                        parameters(
+                                            String::class,
+                                            String::class,
+                                            "com.bytedance.bpea.cert.token.TokenCert"
+                                        )
+                                        parameterCount = 3
+                                    }?.self
+                            val getStorageDirMethod =
+                                ugFileUtilsClsName
+                                    .toClass(hostAppClassLoader)
+                                    .resolve()
+                                    .firstMethodOrNull {
+                                        name = "getStorageDir"
+                                        returnType = String::class
+                                        modifiers(Modifiers.PUBLIC, Modifiers.STATIC, Modifiers.FINAL)
+                                        parameters(String::class, Boolean::class)
+                                        parameterCount = 2
+                                    }?.self
+                            val getExternalStorageDirectoryMethod =
+                                ugFileUtilsClsName
+                                    .toClass(hostAppClassLoader)
+                                    .resolve()
+                                    .firstMethodOrNull {
+                                        name = "getExternalStorageDirectory"
+                                        returnType = String::class
+                                        modifiers(Modifiers.PUBLIC, Modifiers.STATIC, Modifiers.FINAL)
+                                        parameters(String::class, Boolean::class)
+                                        parameterCount = 2
+                                    }?.self
+                            val getImageUriMethod =
+                                ugFileUtilsClsName
+                                    .toClass(hostAppClassLoader)
+                                    .resolve()
+                                    .firstMethodOrNull {
+                                        name = "getImageUri"
+                                        returnType = android.net.Uri::class
+                                        modifiers(Modifiers.PUBLIC, Modifiers.STATIC, Modifiers.FINAL)
+                                        parameters(
+                                            android.content.Context::class,
+                                            String::class,
+                                            String::class,
+                                            String::class,
+                                            "com.bytedance.bpea.cert.token.TokenCert"
+                                        )
+                                        parameterCount = 5
+                                    }?.self
+                            if (copyFileMethod == null || getStorageDirMethod == null || getExternalStorageDirectoryMethod == null ||
+                                getImageUriMethod == null
+                            ) {
+                                YLog.error(
+                                    "$TAG: Unable to populate ${this::class.simpleName} config, possibly due to unfound obfuscated methods"
+                                )
+                                return@uGFileUtilsKt
+                            }
 
-                        class_ =
-                            class_ {
-                                name = ugFileUtilsClsName
-                            }
-                        this.context =
-                            field {
-                                name = "context"
-                            }
-                        copyFile =
-                            method {
-                                name = copyFileMethod.name
-                                parameters =
-                                    MethodKt.parameters {
-                                        values.clear()
-                                        copyFileMethod.parameterTypes.forEach { paramType ->
-                                            values.add(paramType.name)
+                            class_ =
+                                class_ {
+                                    name = ugFileUtilsClsName
+                                }
+                            this.context =
+                                field {
+                                    name = "context"
+                                }
+                            copyFile =
+                                method {
+                                    name = copyFileMethod.name
+                                    parameters =
+                                        MethodKt.parameters {
+                                            values.clear()
+                                            copyFileMethod.parameterTypes.forEach { paramType ->
+                                                values.add(paramType.name)
+                                            }
                                         }
-                                    }
-                            }
-                        getStorageDir =
-                            method {
-                                name = getStorageDirMethod.name
-                                parameters =
-                                    MethodKt.parameters {
-                                        values.clear()
-                                        getStorageDirMethod.parameterTypes.forEach { paramType ->
-                                            values.add(paramType.name)
+                                }
+                            getStorageDir =
+                                method {
+                                    name = getStorageDirMethod.name
+                                    parameters =
+                                        MethodKt.parameters {
+                                            values.clear()
+                                            getStorageDirMethod.parameterTypes.forEach { paramType ->
+                                                values.add(paramType.name)
+                                            }
                                         }
-                                    }
-                            }
-                        getExternalStorageDir =
-                            method {
-                                name = getExternalStorageDirectoryMethod.name
-                                parameters =
-                                    MethodKt.parameters {
-                                        values.clear()
-                                        getExternalStorageDirectoryMethod.parameterTypes.forEach { paramType ->
-                                            values.add(paramType.name)
+                                }
+                            getExternalStorageDir =
+                                method {
+                                    name = getExternalStorageDirectoryMethod.name
+                                    parameters =
+                                        MethodKt.parameters {
+                                            values.clear()
+                                            getExternalStorageDirectoryMethod.parameterTypes.forEach { paramType ->
+                                                values.add(paramType.name)
+                                            }
                                         }
-                                    }
-                            }
-                        getImageUri =
-                            method {
-                                name = getImageUriMethod.name
-                                parameters =
-                                    MethodKt.parameters {
-                                        values.clear()
-                                        getImageUriMethod.parameterTypes.forEach { paramType ->
-                                            values.add(paramType.name)
+                                }
+                            getImageUri =
+                                method {
+                                    name = getImageUriMethod.name
+                                    parameters =
+                                        MethodKt.parameters {
+                                            values.clear()
+                                            getImageUriMethod.parameterTypes.forEach { paramType ->
+                                                values.add(paramType.name)
+                                            }
                                         }
-                                    }
-                            }
+                                }
+                        }.onFailure {
+                            YLog.error("$TAG: Unable to populate config", it)
+                        }
                     }
 
                 tokenCert =
