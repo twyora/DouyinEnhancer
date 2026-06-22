@@ -20,7 +20,8 @@ A small Xposed module that adds quality-of-life features to Douyin.
 - Save playing content to album
 - Save favorited emojis to album
 - Module settings UI
-- Cache obfuscated method lookup results for faster host app startup
+- Clear-screen playback without hiding danmaku
+- [x] Cache obfuscated method lookup results for faster host app startup
 
 ## Usage
 
@@ -41,3 +42,4 @@ A small Xposed module that adds quality-of-life features to Douyin.
 - [Gropify](https://github.com/HighCapable/Gropify) for managing build configuration
 - [gif.kt](https://github.com/shaksternano/gif.kt) for GIF encoding and decoding
 - [RestoreSplashScreen](https://github.com/GSWXXN/RestoreSplashScreen) for being the core inspiration for this project, with deep references in build configurations, hook logic organization, Android CI setups, and so on.
+- Thanks to [BiliRoaming](https://github.com/yujincheng08/BiliRoaming) for providing the approach to caching obfuscated method lookup results
