@@ -50,6 +50,7 @@ object HookEntry : IYukiHookXposedInit {
                         DouyinPackage(appClassLoader!!, context)
                         loadApp(hooker = CommentImageHooker)
                         loadApp(hooker = CommentEmojiHooker)
+                        loadApp(hooker = SettingsHooker)
                     }
                 }
         }
