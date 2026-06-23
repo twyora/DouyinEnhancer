@@ -112,7 +112,7 @@ message CommentImageSaveHelper{
 
 message CommonItemView{
   optional Class  class             = 1;
-  optional Method set_text_left     = 2;
+  optional Method set_left_text     = 2;
   optional Method set_right_ui_mode = 3;
   optional Method set_left_icon     = 4;
   optional Method set_right_text    = 5;

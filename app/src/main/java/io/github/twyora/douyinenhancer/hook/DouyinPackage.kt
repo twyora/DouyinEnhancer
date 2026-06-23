@@ -280,12 +280,12 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
                 ?.toClass(classLoader)
         }
 
-        fun setTextLeft() = Method(
-            hookInfo.commonItemView.setTextLeft.nameOrNull,
-            hookInfo.commonItemView.setTextLeft.parameters.valuesListOrNull
+        fun setLeftText() = Method(
+            hookInfo.commonItemView.setLeftText.nameOrNull,
+            hookInfo.commonItemView.setLeftText.parameters.valuesListOrNull
         )
 
-        fun setRightUiMode() = Method(
+        fun setRightUIMode() = Method(
             hookInfo.commonItemView.setRightUiMode.nameOrNull,
             hookInfo.commonItemView.setRightUiMode.parameters.valuesListOrNull
         )
@@ -987,8 +987,8 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
                     class_ = class_ {
                         name = "com.bytedance.ies.dmt.ui.common.views.CommonItemView"
                     }
-                    setTextLeft = method {
-                        name = "setTextLeft"
+                    setLeftText = method {
+                        name = "setLeftText"
                         parameters = MethodKt.parameters {
                             values.clear()
                             values.add("java.lang.CharSequence")
