@@ -10,6 +10,8 @@ import com.highcapable.yukihookapi.hook.log.YLog
 import io.github.twyora.douyinenhancer.hook.utils.getField
 import io.github.twyora.douyinenhancer.hook.utils.invokeMethod
 import io.github.twyora.douyinenhancer.hook.utils.resolveMethod
+import io.github.twyora.douyinenhancer.R
+import io.github.twyora.douyinenhancer.ui.SettingDialog
 
 object SettingsHooker : YukiBaseHooker() {
     private val TAG = this::class.simpleName
@@ -22,6 +24,11 @@ object SettingsHooker : YukiBaseHooker() {
                 packageInstance.douYinSettingNewVersionActivity.onResume()
             )?.hook {
                 after {
+                    val currentActivity = instance as? Activity ?: run {
+                        YLog.error("$TAG: instance is not an Activity")
+                        return@after
+                    }
+
                     val settingsScrollView = instance.getField<ViewGroup?>(
                         packageInstance.douYinSettingNewVersionActivity.settingsScrollView()
                     ) ?: run {
@@ -57,15 +64,11 @@ object SettingsHooker : YukiBaseHooker() {
 
                     dyEnhancerCommonItemView.invokeMethod<Unit>(
                         packageInstance.commonItemView.setLeftText(),
-                        "Douyin Enhancer"
+                        moduleAppResources.getString(R.string.app_name)
                     )
                     dyEnhancerCommonItemView.invokeMethod<Unit>(
                         packageInstance.commonItemView.setRightUIMode(),
                         0
-                    )
-                    dyEnhancerCommonItemView.invokeMethod<Unit>(
-                        packageInstance.commonItemView.setRightText(),
-                        "点击进入"
                     )
                     dyEnhancerCommonItemView.layoutParams = LinearLayout.LayoutParams(
                         ViewGroup.LayoutParams.MATCH_PARENT,
@@ -74,6 +77,7 @@ object SettingsHooker : YukiBaseHooker() {
 
                     dyEnhancerCommonItemView.setOnClickListener {
                         YLog.debug("$TAG: dyEnhancerCommonItemView clicked")
+                        SettingDialog.show(currentActivity, moduleAppResources)
                     }
 
                     logoutPanel.apply {

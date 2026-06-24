@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">抖柚</string>
+    <string name="settings_title">抖音增强 - 设置</string>
+    <string name="settings_close">关闭</string>
+    <string name="pref_comment_image">评论区图片</string>
+    <string name="pref_comment_emoji">评论区表情</string>
+</resources>

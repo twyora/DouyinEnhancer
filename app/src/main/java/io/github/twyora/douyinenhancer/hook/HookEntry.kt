@@ -9,6 +9,7 @@ import com.highcapable.yukihookapi.annotation.xposed.InjectYukiHookWithXposed
 import com.highcapable.yukihookapi.hook.factory.encase
 import com.highcapable.yukihookapi.hook.log.YLog
 import com.highcapable.yukihookapi.hook.xposed.proxy.IYukiHookXposedInit
+import io.github.twyora.douyinenhancer.config.FastKVConfigManager
 
 @InjectYukiHookWithXposed
 object HookEntry : IYukiHookXposedInit {
@@ -48,6 +49,8 @@ object HookEntry : IYukiHookXposedInit {
                         }
 
                         DouyinPackage(appClassLoader!!, context)
+                        FastKVConfigManager.init(context)
+
                         loadApp(hooker = CommentImageHooker)
                         loadApp(hooker = CommentEmojiHooker)
                         loadApp(hooker = SettingsHooker)

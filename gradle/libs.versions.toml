@@ -15,6 +15,7 @@ gifkt = "0.3.3"
 protobuf = "0.10.0"
 protobuf-lib = "4.35.1"
 spotless = "8.7.0"
+fastkv = "2.6.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -37,6 +38,7 @@ gifkt = { module = "com.shakster:gifkt", version.ref = "gifkt" }
 protobuf-javalite = { module = "com.google.protobuf:protobuf-javalite", version.ref = "protobuf-lib" }
 protobuf-kotlin-lite = { module = "com.google.protobuf:protobuf-kotlin-lite", version.ref = "protobuf-lib" }
 protobuf-protoc = { module = "com.google.protobuf:protoc", version.ref = "protobuf-lib" }
+fastkv = { module = "io.github.billywei01:fastkv", version.ref = "fastkv" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

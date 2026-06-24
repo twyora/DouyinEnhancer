@@ -33,7 +33,7 @@ android {
      */
     val isKeyStoreAvailable = try {
         gropify.keystore.path.isNotBlank() && gropify.keystore.password.isNotBlank() && gropify.key.alias.isNotBlank() &&
-            gropify.key.password.isNotBlank()
+                gropify.key.password.isNotBlank()
     } catch (_: Exception) {
         false
     }
@@ -155,6 +155,7 @@ dependencies {
     // ------------------ 底层与工具库 ------------------
     implementation(libs.luckypray.dexkit)
     implementation(libs.gifkt)
+    implementation(libs.fastkv)
     implementation(libs.protobuf.javalite)
     implementation(libs.protobuf.kotlin.lite)
 
