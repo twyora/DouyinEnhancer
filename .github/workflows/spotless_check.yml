@@ -3,11 +3,6 @@ name: Spotless Format Check
 on:
   pull_request:
     branches: [ "main" ]
-    paths:
-      - 'app/src/**'
-      - '**.gradle'
-      - '**.gradle.kts'
-      - 'gradle.properties'
 
 permissions:
     contents: read
