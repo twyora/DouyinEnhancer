@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import com.highcapable.yukihookapi.hook.entity.YukiBaseHooker
+import com.highcapable.yukihookapi.hook.factory.injectModuleAppResources
 import com.highcapable.yukihookapi.hook.log.YLog
 import io.github.twyora.douyinenhancer.R
 import io.github.twyora.douyinenhancer.hook.utils.getField
@@ -23,66 +24,67 @@ object SettingsHooker : YukiBaseHooker() {
                 packageInstance.douYinSettingNewVersionActivity.onResume()
             )?.hook {
                 after {
-                    val currentActivity = instance as? Activity ?: run {
-                        YLog.error("$TAG: instance is not an Activity")
-                        return@after
-                    }
+                    val moduleSettingsTag = "dyenhancer_settings"
+
+                    val activity = instance as? Activity ?: return@after
 
                     val settingsScrollView = instance.getField<ViewGroup?>(
                         packageInstance.douYinSettingNewVersionActivity.settingsScrollView()
                     ) ?: run {
-                        YLog.error("$TAG: settingsScrollView is null")
+                        YLog.error("$TAG: Settings scroll view field not found, cannot inject module entry")
                         return@after
                     }
 
-                    val logoutView = settingsScrollView.findViewWithTag<View?>("logout") ?: run {
-                        YLog.error("$TAG: logoutView is null")
+                    if (settingsScrollView.findViewWithTag<View>(moduleSettingsTag) != null) {
+                        YLog.debug("$TAG: Module settings entry already injected, skipping")
                         return@after
                     }
 
-                    val logoutPanel = logoutView.parent as? ViewGroup ?: run {
-                        YLog.error("$TAG: logoutPanel is null")
-                        return@after
-                    }
-
-                    if (logoutPanel.findViewWithTag<View>("dyenhancer_settings") != null) {
-                        YLog.warn("$TAG: settingsScrollView already has dyenhancer_settings")
-                        return@after
-                    }
-
-                    val dyEnhancerCommonItemView =
+                    val moduleSettingsCommonItemView =
                         packageInstance.commonItemView.selfClass?.getConstructor(Context::class.java)
                             ?.newInstance(instance) as? ViewGroup
-                    if (dyEnhancerCommonItemView == null) {
-                        YLog.warn("$TAG: dyEnhancerCommonItemView is null")
+                    if (moduleSettingsCommonItemView == null) {
+                        YLog.error("$TAG: Failed to create module settings entry")
                         return@after
                     }
 
-                    dyEnhancerCommonItemView.tag = "dyenhancer_settings"
-                    dyEnhancerCommonItemView.id = View.generateViewId()
+                    moduleSettingsCommonItemView.tag = moduleSettingsTag
+                    moduleSettingsCommonItemView.id = View.generateViewId()
 
-                    dyEnhancerCommonItemView.invokeMethod<Unit>(
-                        packageInstance.commonItemView.setLeftText(),
-                        moduleAppResources.getString(R.string.app_name)
+                    // Ensure the host app can find the module settings icon
+                    activity.injectModuleAppResources()
+                    moduleSettingsCommonItemView.invokeMethod<Unit>(
+                        packageInstance.commonItemView.setLeftTextAndIcon(),
+                        moduleAppResources.getString(R.string.app_name),
+                        R.drawable.ic_module_settings
                     )
-                    dyEnhancerCommonItemView.invokeMethod<Unit>(
+                    moduleSettingsCommonItemView.invokeMethod<Unit>(
                         packageInstance.commonItemView.setRightUIMode(),
-                        0
+                        0 // arrow mode for the right UI element
                     )
-                    dyEnhancerCommonItemView.layoutParams = LinearLayout.LayoutParams(
+                    moduleSettingsCommonItemView.layoutParams = LinearLayout.LayoutParams(
                         ViewGroup.LayoutParams.MATCH_PARENT,
                         ViewGroup.LayoutParams.WRAP_CONTENT
                     )
 
-                    dyEnhancerCommonItemView.setOnClickListener {
-                        YLog.debug("$TAG: dyEnhancerCommonItemView clicked")
-                        SettingsDialog.show(currentActivity)
+                    moduleSettingsCommonItemView.setOnClickListener {
+                        SettingsDialog.show(activity)
                     }
 
-                    logoutPanel.apply {
-                        YLog.debug("$TAG: logoutPanel child count: $childCount")
-                        addView(dyEnhancerCommonItemView, 0)
-                    }
+                    // Prefer inserting above the logout button; fallback to direct insert
+                    val targetParent = settingsScrollView
+                        .findViewWithTag<View?>("logout")
+                        ?.parent as? ViewGroup
+                        ?: (settingsScrollView.getChildAt(0) as? ViewGroup)
+                        ?: run {
+                            YLog.error("$TAG: Unable to find a suitable parent for module settings entry")
+                            return@after
+                        }
+
+                    targetParent.addView(
+                        moduleSettingsCommonItemView,
+                        0
+                    )
                 }
             }
         }

@@ -299,6 +299,11 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
             hookInfo.commonItemView.setRightText.nameOrNull,
             hookInfo.commonItemView.setRightText.parameters.valuesListOrNull
         )
+
+        fun setLeftTextAndIcon() = Method(
+            hookInfo.commonItemView.setLeftTextAndIcon.nameOrNull,
+            hookInfo.commonItemView.setLeftTextAndIcon.parameters.valuesListOrNull
+        )
     }
 
     inner class DouYinSettingNewVersionActivityModule {
@@ -1013,6 +1018,14 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
                         parameters = MethodKt.parameters {
                             values.clear()
                             values.add("java.lang.CharSequence")
+                        }
+                    }
+                    setLeftTextAndIcon = method {
+                        name = "setLeftTextAndIcon"
+                        parameters = MethodKt.parameters {
+                            values.clear()
+                            values.add("java.lang.CharSequence")
+                            values.add("int")
                         }
                     }
                 }
