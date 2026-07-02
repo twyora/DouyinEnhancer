@@ -1,8 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">抖柚</string>
-    <string name="settings_title">抖音增强 - 设置</string>
-    <string name="settings_close">关闭</string>
-    <string name="pref_comment_image">评论区图片</string>
-    <string name="pref_comment_emoji">评论区表情</string>
+
+    <string name="settings_dialog_title">抖柚</string>
+    <string name="settings_dialog_back">返回</string>
+    <string name="settings_dialog_confirm_and_restart">确定并重启客户端</string>
+    <string name="pref_category_save">保存</string>
+    <string name="pref_comment_image_title">评论图片去水印</string>
+    <string name="pref_comment_image_summary">保存无水印评论原图</string>
+    <string name="pref_comment_emoji_title">解锁表情保存</string>
+    <string name="pref_comment_emoji_summary">解除评论区表情保存限制</string>
+
 </resources>

@@ -1,17 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
-    android:title="抖柚设置">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <PreferenceCategory android:title="评论区功能">
-        <SwitchPreference
-            android:defaultValue="false"
-            android:key="comment_image"
-            android:title="评论区图片" />
+    <PreferenceCategory
+        android:key="pref_category_save"
+        android:title="@string/pref_category_save">
 
         <SwitchPreference
             android:defaultValue="false"
-            android:key="comment_emoji"
-            android:title="评论区表情" />
+            android:key="purify_comment_image"
+            android:summary="@string/pref_comment_image_summary"
+            android:title="@string/pref_comment_image_title" />
+
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="unlock_comment_emoji"
+            android:summary="@string/pref_comment_emoji_summary"
+            android:title="@string/pref_comment_emoji_title" />
     </PreferenceCategory>
 
 </PreferenceScreen>

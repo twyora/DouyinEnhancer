@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 import android.app.Activity
 import android.app.AlertDialog
 import android.content.Context
@@ -5,10 +7,11 @@ import android.os.Bundle
 import android.preference.PreferenceFragment
 import com.highcapable.yukihookapi.hook.factory.injectModuleAppResources
 import com.highcapable.yukihookapi.hook.log.YLog
-import io.fastkv.FastKV
 import io.github.twyora.douyinenhancer.R
+import io.github.twyora.douyinenhancer.config.FastKVConfigManager
 import io.github.twyora.douyinenhancer.hook.DouyinPackage
 import io.github.twyora.douyinenhancer.hook.utils.setField
+import kotlin.system.exitProcess
 
 /**
  * Settings dialog for DouyinEnhancer.
@@ -17,11 +20,11 @@ import io.github.twyora.douyinenhancer.hook.utils.setField
  */
 class SettingsDialog(context: Context) : AlertDialog.Builder(context) {
     class PrefsFragment : PreferenceFragment() {
+        @Deprecated("Deprecated in Java")
         override fun onCreate(savedInstanceState: Bundle?) {
             super.onCreate(savedInstanceState)
 
-            val fastKVSharedPref = FastKV.adapt(this.activity, "douyinenhancer_prefs")
-            preferenceManager.setField<Any?>(DouyinPackage.Field("mSharedPreferences"), fastKVSharedPref)
+            preferenceManager.setField<Any?>(DouyinPackage.Field("mSharedPreferences"), FastKVConfigManager.settings)
             preferenceManager.setField<Any?>(DouyinPackage.Field("mEditor"), null)
             addPreferencesFromResource(R.xml.prefs_setting)
         }
@@ -36,9 +39,11 @@ class SettingsDialog(context: Context) : AlertDialog.Builder(context) {
         activity.fragmentManager.executePendingTransactions()
 
         setView(prefsFragment.view)
-        setTitle("抖柚设置")
-        setNegativeButton("返回", null)
-        setPositiveButton("确定", null)
+        setTitle(context.getString(R.string.settings_dialog_title))
+        setNegativeButton(context.getString(R.string.settings_dialog_back), null)
+        setPositiveButton(context.getString(R.string.settings_dialog_confirm_and_restart)) { _, _ ->
+            restartApplication(activity)
+        }
         setOnDismissListener {
             activity.fragmentManager.beginTransaction().remove(prefsFragment).commitAllowingStateLoss()
         }
@@ -53,6 +58,15 @@ class SettingsDialog(context: Context) : AlertDialog.Builder(context) {
             }.onFailure {
                 YLog.error("$TAG: SettingDialog show failed", it)
             }
+        }
+
+        private fun restartApplication(activity: Activity) {
+            // https://stackoverflow.com/a/58530756
+            val pm = activity.packageManager
+            val intent = pm.getLaunchIntentForPackage(activity.packageName)
+            activity.finishAffinity()
+            activity.startActivity(intent)
+            exitProcess(0)
         }
     }
 }

@@ -1,7 +1,13 @@
 <resources>
     <string name="app_name">Douyin Enhancer</string>
-    <string name="settings_title">Douyin Enhancer - Settings</string>
-    <string name="settings_close">Close</string>
-    <string name="pref_comment_image">Comment Images</string>
-    <string name="pref_comment_emoji">Comment Emojis</string>
+
+    <string name="settings_dialog_title">Douyin Enhancer</string>
+    <string name="settings_dialog_back">Back</string>
+    <string name="settings_dialog_confirm_and_restart">Confirm &amp; Restart</string>
+    <string name="pref_category_save">Save</string>
+    <string name="pref_comment_image_title">Remove Watermark from Comment Images</string>
+    <string name="pref_comment_image_summary">Save watermark-free original comment images</string>
+    <string name="pref_comment_emoji_title">Unlock Emoji Saving</string>
+    <string name="pref_comment_emoji_summary">Remove comment emoji save restrictions</string>
+
 </resources>
