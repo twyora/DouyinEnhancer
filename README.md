@@ -9,6 +9,10 @@ A small Xposed module that adds quality-of-life features to Douyin.
 
 > This project is still in its early stages. Features are being added gradually — feedback and suggestions are welcome.
 
+## Tested Environment
+
+> Douyin 37.6.0
+
 ## Features
 
 - Download comment images without watermark
