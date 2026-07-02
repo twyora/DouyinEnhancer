@@ -11,7 +11,6 @@ import io.github.twyora.douyinenhancer.hook.utils.getField
 import io.github.twyora.douyinenhancer.hook.utils.invokeMethod
 import io.github.twyora.douyinenhancer.hook.utils.resolveMethod
 import io.github.twyora.douyinenhancer.R
-import io.github.twyora.douyinenhancer.ui.SettingDialog
 
 object SettingsHooker : YukiBaseHooker() {
     private val TAG = this::class.simpleName
@@ -77,7 +76,7 @@ object SettingsHooker : YukiBaseHooker() {
 
                     dyEnhancerCommonItemView.setOnClickListener {
                         YLog.debug("$TAG: dyEnhancerCommonItemView clicked")
-                        SettingDialog.show(currentActivity, moduleAppResources)
+                        SettingsDialog.show(currentActivity)
                     }
 
                     logoutPanel.apply {
