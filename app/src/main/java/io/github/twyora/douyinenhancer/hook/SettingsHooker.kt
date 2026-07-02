@@ -7,10 +7,10 @@ import android.view.ViewGroup
 import android.widget.LinearLayout
 import com.highcapable.yukihookapi.hook.entity.YukiBaseHooker
 import com.highcapable.yukihookapi.hook.log.YLog
+import io.github.twyora.douyinenhancer.R
 import io.github.twyora.douyinenhancer.hook.utils.getField
 import io.github.twyora.douyinenhancer.hook.utils.invokeMethod
 import io.github.twyora.douyinenhancer.hook.utils.resolveMethod
-import io.github.twyora.douyinenhancer.R
 
 object SettingsHooker : YukiBaseHooker() {
     private val TAG = this::class.simpleName
