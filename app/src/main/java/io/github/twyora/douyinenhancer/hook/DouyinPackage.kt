@@ -86,6 +86,8 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
     val digestUtils = DigestUtilsModule()
     val ugFileUtils = UGFileUtilsKtModule()
     val tokenCert = TokenCertModule()
+    val commonItemView = CommonItemViewModule()
+    val douYinSettingNewVersionActivity = DouYinSettingNewVersionActivityModule()
 
     inner class CommentImageStructModule {
         val selfClass by weak {
@@ -270,6 +272,54 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
             hookInfo.tokenCert.class_.nameOrNull
                 ?.toClass(classLoader)
         }
+    }
+
+    inner class CommonItemViewModule {
+        val selfClass by weak {
+            hookInfo.commonItemView.class_.nameOrNull
+                ?.toClass(classLoader)
+        }
+
+        fun setLeftText() = Method(
+            hookInfo.commonItemView.setLeftText.nameOrNull,
+            hookInfo.commonItemView.setLeftText.parameters.valuesListOrNull
+        )
+
+        fun setRightUIMode() = Method(
+            hookInfo.commonItemView.setRightUiMode.nameOrNull,
+            hookInfo.commonItemView.setRightUiMode.parameters.valuesListOrNull
+        )
+
+        fun setLeftIcon() = Method(
+            hookInfo.commonItemView.setLeftIcon.nameOrNull,
+            hookInfo.commonItemView.setLeftIcon.parameters.valuesListOrNull
+        )
+
+        fun setRightText() = Method(
+            hookInfo.commonItemView.setRightText.nameOrNull,
+            hookInfo.commonItemView.setRightText.parameters.valuesListOrNull
+        )
+
+        fun setLeftTextAndIcon() = Method(
+            hookInfo.commonItemView.setLeftTextAndIcon.nameOrNull,
+            hookInfo.commonItemView.setLeftTextAndIcon.parameters.valuesListOrNull
+        )
+    }
+
+    inner class DouYinSettingNewVersionActivityModule {
+        val selfClass by weak {
+            hookInfo.douYinSettingNewVersionActivity.class_.nameOrNull
+                ?.toClass(classLoader)
+        }
+
+        fun settingsScrollView() = Field(
+            hookInfo.douYinSettingNewVersionActivity.settingsScrollView.nameOrNull
+        )
+
+        fun onResume() = Method(
+            hookInfo.douYinSettingNewVersionActivity.onResume.nameOrNull,
+            hookInfo.douYinSettingNewVersionActivity.onResume.parameters.valuesListOrNull
+        )
     }
 
     companion object {
@@ -937,6 +987,76 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
                                 name = "com.bytedance.bpea.cert.token.TokenCert"
                             }
                     }
+
+                commonItemView = commonItemView {
+                    class_ = class_ {
+                        name = "com.bytedance.ies.dmt.ui.common.views.CommonItemView"
+                    }
+                    setLeftText = method {
+                        name = "setLeftText"
+                        parameters = MethodKt.parameters {
+                            values.clear()
+                            values.add("java.lang.CharSequence")
+                        }
+                    }
+                    setRightUiMode = method {
+                        name = "setRightUIMode"
+                        parameters = MethodKt.parameters {
+                            values.clear()
+                            values.add("int")
+                        }
+                    }
+                    setLeftIcon = method {
+                        name = "setLeftIcon"
+                        parameters = MethodKt.parameters {
+                            values.clear()
+                            values.add("int")
+                        }
+                    }
+                    setRightText = method {
+                        name = "setRightText"
+                        parameters = MethodKt.parameters {
+                            values.clear()
+                            values.add("java.lang.CharSequence")
+                        }
+                    }
+                    setLeftTextAndIcon = method {
+                        name = "setLeftTextAndIcon"
+                        parameters = MethodKt.parameters {
+                            values.clear()
+                            values.add("java.lang.CharSequence")
+                            values.add("int")
+                        }
+                    }
+                }
+
+                douYinSettingNewVersionActivity = douYinSettingNewVersionActivity {
+                    runCatching {
+                        val dySettingsNewVersionActivityClsName = "com.ss.android.ugc.aweme.setting.ui.DouYinSettingNewVersionActivity"
+                        val settingsScrollViewFieldName = dySettingsNewVersionActivityClsName.toClass(
+                            hostAppClassLoader
+                        ).resolve().firstFieldOrNull {
+                            type = "com.ss.android.ugc.aweme.setting.ui.SettingNestedScrollView"
+                        }?.self?.name
+
+                        if (settingsScrollViewFieldName == null) {
+                            YLog.error("$TAG: Unable to populate config, settingsScrollViewFieldName is null")
+                            return@runCatching
+                        }
+
+                        class_ = class_ {
+                            name = dySettingsNewVersionActivityClsName
+                        }
+                        settingsScrollView = field {
+                            name = settingsScrollViewFieldName
+                        }
+                        onResume = method {
+                            name = "onResume"
+                        }
+                    }.onFailure {
+                        YLog.error("$TAG: Unable to populate config", it)
+                    }
+                }
             }
         }
     }

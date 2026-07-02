@@ -110,6 +110,21 @@ message CommentImageSaveHelper{
   optional Method notify_result = 3;
 }
 
+message CommonItemView{
+  optional Class  class                  = 1;
+  optional Method set_left_text          = 2;
+  optional Method set_right_ui_mode      = 3;
+  optional Method set_left_icon          = 4;
+  optional Method set_right_text         = 5;
+  optional Method set_left_text_and_icon = 6;
+}
+
+message DouYinSettingNewVersionActivity{
+  optional Class  class                = 1;
+  optional Field  settings_scroll_view = 2;
+  optional Method on_resume            = 3;
+}
+
 message HookInfo {
   uint64 last_update_time    = 1;
   uint32 module_version_code = 2;
@@ -117,17 +132,19 @@ message HookInfo {
   uint32 host_version_code   = 4;
   uint32 generation          = 5;
 
-  optional CommentImageStruct        comment_image_struct          = 6;
-  optional UrlModel                  url_model                     = 7;
-  optional Comment                   comment                       = 8;
-  optional Emoji                     emoji                         = 9;
-  optional CommentActionParams       comment_action_params         = 10;
-  optional CommentLongPressItemModel comment_long_press_item_model = 11;
-  optional SaveImageActionItem       save_image_action_item        = 12;
-  optional CommentExtensionKt        comment_extension_kt          = 13;
-  optional CommentImageSaveHelper    comment_image_save_helper     = 14;
-  optional DownloadInfo              download_info                 = 15;
-  optional DigestUtils               digest_utils                  = 16;
-  optional UGFileUtilsKt             ug_file_utils                 = 17;
-  optional TokenCert                 token_cert                    = 18;
+  optional CommentImageStruct              comment_image_struct                 = 6;
+  optional UrlModel                        url_model                            = 7;
+  optional Comment                         comment                              = 8;
+  optional Emoji                           emoji                                = 9;
+  optional CommentActionParams             comment_action_params                = 10;
+  optional CommentLongPressItemModel       comment_long_press_item_model        = 11;
+  optional SaveImageActionItem             save_image_action_item               = 12;
+  optional CommentExtensionKt              comment_extension_kt                 = 13;
+  optional CommentImageSaveHelper          comment_image_save_helper            = 14;
+  optional DownloadInfo                    download_info                        = 15;
+  optional DigestUtils                     digest_utils                         = 16;
+  optional UGFileUtilsKt                   ug_file_utils                        = 17;
+  optional TokenCert                       token_cert                           = 18;
+  optional CommonItemView                  common_item_view                     = 19;
+  optional DouYinSettingNewVersionActivity dou_yin_setting_new_version_activity = 20;
 }

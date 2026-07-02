@@ -106,6 +106,10 @@ android {
         sourceCompatibility = JavaVersion.VERSION_21
         targetCompatibility = JavaVersion.VERSION_21
     }
+
+    aaptOptions {
+        additionalParameters += listOf("--package-id", "0x7E", "--allow-reserved-package-id")
+    }
 }
 
 androidComponents {
@@ -155,6 +159,7 @@ dependencies {
     // ------------------ 底层与工具库 ------------------
     implementation(libs.luckypray.dexkit)
     implementation(libs.gifkt)
+    implementation(libs.fastkv)
     implementation(libs.protobuf.javalite)
     implementation(libs.protobuf.kotlin.lite)
 
