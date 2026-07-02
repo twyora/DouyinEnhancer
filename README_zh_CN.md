@@ -9,6 +9,9 @@
 
 > 项目仍处于早期阶段，功能还在逐步完善中，欢迎反馈和建议。
 
+## 测试环境
+> 抖音 37.6.0
+
 ## 模块功能
 
 - 评论区图片无水印下载
@@ -19,8 +22,10 @@
 - 视频过滤
 - 播放内容保存到相册
 - 已收藏表情保存到相册
-- 模块设置页面
-- 缓存被混淆方法的查找结果，提升宿主启动速度
+- [x] 模块设置页面
+- 清屏播放不隐藏弹幕
+- [x] 缓存被混淆方法的查找结果，提升宿主启动速度
+- 保存评论区语音评论
 
 ## 使用方法
 
@@ -40,4 +45,5 @@
 - 使用 [KavaRef](https://github.com/HighCapable/KavaLib) 提供反射 API 支持
 - 使用 [Gropify](https://github.com/HighCapable/Gropify) 管理项目构建配置
 - 使用 [gif.kt](https://github.com/shaksternano/gif.kt) 处理 GIF 动图的编码与解码
-- [RestoreSplashScreen](https://github.com/GSWXXN/RestoreSplashScreen) 是本人初次接触 Xposed 时的启蒙模块，第一次让我领略到 Xposed 的强大，也因此成为后来开发本项目的“白月光”与灵感源泉。本项目在构建配置、Hook 代码组织、Android CI 搭建等方面大量借鉴了[迷璐](https://github.com/GSWXXN)的设计思路。
+- [RestoreSplashScreen](https://github.com/GSWXXN/RestoreSplashScreen) 是本人初次接触 Xposed 时的启蒙模块，第一次让我领略到 Xposed 的强大，也因此成为后来开发本项目的“白月光”与灵感源泉。本项目在构建配置、Hook 代码组织、Android CI 搭建等方面大量借鉴了[迷璐](https://github.com/GSWXXN)的设计思路
+- 感谢 [BiliRoaming](https://github.com/yujincheng08/BiliRoaming) 为本项目缓存混淆方法查找结果的实现提供思路
