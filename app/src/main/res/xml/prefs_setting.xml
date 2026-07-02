@@ -18,4 +18,33 @@
             android:title="@string/pref_comment_emoji_title" />
     </PreferenceCategory>
 
+    <PreferenceCategory
+        android:key="pref_category_about"
+        android:title="@string/pref_category_about">
+
+        <Preference
+            android:key="version"
+            android:title="@string/pref_about_version_title"
+            android:summary="@string/pref_about_version_summary" />
+
+        <Preference
+            android:key="author"
+            android:title="@string/pref_about_author_title"
+            android:summary="@string/pref_about_author_summary">
+            <intent
+                android:action="android.intent.action.VIEW"
+                android:data="@string/author_url" />
+        </Preference>
+
+        <Preference
+            android:key="repository"
+            android:title="@string/pref_about_repository_title"
+            android:summary="@string/pref_about_repository_summary">
+            <intent
+                android:action="android.intent.action.VIEW"
+                android:data="@string/repository_url" />
+        </Preference>
+
+    </PreferenceCategory>
+
 </PreferenceScreen>

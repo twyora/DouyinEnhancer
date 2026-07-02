@@ -9,6 +9,7 @@ import com.highcapable.yukihookapi.hook.factory.injectModuleAppResources
 import com.highcapable.yukihookapi.hook.log.YLog
 import io.github.twyora.douyinenhancer.R
 import io.github.twyora.douyinenhancer.config.FastKVConfigManager
+import io.github.twyora.douyinenhancer.generated.AppProperties
 import io.github.twyora.douyinenhancer.hook.DouyinPackage
 import io.github.twyora.douyinenhancer.hook.utils.setField
 import kotlin.system.exitProcess
@@ -27,6 +28,8 @@ class SettingsDialog(context: Context) : AlertDialog.Builder(context) {
             preferenceManager.setField<Any?>(DouyinPackage.Field("mSharedPreferences"), FastKVConfigManager.settings)
             preferenceManager.setField<Any?>(DouyinPackage.Field("mEditor"), null)
             addPreferencesFromResource(R.xml.prefs_setting)
+
+            findPreference("version")?.summary = AppProperties.PROJECT_VERSION_NAME
         }
     }
 
