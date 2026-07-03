@@ -88,6 +88,9 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
     val tokenCert = TokenCertModule()
     val commonItemView = CommonItemViewModule()
     val douYinSettingNewVersionActivity = DouYinSettingNewVersionActivityModule()
+    val user = UserModule()
+    val aweme = AwemeModule()
+    val feedResponseHandler = FeedResponseHandlerModule()
 
     inner class CommentImageStructModule {
         val selfClass by weak {
@@ -319,6 +322,52 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
         fun onResume() = Method(
             hookInfo.douYinSettingNewVersionActivity.onResume.nameOrNull,
             hookInfo.douYinSettingNewVersionActivity.onResume.parameters.valuesListOrNull
+        )
+    }
+
+    inner class UserModule {
+        val selfClass by weak {
+            hookInfo.user.class_.nameOrNull
+                ?.toClass(classLoader)
+        }
+
+        fun nickname() = Field(hookInfo.user.nickname.nameOrNull)
+        fun uid() = Field(hookInfo.user.uid.nameOrNull)
+    }
+
+    inner class AwemeModule {
+        val selfClass by weak {
+            hookInfo.aweme.class_.nameOrNull
+                ?.toClass(classLoader)
+        }
+
+        fun desc() = Field(hookInfo.aweme.desc.nameOrNull)
+
+        fun author() = Field(hookInfo.aweme.author.nameOrNull)
+
+        fun getAd() = Method(
+            hookInfo.aweme.getAd.nameOrNull,
+            hookInfo.aweme.getAd.parameters.valuesListOrNull
+        )
+        fun itemTitle() = Field(hookInfo.aweme.itemTitle.nameOrNull)
+
+        fun duration() = Field(hookInfo.aweme.duration.nameOrNull)
+
+        fun isNormalVideo() = Method(
+            hookInfo.aweme.isNormalVideo.nameOrNull,
+            hookInfo.aweme.isNormalVideo.parameters.valuesListOrNull
+        )
+    }
+
+    inner class FeedResponseHandlerModule {
+        val selfClass by weak {
+            hookInfo.feedResponseHandler.class_.nameOrNull
+                ?.toClass(classLoader)
+        }
+
+        fun processAwemeList() = Method(
+            hookInfo.feedResponseHandler.processAwemeList.nameOrNull,
+            hookInfo.feedResponseHandler.processAwemeList.parameters.valuesListOrNull
         )
     }
 
@@ -1052,6 +1101,94 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
                         }
                         onResume = method {
                             name = "onResume"
+                        }
+                    }.onFailure {
+                        YLog.error("$TAG: Unable to populate config", it)
+                    }
+                }
+
+                user = user {
+                    class_ = class_ {
+                        name = "com.ss.android.ugc.aweme.profile.model.User"
+                    }
+                    nickname = field {
+                        name = "nickname"
+                    }
+                    uid = field {
+                        name = "uid"
+                    }
+                }
+
+                aweme = aweme {
+                    class_ = class_ {
+                        name = "com.ss.android.ugc.aweme.feed.model.Aweme"
+                    }
+                    desc = field {
+                        name = "desc"
+                    }
+                    author = field {
+                        name = "author"
+                    }
+                    getAd = method {
+                        name = "getAd"
+                    }
+                    itemTitle = field {
+                        name = "itemTitle"
+                    }
+                    duration = field {
+                        name = "duration"
+                    }
+                    isNormalVideo = method {
+                        name = "isNormalVideo"
+                    }
+                }
+
+                feedResponseHandler = feedResponseHandler {
+                    runCatching {
+                        bridge.findMethod {
+                            matcher {
+                                modifiers = Modifier.PUBLIC + Modifier.STATIC
+                                returnType = "void"
+                                params {
+                                    add("int")
+                                    add("java.lang.String")
+                                    add("java.util.List")
+                                }
+                                invokeMethods {
+                                    add {
+                                        descriptor = "Ljava/util/List;->size()I"
+                                    }
+                                    add {
+                                        descriptor = "Lcom/ss/android/ugc/aweme/feed/model/Aweme;->setRequestId(Ljava/lang/String;)V"
+                                    }
+                                    add {
+                                        descriptor = "Lcom/ss/android/ugc/aweme/feed/model/Aweme;->getAd()Z"
+                                    }
+                                    add {
+                                        descriptor =
+                                            "Lcom/ss/android/ugc/aweme/awemeservice/api/IAwemeService;->updateAweme(Lcom/ss/android/ugc/aweme/feed/model/Aweme;I)Lcom/ss/android/ugc/aweme/feed/model/Aweme;"
+                                    }
+                                    add {
+                                        descriptor = "Lcom/ss/android/ugc/aweme/feed/model/Aweme;->isLive()Z"
+                                    }
+                                }
+                            }
+                        }.singleOrNull()?.also { match ->
+                            class_ = class_ {
+                                name = match.className
+                            }
+                            processAwemeList = method {
+                                name = match.methodName
+                                parameters = MethodKt.parameters {
+                                    values.clear()
+                                    values.addAll(match.paramTypeNames)
+                                }
+                            }
+                        } ?: run {
+                            YLog.error(
+                                "$TAG: Unable to populate ${this::class.simpleName} config, possibly due to unfound obfuscated methods"
+                            )
+                            return@feedResponseHandler
                         }
                     }.onFailure {
                         YLog.error("$TAG: Unable to populate config", it)

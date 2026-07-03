@@ -1,124 +1,108 @@
-package com.yst.mkga.hook.dy.hook
+package io.github.twyora.douyinenhancer.hook
 
-import com.highcapable.kavaref.KavaRef.Companion.resolve
-import com.highcapable.yukihookapi.hook.core.YukiMemberHookCreator
 import com.highcapable.yukihookapi.hook.entity.YukiBaseHooker
 import com.highcapable.yukihookapi.hook.log.YLog
-import java.lang.reflect.Field
-import java.lang.reflect.Method
-import java.lang.reflect.Modifier
-import kotlin.random.Random
-import org.json.JSONObject
-import org.luckypray.dexkit.DexKitBridge
+import io.github.twyora.douyinenhancer.config.FastKVConfigManager
+import io.github.twyora.douyinenhancer.hook.utils.getField
+import io.github.twyora.douyinenhancer.hook.utils.invokeMethod
+import io.github.twyora.douyinenhancer.hook.utils.resolveMethod
 
 object FeedHooker : YukiBaseHooker() {
     private val TAG = this::class.simpleName
 
-    private val AwemeClass by lazyClass("com.ss.android.ugc.aweme.feed.model.Aweme")
-    private val AwemeClassGetAdMethod: Method by lazy {
-        AwemeClass.resolve().firstMethod {
-            name = "getAd"
-        }.self.apply {
-            isAccessible = true
-        }
+    private val hideAdNeeded by lazy {
+        FastKVConfigManager.settings.getBoolean("recommended_feed_filter_hide_ad", false)
     }
-    private val AwemeClassDescriptionField: Field by lazy {
-        AwemeClass.resolve().firstField {
-            name = "desc"
-        }.self.apply {
-            isAccessible = true
-        }
+
+    private val hideShortDurationLimit by lazy {
+        FastKVConfigManager.settings.getInt("recommended_feed_filter_hide_short_duration_limit", 0)
     }
-    private val AwemeClassAuthorField: Field by lazy {
-        AwemeClass.resolve().firstField {
-            name = "author"
-        }.self.apply {
-            isAccessible = true
+    private val hideLongDurationLimit by lazy {
+        FastKVConfigManager.settings.getInt("recommended_feed_filter_hide_long_duration_limit", 0)
+    }
+
+    private val kwdFilterTitleRegexMode by lazy {
+        FastKVConfigManager.settings.getBoolean("recommended_feed_filter_title_regex_mode", false)
+    }
+    private val kwdFilterTitleRegexes by lazy {
+        val titleList = FastKVConfigManager.settings.getStringSet("recommended_feed_filter_group_aweme_title", null)
+        if (kwdFilterTitleRegexMode) {
+            titleList?.map {
+                it.toRegex()
+            }
+        } else {
+            titleList?.map {
+                Regex.escape(it).toRegex()
+            }
         }
     }
 
-    private val UserClass by lazyClass("com.ss.android.ugc.aweme.profile.model.User")
-    private val UserClassNickNameField: Field by lazy {
-        UserClass.resolve().firstField {
-            name = "nickname"
-        }.self.apply {
-            isAccessible = true
+    private val kwdFilterAuthorUid by lazy {
+        FastKVConfigManager.settings.getStringSet("recommended_feed_filter_group_author_uid", null)
+    }
+
+    private val kwdFilterAuthorNicknames by lazy {
+        FastKVConfigManager.settings.getStringSet("recommended_feed_filter_group_author_nickname", null)
+    }
+
+    private val kwdFilterDescRegexMode by lazy {
+        FastKVConfigManager.settings.getBoolean("recommended_feed_filter_desc_regex_mode", false)
+    }
+    private val kwdFilterDescRegexes by lazy {
+        val descList = FastKVConfigManager.settings.getStringSet("recommended_feed_filter_group_aweme_desc", null)
+        if (kwdFilterDescRegexMode) {
+            descList?.map { it.toRegex() }
+        } else {
+            descList?.map { Regex.escape(it).toRegex() }
         }
     }
 
     override fun onHook() {
+        val packageInstance = DouyinPackage.instance
+
         withProcess(mainProcessName) {
-            DexKitBridge.create(this.appInfo.sourceDir).use { bridge ->
-                installFeedHook(bridge)
-            }
-        }
-    }
-
-    private fun installFeedHook(bridge: DexKitBridge): YukiMemberHookCreator.MemberHookCreator.Result? {
-        var ret: YukiMemberHookCreator.MemberHookCreator.Result? = null
-
-        bridge.findMethod {
-            matcher {
-                modifiers = Modifier.PUBLIC + Modifier.STATIC
-                returnType = "void"
-                params {
-                    add("int")
-                    add("java.lang.String")
-                    add("java.util.List")
-                }
-                invokeMethods {
-                    add {
-                        descriptor = "Ljava/util/List;->size()I"
-                    }
-                    add {
-                        descriptor = "Lcom/ss/android/ugc/aweme/feed/model/Aweme;->setRequestId(Ljava/lang/String;)V"
-                    }
-                    add {
-                        descriptor = "Lcom/ss/android/ugc/aweme/feed/model/Aweme;->getAd()Z"
-                    }
-                    add {
-                        descriptor =
-                            "Lcom/ss/android/ugc/aweme/awemeservice/api/IAwemeService;->updateAweme(Lcom/ss/android/ugc/aweme/feed/model/Aweme;I)Lcom/ss/android/ugc/aweme/feed/model/Aweme;"
-                    }
-                    add {
-                        descriptor = "Lcom/ss/android/ugc/aweme/feed/model/Aweme;->isLive()Z"
-                    }
-                }
-            }
-        }.singleOrNull()?.also { match ->
-            YLog.info("$TAG: Target method found: ${match.className}.${match.methodName}")
-
-            match.className.toClass().resolve().firstMethod {
-                name = match.methodName
-            }.hook {
+            packageInstance.feedResponseHandler.selfClass?.resolveMethod(
+                packageInstance.feedResponseHandler.processAwemeList()
+            )?.hook {
                 before {
-                    val awemeList = args[2] as? List<*> ?: return@before
-                    if (awemeList !is MutableList<*>) {
-                        YLog.error("$TAG: awemeList is not MutableList, cannot remove items")
-                        return@before
-                    }
+                    val awemeList = args[2] as? MutableList<*> ?: return@before
 
                     val iter = awemeList.iterator()
                     while (iter.hasNext()) {
-                        val awemeObj = iter.next()
+                        val awemeObj = iter.next() ?: continue
 
-                        val awemeDesc = AwemeClassDescriptionField.get(awemeObj) as? String ?: continue
-                        if (awemeDesc.isNotEmpty() && awemeDesc.contains("我")) {
-                            val awemeAuthor = AwemeClassAuthorField.get(awemeObj)
-                            val awemeAuthorNickName = if (awemeAuthor != null) {
-                                UserClassNickNameField.get(awemeAuthor) as? String ?: "unknown"
-                            } else {
-                                "unknown"
+                        if (hideAdNeeded && awemeObj.invokeMethod<Boolean?>(packageInstance.aweme.getAd()) == true) {
+                            YLog.debug("$TAG: filtered ad")
+                            iter.remove()
+                            continue
+                        } else if (run {
+                                if (awemeObj.invokeMethod<Boolean?>(
+                                        packageInstance.aweme.isNormalVideo()
+                                    ) == false
+                                ) {
+                                    return@run false
+                                }
+
+                                val duration = awemeObj.getField<Int?>(
+                                    packageInstance.aweme.duration()
+                                ) ?: return@run false
+
+                                if(duration==0){
+                                        return@run false
+                                }
+                                duration !in (hideShortDurationLimit + 1) until hideLongDurationLimit
                             }
-                            YLog.warn(
-                                "$TAG: Aweme desc contains specific word, author name: $awemeAuthorNickName, aweme description: $awemeDesc, removing from aweme list"
-                            )
+                        ) {
+                            YLog.debug("$TAG: filtered by duration")
+                            iter.remove()
+                            continue
+                        } else if (isContainsBlockKwd(awemeObj)) {
                             iter.remove()
                             continue
                         }
                     }
                 }
-            }.result {
+            }?.result {
                 onConductFailure { param, throwable ->
                     YLog.error("$TAG: Feed hook runtime error", throwable)
                 }
@@ -127,14 +111,64 @@ object FeedHooker : YukiBaseHooker() {
                 }
                 onHooked {
                     YLog.info("$TAG: Feed hook installed")
-                }.also {
-                    ret = it
                 }
             }
-        } ?: run {
-            YLog.error("$TAG: Target method not found, feed hook will not be installed")
+        }
+    }
+
+    private fun isContainsBlockKwd(aweme: Any): Boolean {
+        val packageInstance = DouyinPackage.instance
+
+        val titleRegexes = kwdFilterTitleRegexes
+        if (!titleRegexes.isNullOrEmpty()) {
+            val title = aweme.getField<String?>(
+                packageInstance.aweme.itemTitle()
+            )
+            if (!title.isNullOrBlank() && titleRegexes.any {
+                    title.contains(it)
+                }
+            ) {
+                YLog.debug("$TAG: filtered by title: $title")
+                return true
+            }
         }
 
-        return ret
+        val uidFilters = kwdFilterAuthorUid
+        if (!uidFilters.isNullOrEmpty()) {
+            val authorObj = aweme.getField<Any?>(packageInstance.aweme.author())
+            if (authorObj != null) {
+                val uid = authorObj.getField<String?>(packageInstance.user.uid())
+                if (uid != null && uid in uidFilters) {
+                    YLog.debug("$TAG: filtered by author uid: $uid")
+                    return true
+                }
+            }
+        }
+
+        val nicknameFilters = kwdFilterAuthorNicknames
+        if (!nicknameFilters.isNullOrEmpty()) {
+            val authorObj = aweme.getField<Any?>(packageInstance.aweme.author())
+            if (authorObj != null) {
+                val nickname = authorObj.getField<String?>(packageInstance.user.nickname())
+                if (!nickname.isNullOrBlank() && nickname in nicknameFilters) {
+                    YLog.debug("$TAG: filtered by author nickname: $nickname")
+                    return true
+                }
+            }
+        }
+
+        val descRegexes = kwdFilterDescRegexes
+        if (!descRegexes.isNullOrEmpty()) {
+            val desc = aweme.getField<String?>(packageInstance.aweme.desc())
+            if (!desc.isNullOrBlank() && descRegexes.any {
+                    desc.contains(it)
+                }
+            ) {
+                YLog.debug("$TAG: filtered by desc: $desc")
+                return true
+            }
+        }
+
+        return false
     }
 }

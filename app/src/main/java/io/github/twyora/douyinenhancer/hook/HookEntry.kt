@@ -51,9 +51,10 @@ object HookEntry : IYukiHookXposedInit {
                         DouyinPackage(appClassLoader!!, context)
                         FastKVConfigManager.init(context)
 
+                        loadApp(hooker = SettingsHooker)
                         loadApp(hooker = CommentImageHooker)
                         loadApp(hooker = CommentEmojiHooker)
-                        loadApp(hooker = SettingsHooker)
+                        loadApp(hooker = FeedHooker)
                     }
                 }
         }

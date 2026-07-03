@@ -125,6 +125,27 @@ message DouYinSettingNewVersionActivity{
   optional Method on_resume            = 3;
 }
 
+message User {
+  optional Class class    = 1;
+  optional Field nickname = 2;
+  optional Field uid      = 3;
+}
+
+message Aweme {
+  optional Class  class           = 1;
+  optional Field  desc            = 2;
+  optional Field  author          = 3;
+  optional Method get_ad          = 4;
+  optional Field  item_title      = 5;
+  optional Field  duration        = 6;
+  optional Method is_normal_video = 7;
+}
+
+message FeedResponseHandler {
+  optional Class  class            = 1;
+  optional Method processAwemeList = 2;
+}
+
 message HookInfo {
   uint64 last_update_time    = 1;
   uint32 module_version_code = 2;
@@ -147,4 +168,7 @@ message HookInfo {
   optional TokenCert                       token_cert                           = 18;
   optional CommonItemView                  common_item_view                     = 19;
   optional DouYinSettingNewVersionActivity dou_yin_setting_new_version_activity = 20;
+  optional User                            user                                 = 21;
+  optional Aweme                           aweme                                = 22;
+  optional FeedResponseHandler             feed_response_handler                = 23;
 }
