@@ -19,6 +19,13 @@
     </PreferenceCategory>
 
     <PreferenceCategory
+        android:title="推荐">
+        <Preference
+            android:key="recommend_feed_filter"
+            android:title="推荐视频流过滤器"/>
+    </PreferenceCategory>
+
+    <PreferenceCategory
         android:key="pref_category_about"
         android:title="@string/pref_category_about">
 
