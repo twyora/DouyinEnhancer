@@ -1,0 +1,27 @@
+name: Spotless Format Check
+
+on:
+  pull_request:
+    branches: [ "main" ]
+
+permissions:
+    contents: read
+
+jobs:
+  spotless:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v6
+        with:
+          submodules: true
+
+      - name: Setup Java JDK
+        uses: actions/setup-java@v5.2.0
+        with:
+          java-version: "21"
+          distribution: "temurin"
+
+      - name: Run Spotless Check
+        run: bash ./gradlew spotlessCheck

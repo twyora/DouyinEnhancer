@@ -12,6 +12,10 @@ kavaref-core = "1.0.3"
 kavaref-extension = "1.0.3"
 dexkit = "2.2.0"
 gifkt = "0.3.3"
+protobuf = "0.10.0"
+protobuf-lib = "4.35.1"
+spotless = "8.7.0"
+fastkv = "2.6.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -31,9 +35,14 @@ kavaref-extension = { module = "com.highcapable.kavaref:kavaref-extension", vers
 xposed-api = { module = "de.robv.android.xposed:api", version = "82" }
 luckypray-dexkit = { group = "org.luckypray", name = "dexkit", version.ref = "dexkit" }
 gifkt = { module = "com.shakster:gifkt", version.ref = "gifkt" }
+protobuf-javalite = { module = "com.google.protobuf:protobuf-javalite", version.ref = "protobuf-lib" }
+protobuf-kotlin-lite = { module = "com.google.protobuf:protobuf-kotlin-lite", version.ref = "protobuf-lib" }
+protobuf-protoc = { module = "com.google.protobuf:protoc", version.ref = "protobuf-lib" }
+fastkv = { module = "io.github.billywei01:fastkv", version.ref = "fastkv" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 # 作为 Xposed 模块使用务必添加，其它情况可选
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
-
+protobuf = { id = "com.google.protobuf", version.ref = "protobuf" }
+spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }

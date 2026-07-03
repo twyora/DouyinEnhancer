@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">抖柚</string>
+
+    <string name="settings_dialog_title">抖柚</string>
+    <string name="settings_dialog_back">返回</string>
+    <string name="settings_dialog_confirm_and_restart">确定并重启客户端</string>
+    <string name="pref_category_save">保存</string>
+    <string name="pref_comment_image_title">评论图片去水印</string>
+    <string name="pref_comment_image_summary">保存无水印评论原图</string>
+    <string name="pref_comment_emoji_title">解锁表情保存</string>
+    <string name="pref_comment_emoji_summary">解除评论区表情保存限制</string>
+
+    <string name="pref_category_about">关于</string>
+    <string name="pref_about_version_title">版本</string>
+    <string name="pref_about_version_summary">0.0.1</string>
+    <string name="pref_about_author_title">作者</string>
+    <string name="pref_about_author_summary">twyora</string>
+    <string name="pref_about_repository_title">仓库地址</string>
+    <string name="pref_about_repository_summary">欢迎 Star 和反馈</string>
+
+</resources>

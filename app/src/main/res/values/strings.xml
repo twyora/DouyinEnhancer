@@ -1,3 +1,22 @@
 <resources>
-    <string name="app_name">抖柚</string>
+    <string name="app_name">Douyin Enhancer</string>
+
+    <string name="settings_dialog_title">Douyin Enhancer</string>
+    <string name="settings_dialog_back">Back</string>
+    <string name="settings_dialog_confirm_and_restart">Confirm &amp; Restart</string>
+
+    <string name="pref_category_save">Save</string>
+    <string name="pref_comment_image_title">Remove Watermark from Comment Images</string>
+    <string name="pref_comment_image_summary">Save watermark-free original comment images</string>
+    <string name="pref_comment_emoji_title">Unlock Emoji Saving</string>
+    <string name="pref_comment_emoji_summary">Remove comment emoji save restrictions</string>
+
+    <string name="pref_category_about">About</string>
+    <string name="pref_about_version_title">Version</string>
+    <string name="pref_about_version_summary">0.0.1</string>
+    <string name="pref_about_author_title">Author</string>
+    <string name="pref_about_author_summary">twyora</string>
+    <string name="pref_about_repository_title">Repository</string>
+    <string name="pref_about_repository_summary">Welcome Star and Feedback</string>
+
 </resources>

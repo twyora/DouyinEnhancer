@@ -1,0 +1,150 @@
+syntax = "proto3";
+
+package io.github.twyora.douyinenhancer.hook;
+
+option java_package = "io.github.twyora.douyinenhancer.hook";
+option java_outer_classname = "Configs";
+option optimize_for = LITE_RUNTIME;
+
+message Class {
+  optional string name = 1;
+}
+
+message Method {
+  optional string name = 1;
+
+  message Parameters {
+    repeated string values = 1;
+  }
+  optional Parameters parameters = 2;
+}
+
+message Field {
+  optional string name = 1;
+}
+
+message Comment {
+  optional Class class      = 1;
+  optional Field emoji      = 2;
+  optional Field image_list = 3;
+}
+
+message CommentImageStruct {
+  optional Class  class            = 1;
+  optional Field  origin_url       = 2;
+  optional Field  download_url     = 3;
+  optional Method get_download_url = 4;
+}
+
+message Emoji {
+  optional Class  class       = 1;
+  optional Method animate_url = 2;
+}
+
+message UrlModel {
+  optional Class class    = 1;
+  optional Field url_list = 2;
+}
+
+message CommentActionParams {
+  optional Class class       = 1;
+  optional Field comment     = 2;
+  optional Field image_index = 3;
+}
+
+message CommentLongPressItemModel {
+  optional Class class                 = 1;
+  optional Field comment_action_params = 2;
+}
+
+message SaveImageActionItemOnClickExecutor{
+  optional Class  class    = 1;
+  optional Method on_click = 2;
+}
+
+message SaveImageActionItem {
+  optional Class                              class                  = 1;
+  optional Field                              cmt_action_params      = 2;
+  optional Field                              save_img_action_params = 3;
+  optional SaveImageActionItemOnClickExecutor on_click_executor      = 4;
+}
+
+message TokenCert{
+  optional Class class = 1;
+}
+
+message DigestUtils{
+  optional Class  class   = 1;
+  optional Method md5_hex = 2;
+}
+
+message DownloadInfo {
+  optional Class  class                = 1;
+  optional Field  url                  = 2;
+  optional Method get_target_file_path = 3;
+}
+
+message UGFileUtilsKt {
+  optional Class  class                    = 1;
+  optional Field  context                  = 2;
+  optional Method copy_file                = 3;
+  optional Method get_storage_dir          = 4;
+  optional Method get_external_storage_dir = 5;
+  optional Method get_image_uri            = 6;
+  optional Method create_uri               = 7;
+}
+
+message CommentExtensionKt{
+  optional Class  class               = 1;
+  optional Method has_valid_image_url = 2;
+}
+
+message CmtSaveToAlbumBtnClickedCallback{
+  optional Class  class            = 1;
+  optional Method clicked_callback = 2;
+}
+
+message CommentImageSaveHelper{
+  optional Class  class         = 1;
+  optional Method on_successed  = 2;
+  optional Method notify_result = 3;
+}
+
+message CommonItemView{
+  optional Class  class                  = 1;
+  optional Method set_left_text          = 2;
+  optional Method set_right_ui_mode      = 3;
+  optional Method set_left_icon          = 4;
+  optional Method set_right_text         = 5;
+  optional Method set_left_text_and_icon = 6;
+}
+
+message DouYinSettingNewVersionActivity{
+  optional Class  class                = 1;
+  optional Field  settings_scroll_view = 2;
+  optional Method on_resume            = 3;
+}
+
+message HookInfo {
+  uint64 last_update_time    = 1;
+  uint32 module_version_code = 2;
+  string module_version_name = 3;
+  uint32 host_version_code   = 4;
+  uint32 generation          = 5;
+
+  optional CommentImageStruct              comment_image_struct                 = 6;
+  optional UrlModel                        url_model                            = 7;
+  optional Comment                         comment                              = 8;
+  optional Emoji                           emoji                                = 9;
+  optional CommentActionParams             comment_action_params                = 10;
+  optional CommentLongPressItemModel       comment_long_press_item_model        = 11;
+  optional SaveImageActionItem             save_image_action_item               = 12;
+  optional CommentExtensionKt              comment_extension_kt                 = 13;
+  optional CommentImageSaveHelper          comment_image_save_helper            = 14;
+  optional DownloadInfo                    download_info                        = 15;
+  optional DigestUtils                     digest_utils                         = 16;
+  optional UGFileUtilsKt                   ug_file_utils                        = 17;
+  optional TokenCert                       token_cert                           = 18;
+  optional CommonItemView                  common_item_view                     = 19;
+  optional DouYinSettingNewVersionActivity dou_yin_setting_new_version_activity = 20;
+}

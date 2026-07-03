@@ -1,9 +1,13 @@
+@file:Suppress("ktlint:standard:no-wildcard-imports")
+
+import com.google.protobuf.gradle.*
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.android.application)
     // 作为 Xposed 模块使用务必添加，其它情况可选
     alias(libs.plugins.ksp)
+    alias(libs.plugins.protobuf)
 }
 
 android {
@@ -28,7 +32,8 @@ android {
      * Thanks to [GSWXXN](https://github.com/GSWXXN)
      */
     val isKeyStoreAvailable = try {
-        gropify.keystore.path.isNotBlank() && gropify.keystore.password.isNotBlank() && gropify.key.alias.isNotBlank() && gropify.key.password.isNotBlank()
+        gropify.keystore.path.isNotBlank() && gropify.keystore.password.isNotBlank() && gropify.key.alias.isNotBlank() &&
+            gropify.key.password.isNotBlank()
     } catch (_: Exception) {
         false
     }
@@ -102,6 +107,9 @@ android {
         targetCompatibility = JavaVersion.VERSION_21
     }
 
+    aaptOptions {
+        additionalParameters += listOf("--package-id", "0x7E", "--allow-reserved-package-id")
+    }
 }
 
 androidComponents {
@@ -110,7 +118,7 @@ androidComponents {
         val vn: String = flavorVN ?: android.defaultConfig.versionName ?: ""
         val buildTypeSuffix = if (variant.buildType == "debug") "-debug" else ""
         variant.outputs.forEach { output ->
-            output.outputFileName.set("DouyinEnhancer_${vn}${buildTypeSuffix}.apk")
+            output.outputFileName.set("DouyinEnhancer_${vn}$buildTypeSuffix.apk")
         }
     }
 }
@@ -118,6 +126,25 @@ androidComponents {
 kotlin {
     compilerOptions {
         jvmTarget.set(JvmTarget.JVM_21)
+    }
+}
+
+protobuf {
+    protoc {
+        artifact = libs.protobuf.protoc.get().toString()
+    }
+
+    generateProtoTasks {
+        all().forEach { task ->
+            task.plugins {
+                id("java") {
+                    option("lite")
+                }
+                id("kotlin") {
+                    option("lite")
+                }
+            }
+        }
     }
 }
 
@@ -132,6 +159,9 @@ dependencies {
     // ------------------ 底层与工具库 ------------------
     implementation(libs.luckypray.dexkit)
     implementation(libs.gifkt)
+    implementation(libs.fastkv)
+    implementation(libs.protobuf.javalite)
+    implementation(libs.protobuf.kotlin.lite)
 
     // ---------------------- HOOK ----------------------
     // 基础依赖
