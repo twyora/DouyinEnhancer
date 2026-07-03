@@ -11,25 +11,25 @@
     <string name="pref_comment_emoji_title">Unlock Emoji Saving</string>
     <string name="pref_comment_emoji_summary">Remove comment emoji save restrictions</string>
 
-    <string name="hide_ad_recommend_title">Hide ads</string>
-    <string name="hide_ad_recommend_summary">Attempt to hide ads in the feed</string>
+    <string name="recommended_feed_filter_hide_ad_title">Hide ads</string>
+    <string name="recommended_feed_filter_hide_ad_summary">Attempt to hide ads in the feed</string>
 
-    <string name="hide_ecom_aweme_recommend_title">Hide e-commerce promotions</string>
-    <string name="hide_ecom_aweme_recommend_summary">Attempt to hide e-commerce promotions in the feed (may affect normal content)</string>
+    <string name="recommended_feed_filter_hide_ecom_aweme_title">Hide e-commerce promotions</string>
+    <string name="recommended_feed_filter_hide_ecom_aweme_summary">Attempt to hide e-commerce promotions in the feed (may affect normal content)</string>
 
-    <string name="hide_groupon_large_card_recommend_title">Hide group-buying cards</string>
-    <string name="hide_groupon_large_card_recommend_summary">Attempt to hide large group-buying event cards in the feed</string>
+    <string name="recommended_feed_filter_hide_groupon_large_card_title">Hide group-buying cards</string>
+    <string name="recommended_feed_filter_hide_groupon_large_card_summary">Attempt to hide large group-buying event cards in the feed</string>
 
-    <string name="hide_duration_recommend_title">Hide videos by duration (ms)</string>
-    <string name="hide_short_duration_recommend_title">Hide shorter than</string>
-    <string name="hide_long_duration_recommend_title">Hide longer than</string>
+    <string name="recommended_feed_filter_hide_by_duration_title">Hide videos by duration (ms)</string>
+    <string name="recommended_feed_filter_hide_by_short_duration">Hide shorter than</string>
+    <string name="recommended_feed_filter_hide_by_long_duration">Hide longer than</string>
 
-    <string name="keywords_filter_recommend_title">Filter videos by keywords</string>
+    <string name="recommended_feed_filter_keywords_title">Filter videos by keywords</string>
 
-    <string name="keyword_group_name_title">Title</string>
-    <string name="keyword_group_name_uid">UID</string>
-    <string name="keyword_group_name_up">Author name</string>
-    <string name="keyword_group_name_desc">Description</string>
+    <string name="recommended_feed_filter_group_title">Title</string>
+    <string name="recommended_feed_filter_group_uid">UID</string>
+    <string name="recommended_feed_filter_group_author_nickname">Author name</string>
+    <string name="recommended_feed_filter_group_desc">Description</string>
 
     <string name="add">Add</string>
     <string name="delete">Delete</string>

@@ -28,13 +28,13 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/hide_ad_recommend_title"
+                    android:text="@string/recommended_feed_filter_hide_ad_title"
                     android:textAppearance="?android:attr/textAppearanceListItem" />
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/hide_ad_recommend_summary"
+                    android:text="@string/recommended_feed_filter_hide_ad_summary"
                     android:textAppearance="?android:attr/textAppearanceListItemSecondary" />
             </LinearLayout>
 
@@ -67,13 +67,13 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/hide_ecom_aweme_recommend_title"
+                    android:text="@string/recommended_feed_filter_hide_ecom_aweme_title"
                     android:textAppearance="?android:attr/textAppearanceListItem" />
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/hide_ecom_aweme_recommend_summary"
+                    android:text="@string/recommended_feed_filter_hide_ecom_aweme_summary"
                     android:textAppearance="?android:attr/textAppearanceListItemSecondary" />
             </LinearLayout>
 
@@ -106,13 +106,13 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/hide_groupon_large_card_recommend_title"
+                    android:text="@string/recommended_feed_filter_hide_groupon_large_card_title"
                     android:textAppearance="?android:attr/textAppearanceListItem" />
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/hide_groupon_large_card_recommend_summary"
+                    android:text="@string/recommended_feed_filter_hide_groupon_large_card_summary"
                     android:textAppearance="?android:attr/textAppearanceListItemSecondary" />
             </LinearLayout>
 
@@ -131,7 +131,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/hide_duration_recommend_title"
+            android:text="@string/recommended_feed_filter_hide_by_duration_title"
             android:textAppearance="?android:attr/textAppearanceListItemSecondary"
             android:textColor="?attr/colorAccent"
             android:paddingTop="4dp"
@@ -146,7 +146,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/hide_short_duration_recommend_title"
+                android:text="@string/recommended_feed_filter_hide_by_short_duration"
                 android:textAppearance="?android:attr/textAppearanceListItemSecondary" />
 
             <EditText
@@ -172,7 +172,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/hide_long_duration_recommend_title"
+                android:text="@string/recommended_feed_filter_hide_by_long_duration"
                 android:textAppearance="?android:attr/textAppearanceListItemSecondary" />
 
             <EditText
@@ -191,7 +191,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/keywords_filter_recommend_title"
+            android:text="@string/recommended_feed_filter_keywords_title"
             android:textAppearance="?android:attr/textAppearanceListItemSecondary"
             android:textColor="?attr/colorAccent"
             android:paddingTop="4dp"
@@ -214,7 +214,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:gravity="center"
-                    android:text="@string/keyword_group_name_title"
+                    android:text="@string/recommended_feed_filter_group_title"
                     android:textAppearance="?android:attr/textAppearanceListItem" />
 
                 <Button
@@ -272,7 +272,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:gravity="center"
-                    android:text="@string/keyword_group_name_uid"
+                    android:text="@string/recommended_feed_filter_group_uid"
                     android:textAppearance="?android:attr/textAppearanceListItem" />
 
                 <Button
@@ -320,11 +320,11 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:gravity="center"
-                    android:text="@string/keyword_group_name_up"
+                    android:text="@string/recommended_feed_filter_group_author_nickname"
                     android:textAppearance="?android:attr/textAppearanceListItem" />
 
                 <Button
-                    android:id="@+id/btn_add_up"
+                    android:id="@+id/btn_add_author_nickname"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
@@ -368,7 +368,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:gravity="center"
-                    android:text="@string/keyword_group_name_desc"
+                    android:text="@string/recommended_feed_filter_group_desc"
                     android:textAppearance="?android:attr/textAppearanceListItem" />
 
                 <Button

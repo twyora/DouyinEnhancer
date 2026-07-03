@@ -61,7 +61,7 @@ class RecommendedFeedFilterDialog(context: Context) : AlertDialog.Builder(contex
                 editInput.inputType = InputType.TYPE_CLASS_NUMBER
             }
         }
-        recommendedFeedFilterDialogBinding.btnAddUp.setOnClickListener {
+        recommendedFeedFilterDialogBinding.btnAddAuthorNickname.setOnClickListener {
             pushKeywordItem(context, recommendedFeedFilterDialogBinding.groupAuthorNickname)
         }
         recommendedFeedFilterDialogBinding.btnAddDesc.setOnClickListener {
