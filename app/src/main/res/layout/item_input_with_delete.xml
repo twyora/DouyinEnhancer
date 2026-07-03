@@ -8,7 +8,7 @@
     android:paddingVertical="6dp">
 
     <EditText
-        android:id="@+id/edit_keyword"
+        android:id="@+id/edit_input"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
@@ -18,7 +18,7 @@
         android:id="@+id/btn_delete"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="删除"
+        android:text="@string/delete"
         android:minWidth="0dp"
         android:textSize="12sp"
         android:textAllCaps="false"

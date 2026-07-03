@@ -11,6 +11,30 @@
     <string name="pref_comment_emoji_title">解锁表情保存</string>
     <string name="pref_comment_emoji_summary">解除评论区表情保存限制</string>
 
+    <string name="hide_ad_recommend_title">隐藏广告</string>
+    <string name="hide_ad_recommend_summary">尝试隐藏推荐流中的广告</string>
+
+    <string name="hide_ecom_aweme_recommend_title">隐藏电商推广</string>
+    <string name="hide_ecom_aweme_recommend_summary">尝试隐藏推荐流中的电商带货推广（可能误伤）</string>
+
+    <string name="hide_groupon_large_card_recommend_title">隐藏团购卡片</string>
+    <string name="hide_groupon_large_card_recommend_summary">尝试隐藏推荐流中的团购活动大卡片</string>
+
+    <string name="hide_duration_recommend_title">隐藏指定时长的视频（毫秒）</string>
+    <string name="hide_short_duration_recommend_title">隐藏视频时长小于</string>
+    <string name="hide_long_duration_recommend_title">隐藏视频时长大于</string>
+
+    <string name="keywords_filter_recommend_title">过滤包含指定关键字的视频</string>
+
+    <string name="keyword_group_name_title">标题</string>
+    <string name="keyword_group_name_uid">UID</string>
+    <string name="keyword_group_name_up">作者昵称</string>
+    <string name="keyword_group_name_desc">视频文案</string>
+
+    <string name="add">添加</string>
+    <string name="delete">删除</string>
+    <string name="regex_mode">正则模式</string>
+
     <string name="pref_category_about">关于</string>
     <string name="pref_about_version_title">版本</string>
     <string name="pref_about_version_summary">0.0.1</string>
@@ -18,5 +42,4 @@
     <string name="pref_about_author_summary">twyora</string>
     <string name="pref_about_repository_title">仓库地址</string>
     <string name="pref_about_repository_summary">欢迎 Star 和反馈</string>
-
 </resources>

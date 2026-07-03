@@ -35,24 +35,24 @@ class RecommendedFeedFilterDialog(context: Context) : AlertDialog.Builder(contex
         recommendedFeedFilterDialogBinding.switchTitleRegex.isChecked = prefs.getBoolean("recommended_feed_filter_title_regex_mode", false)
         prefs.getStringSet("recommended_feed_filter_group_aweme_title", null)?.forEach {
             pushKeywordItem(context, recommendedFeedFilterDialogBinding.groupAwemeTitle).apply {
-                editKeyword.setText(it)
+                editInput.setText(it)
             }
         }
         prefs.getStringSet("recommended_feed_filter_group_author_uid", null)?.forEach {
             pushKeywordItem(context, recommendedFeedFilterDialogBinding.groupAuthorUid).apply {
-                editKeyword.inputType = InputType.TYPE_CLASS_NUMBER
-                editKeyword.setText(it)
+                editInput.inputType = InputType.TYPE_CLASS_NUMBER
+                editInput.setText(it)
             }
         }
         prefs.getStringSet("recommended_feed_filter_group_author_nickname", null)?.forEach {
             pushKeywordItem(context, recommendedFeedFilterDialogBinding.groupAuthorNickname).apply {
-                editKeyword.setText(it)
+                editInput.setText(it)
             }
         }
         recommendedFeedFilterDialogBinding.switchDescRegex.isChecked = prefs.getBoolean("recommended_feed_filter_desc_regex_mode", false)
         prefs.getStringSet("recommended_feed_filter_group_aweme_desc", null)?.forEach {
             pushKeywordItem(context, recommendedFeedFilterDialogBinding.groupAwemeDesc).apply {
-                editKeyword.setText(it)
+                editInput.setText(it)
             }
         }
 
@@ -62,7 +62,7 @@ class RecommendedFeedFilterDialog(context: Context) : AlertDialog.Builder(contex
         }
         recommendedFeedFilterDialogBinding.btnAddUid.setOnClickListener {
             pushKeywordItem(context, recommendedFeedFilterDialogBinding.groupAuthorUid).apply {
-                editKeyword.inputType = InputType.TYPE_CLASS_NUMBER
+                editInput.inputType = InputType.TYPE_CLASS_NUMBER
             }
         }
         recommendedFeedFilterDialogBinding.btnAddUp.setOnClickListener {
@@ -84,7 +84,7 @@ class RecommendedFeedFilterDialog(context: Context) : AlertDialog.Builder(contex
 
             val titleRegexMode = recommendedFeedFilterDialogBinding.switchTitleRegex.isChecked
             val titleKeywords = recommendedFeedFilterDialogBinding.groupAwemeTitle.children.map {
-                (it.tag as ItemInputWithDeleteBinding).editKeyword.text.toString()
+                (it.tag as ItemInputWithDeleteBinding).editInput.text.toString()
             }.filter {
                 it.isNotBlank()
             }.toSet()
@@ -98,18 +98,18 @@ class RecommendedFeedFilterDialog(context: Context) : AlertDialog.Builder(contex
             }
 
             val uidKeywords = recommendedFeedFilterDialogBinding.groupAuthorUid.children.map {
-                (it.tag as ItemInputWithDeleteBinding).editKeyword.text.toString()
+                (it.tag as ItemInputWithDeleteBinding).editInput.text.toString()
             }.filter {
                 it.isNotBlank()
             }.toSet()
 
             val upKeywords = recommendedFeedFilterDialogBinding.groupAuthorNickname.children.map {
-                (it.tag as ItemInputWithDeleteBinding).editKeyword.text.toString()
+                (it.tag as ItemInputWithDeleteBinding).editInput.text.toString()
             }.toSet()
 
             val descRegexMode = recommendedFeedFilterDialogBinding.switchDescRegex.isChecked
             val descKeywords = recommendedFeedFilterDialogBinding.groupAwemeDesc.children.map {
-                (it.tag as ItemInputWithDeleteBinding).editKeyword.text.toString()
+                (it.tag as ItemInputWithDeleteBinding).editInput.text.toString()
             }.toSet()
             if (descRegexMode && runCatching {
                     descKeywords.forEach {

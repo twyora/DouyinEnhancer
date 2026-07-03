@@ -28,13 +28,13 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="隐藏推荐广告"
+                    android:text="@string/hide_ad_recommend_title"
                     android:textAppearance="?android:attr/textAppearanceListItem" />
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="尝试隐藏推荐流中的广告视频"
+                    android:text="@string/hide_ad_recommend_summary"
                     android:textAppearance="?android:attr/textAppearanceListItemSecondary" />
             </LinearLayout>
 
@@ -67,13 +67,13 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="隐藏电商视频"
+                    android:text="@string/hide_ecom_aweme_recommend_title"
                     android:textAppearance="?android:attr/textAppearanceListItem" />
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="尝试隐藏推荐流中的电商带货视频（可能误伤）"
+                    android:text="@string/hide_ecom_aweme_recommend_summary"
                     android:textAppearance="?android:attr/textAppearanceListItemSecondary" />
             </LinearLayout>
 
@@ -106,13 +106,13 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="隐藏团购卡片"
+                    android:text="@string/hide_groupon_large_card_recommend_title"
                     android:textAppearance="?android:attr/textAppearanceListItem" />
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="尝试隐藏推荐流中的团购活动大卡片"
+                    android:text="@string/hide_groupon_large_card_recommend_summary"
                     android:textAppearance="?android:attr/textAppearanceListItemSecondary" />
             </LinearLayout>
 
@@ -131,7 +131,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="隐藏指定时长的视频（毫秒）"
+            android:text="@string/hide_duration_recommend_title"
             android:textAppearance="?android:attr/textAppearanceListItem" />
 
         <LinearLayout
@@ -143,7 +143,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="隐藏视频时长小于"
+                android:text="@string/hide_short_duration_recommend_title"
                 android:textAppearance="?android:attr/textAppearanceListItemSecondary" />
 
             <EditText
@@ -169,7 +169,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="隐藏视频时长大于"
+                android:text="@string/hide_long_duration_recommend_title"
                 android:textAppearance="?android:attr/textAppearanceListItemSecondary" />
 
             <EditText
@@ -188,7 +188,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="过滤包含指定关键字的视频"
+            android:text="@string/keywords_filter_recommend_title"
             android:textAppearance="?android:attr/textAppearanceListItem" />
 
         <LinearLayout
@@ -208,7 +208,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:gravity="center"
-                    android:text="标题"
+                    android:text="@string/keyword_group_name_title"
                     android:textAppearance="?android:attr/textAppearanceListItem" />
 
                 <Button
@@ -216,7 +216,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="添加"
+                    android:text="@string/add"
                     style="?attr/materialButtonOutlinedStyle" />
 
                 <TextView
@@ -224,7 +224,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:gravity="center"
-                    android:text="正则模式"
+                    android:text="@string/regex_mode"
                     android:textAppearance="?android:attr/textAppearanceListItemSecondary" />
 
                 <Switch
@@ -266,7 +266,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:gravity="center"
-                    android:text="UID"
+                    android:text="@string/keyword_group_name_uid"
                     android:textAppearance="?android:attr/textAppearanceListItem" />
 
                 <Button
@@ -274,7 +274,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="添加"
+                    android:text="@string/add"
                     style="?attr/materialButtonOutlinedStyle" />
 
                 <View
@@ -314,7 +314,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:gravity="center"
-                    android:text="作者昵称"
+                    android:text="@string/keyword_group_name_up"
                     android:textAppearance="?android:attr/textAppearanceListItem" />
 
                 <Button
@@ -322,7 +322,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="添加"
+                    android:text="@string/add"
                     style="?attr/materialButtonOutlinedStyle" />
 
                 <View
@@ -362,7 +362,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:gravity="center"
-                    android:text="视频文案"
+                    android:text="@string/keyword_group_name_desc"
                     android:textAppearance="?android:attr/textAppearanceListItem" />
 
                 <Button
@@ -370,7 +370,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="添加"
+                    android:text="@string/add"
                     style="?attr/materialButtonOutlinedStyle" />
 
                 <TextView
@@ -378,7 +378,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:gravity="center"
-                    android:text="正则模式"
+                    android:text="@string/regex_mode"
                     android:textAppearance="?android:attr/textAppearanceListItemSecondary" />
 
                 <Switch
