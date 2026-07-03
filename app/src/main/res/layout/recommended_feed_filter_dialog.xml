@@ -19,14 +19,105 @@
             android:background="?android:attr/selectableItemBackground"
             android:gravity="center_vertical">
 
-            <TextView
+            <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="隐藏广告" />
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="隐藏推荐广告"
+                    android:textAppearance="?android:attr/textAppearanceListItem" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="尝试隐藏推荐流中的广告视频"
+                    android:textAppearance="?android:attr/textAppearanceListItemSecondary" />
+            </LinearLayout>
 
             <Switch
                 android:id="@+id/switch_hide_ad"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:background="?android:attr/listDivider" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:background="?android:attr/selectableItemBackground"
+            android:gravity="center_vertical">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="隐藏电商视频"
+                    android:textAppearance="?android:attr/textAppearanceListItem" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="尝试隐藏推荐流中的电商带货视频（可能误伤）"
+                    android:textAppearance="?android:attr/textAppearanceListItemSecondary" />
+            </LinearLayout>
+
+            <Switch
+                android:id="@+id/switch_hide_ecom_aweme"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:background="?android:attr/listDivider" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:background="?android:attr/selectableItemBackground"
+            android:gravity="center_vertical">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="隐藏团购卡片"
+                    android:textAppearance="?android:attr/textAppearanceListItem" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="尝试隐藏推荐流中的团购活动大卡片"
+                    android:textAppearance="?android:attr/textAppearanceListItemSecondary" />
+            </LinearLayout>
+
+            <Switch
+                android:id="@+id/switch_hide_groupon_large_card"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
         </LinearLayout>
@@ -41,8 +132,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="隐藏指定时长的视频（毫秒）"
-            android:textSize="15sp"
-            android:textColor="?android:attr/textColorPrimary" />
+            android:textAppearance="?android:attr/textAppearanceListItem" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -54,7 +144,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="隐藏视频时长小于"
-                android:textColor="?android:attr/textColorSecondary" />
+                android:textAppearance="?android:attr/textAppearanceListItemSecondary" />
 
             <EditText
                 android:id="@+id/edit_short_duration"
@@ -62,6 +152,13 @@
                 android:layout_height="wrap_content"
                 android:inputType="number" />
         </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:background="?android:attr/listDivider" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -73,7 +170,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="隐藏视频时长大于"
-                android:textColor="?android:attr/textColorSecondary" />
+                android:textAppearance="?android:attr/textAppearanceListItemSecondary" />
 
             <EditText
                 android:id="@+id/edit_long_duration"
@@ -92,8 +189,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="过滤包含指定关键字的视频"
-            android:textSize="15sp"
-            android:textColor="?android:attr/textColorPrimary" />
+            android:textAppearance="?android:attr/textAppearanceListItem" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -112,7 +208,8 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:gravity="center"
-                    android:text="标题" />
+                    android:text="标题"
+                    android:textAppearance="?android:attr/textAppearanceListItem" />
 
                 <Button
                     android:id="@+id/btn_add_title"
@@ -127,7 +224,8 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:gravity="center"
-                    android:text="正则模式" />
+                    android:text="正则模式"
+                    android:textAppearance="?android:attr/textAppearanceListItemSecondary" />
 
                 <Switch
                     android:id="@+id/switch_title_regex"
@@ -143,6 +241,13 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical" />
         </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:background="?android:attr/listDivider" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -161,7 +266,8 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:gravity="center"
-                    android:text="UID" />
+                    android:text="UID"
+                    android:textAppearance="?android:attr/textAppearanceListItem" />
 
                 <Button
                     android:id="@+id/btn_add_uid"
@@ -184,6 +290,13 @@
                 android:orientation="vertical" />
         </LinearLayout>
 
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:background="?android:attr/listDivider" />
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -201,7 +314,8 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:gravity="center"
-                    android:text="作者昵称" />
+                    android:text="作者昵称"
+                    android:textAppearance="?android:attr/textAppearanceListItem" />
 
                 <Button
                     android:id="@+id/btn_add_up"
@@ -224,10 +338,12 @@
                 android:orientation="vertical" />
         </LinearLayout>
 
-        <LinearLayout
+        <View
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical" />
+            android:layout_height="1dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:background="?android:attr/listDivider" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -246,7 +362,8 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:gravity="center"
-                    android:text="视频文案" />
+                    android:text="视频文案"
+                    android:textAppearance="?android:attr/textAppearanceListItem" />
 
                 <Button
                     android:id="@+id/btn_add_desc"
@@ -261,7 +378,8 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:gravity="center"
-                    android:text="正则模式" />
+                    android:text="正则模式"
+                    android:textAppearance="?android:attr/textAppearanceListItemSecondary" />
 
                 <Switch
                     android:id="@+id/switch_desc_regex"

@@ -132,13 +132,15 @@ message User {
 }
 
 message Aweme {
-  optional Class  class           = 1;
-  optional Field  desc            = 2;
-  optional Field  author          = 3;
-  optional Method get_ad          = 4;
-  optional Field  item_title      = 5;
-  optional Field  duration        = 6;
-  optional Method is_normal_video = 7;
+  optional Class  class              = 1;
+  optional Field  desc               = 2;
+  optional Field  author             = 3;
+  optional Method get_ad             = 4;
+  optional Field  item_title         = 5;
+  optional Field  duration           = 6;
+  optional Method is_normal_video    = 7;
+  optional Method is_ecom_aweme      = 8;
+  optional Field  groupon_large_card = 9;
 }
 
 message FeedResponseHandler {

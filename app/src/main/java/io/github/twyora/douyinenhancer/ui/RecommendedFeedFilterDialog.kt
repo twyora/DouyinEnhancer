@@ -20,6 +20,8 @@ class RecommendedFeedFilterDialog(context: Context) : AlertDialog.Builder(contex
 
         // restore state
         recommendedFeedFilterDialogBinding.switchHideAd.isChecked = prefs.getBoolean("recommended_feed_filter_hide_ad", false)
+        recommendedFeedFilterDialogBinding.switchHideEcomAweme.isChecked = prefs.getBoolean("recommended_feed_filter_hide_ecom_aweme", false)
+        recommendedFeedFilterDialogBinding.switchHideGrouponLargeCard.isChecked = prefs.getBoolean("recommended_feed_filter_hide_groupon_large_card", false)
         prefs.getInt("recommended_feed_filter_hide_short_duration_limit", 0).takeIf {
             it > 0
         }?.let {
@@ -75,6 +77,8 @@ class RecommendedFeedFilterDialog(context: Context) : AlertDialog.Builder(contex
         setNegativeButton(android.R.string.cancel, null)
         setPositiveButton(android.R.string.ok) { _, _ ->
             val hideAd = recommendedFeedFilterDialogBinding.switchHideAd.isChecked
+            val hideEcomAweme = recommendedFeedFilterDialogBinding.switchHideEcomAweme.isChecked
+            val hideGrouponLargeCard = recommendedFeedFilterDialogBinding.switchHideGrouponLargeCard.isChecked
             val hideShortDurationLimit = recommendedFeedFilterDialogBinding.editShortDuration.text.toString().toIntOrNull() ?: 0
             val hideLongDurationLimit = recommendedFeedFilterDialogBinding.editLongDuration.text.toString().toIntOrNull() ?: 0
 
@@ -118,6 +122,8 @@ class RecommendedFeedFilterDialog(context: Context) : AlertDialog.Builder(contex
 
             prefs.edit(commit = true) {
                 putBoolean("recommended_feed_filter_hide_ad", hideAd)
+                putBoolean("recommended_feed_filter_hide_ecom_aweme", hideEcomAweme)
+                putBoolean("recommended_feed_filter_hide_groupon_large_card", hideGrouponLargeCard)
                 putInt("recommended_feed_filter_hide_short_duration_limit", hideShortDurationLimit)
                 putInt("recommended_feed_filter_hide_long_duration_limit", hideLongDurationLimit)
                 putBoolean("recommended_feed_filter_title_regex_mode", titleRegexMode)

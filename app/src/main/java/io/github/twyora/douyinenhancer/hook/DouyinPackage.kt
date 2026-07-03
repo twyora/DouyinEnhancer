@@ -357,6 +357,13 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
             hookInfo.aweme.isNormalVideo.nameOrNull,
             hookInfo.aweme.isNormalVideo.parameters.valuesListOrNull
         )
+
+        fun isEcomAweme() = Method(
+            hookInfo.aweme.isEcomAweme.nameOrNull,
+            hookInfo.aweme.isEcomAweme.parameters.valuesListOrNull
+        )
+
+        fun grouponLargeCard() = Field(hookInfo.aweme.grouponLargeCard.nameOrNull)
     }
 
     inner class FeedResponseHandlerModule {
@@ -1140,6 +1147,12 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
                     }
                     isNormalVideo = method {
                         name = "isNormalVideo"
+                    }
+                    isEcomAweme = method {
+                        name = "isEcomAweme"
+                    }
+                    grouponLargeCard = field {
+                        name = "grouponLargeCard"
                     }
                 }
 

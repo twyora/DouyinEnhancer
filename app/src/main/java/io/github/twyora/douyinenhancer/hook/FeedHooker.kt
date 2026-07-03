@@ -14,6 +14,14 @@ object FeedHooker : YukiBaseHooker() {
         FastKVConfigManager.settings.getBoolean("recommended_feed_filter_hide_ad", false)
     }
 
+    private val hideEcomNeeded by lazy {
+        FastKVConfigManager.settings.getBoolean("recommended_feed_filter_hide_ecom_aweme", false)
+    }
+
+    private val hideGrouponLargeCardNeeded by lazy {
+        FastKVConfigManager.settings.getBoolean("recommended_feed_filter_hide_groupon_large_card", false)
+    }
+
     private val hideShortDurationLimit by lazy {
         FastKVConfigManager.settings.getInt("recommended_feed_filter_hide_short_duration_limit", 0)
     }
@@ -72,7 +80,20 @@ object FeedHooker : YukiBaseHooker() {
                         val awemeObj = iter.next() ?: continue
 
                         if (hideAdNeeded && awemeObj.invokeMethod<Boolean?>(packageInstance.aweme.getAd()) == true) {
-                            YLog.debug("$TAG: filtered ad")
+                            YLog.debug("$TAG: filtered by ad")
+                            iter.remove()
+                            continue
+                        } else if (hideEcomNeeded && awemeObj.invokeMethod<Boolean?>(packageInstance.aweme.isEcomAweme()) == true) {
+                            // NOTE: this filter logic has not been rigorously verified
+                            YLog.debug("$TAG: filtered by ecom aweme")
+                            iter.remove()
+                            continue
+                        } else if (hideGrouponLargeCardNeeded && awemeObj.getField<Any?>(
+                                packageInstance.aweme.grouponLargeCard()
+                            ) != null
+                        ) {
+                            // NOTE: this filter logic has not been rigorously verified
+                            YLog.debug("$TAG: filtered by groupon large card")
                             iter.remove()
                             continue
                         } else if (run {
@@ -87,8 +108,8 @@ object FeedHooker : YukiBaseHooker() {
                                     packageInstance.aweme.duration()
                                 ) ?: return@run false
 
-                                if(duration==0){
-                                        return@run false
+                                if (duration == 0) {
+                                    return@run false
                                 }
                                 duration !in (hideShortDurationLimit + 1) until hideLongDurationLimit
                             }
