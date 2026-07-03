@@ -4,12 +4,12 @@ import com.highcapable.kavaref.KavaRef.Companion.resolve
 import com.highcapable.yukihookapi.hook.core.YukiMemberHookCreator
 import com.highcapable.yukihookapi.hook.entity.YukiBaseHooker
 import com.highcapable.yukihookapi.hook.log.YLog
-import org.json.JSONObject
-import org.luckypray.dexkit.DexKitBridge
-import kotlin.random.Random
 import java.lang.reflect.Field
 import java.lang.reflect.Method
 import java.lang.reflect.Modifier
+import kotlin.random.Random
+import org.json.JSONObject
+import org.luckypray.dexkit.DexKitBridge
 
 object FeedHooker : YukiBaseHooker() {
     private val TAG = this::class.simpleName
@@ -36,7 +36,6 @@ object FeedHooker : YukiBaseHooker() {
             isAccessible = true
         }
     }
-
 
     private val UserClass by lazyClass("com.ss.android.ugc.aweme.profile.model.User")
     private val UserClassNickNameField: Field by lazy {
@@ -111,7 +110,9 @@ object FeedHooker : YukiBaseHooker() {
                             } else {
                                 "unknown"
                             }
-                            YLog.warn("$TAG: Aweme desc contains specific word, author name: $awemeAuthorNickName, aweme description: $awemeDesc, removing from aweme list")
+                            YLog.warn(
+                                "$TAG: Aweme desc contains specific word, author name: $awemeAuthorNickName, aweme description: $awemeDesc, removing from aweme list"
+                            )
                             iter.remove()
                             continue
                         }
