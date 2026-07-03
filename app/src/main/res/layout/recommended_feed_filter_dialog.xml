@@ -132,7 +132,10 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/hide_duration_recommend_title"
-            android:textAppearance="?android:attr/textAppearanceListItem" />
+            android:textAppearance="?android:attr/textAppearanceListItemSecondary"
+            android:textColor="?attr/colorAccent"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -189,7 +192,10 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/keywords_filter_recommend_title"
-            android:textAppearance="?android:attr/textAppearanceListItem" />
+            android:textAppearance="?android:attr/textAppearanceListItemSecondary"
+            android:textColor="?attr/colorAccent"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp" />
 
         <LinearLayout
             android:layout_width="match_parent"
