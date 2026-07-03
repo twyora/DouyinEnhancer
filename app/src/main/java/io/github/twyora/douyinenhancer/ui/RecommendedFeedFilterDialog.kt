@@ -22,14 +22,10 @@ class RecommendedFeedFilterDialog(context: Context) : AlertDialog.Builder(contex
         recommendedFeedFilterDialogBinding.switchHideAd.isChecked = prefs.getBoolean("recommended_feed_filter_hide_ad", false)
         recommendedFeedFilterDialogBinding.switchHideEcomAweme.isChecked = prefs.getBoolean("recommended_feed_filter_hide_ecom_aweme", false)
         recommendedFeedFilterDialogBinding.switchHideGrouponLargeCard.isChecked = prefs.getBoolean("recommended_feed_filter_hide_groupon_large_card", false)
-        prefs.getInt("recommended_feed_filter_hide_short_duration_limit", 0).takeIf {
-            it > 0
-        }?.let {
+        prefs.getInt("recommended_feed_filter_hide_short_duration_limit", 0).let {
             recommendedFeedFilterDialogBinding.editShortDuration.setText(it.toString())
         }
-        prefs.getInt("recommended_feed_filter_hide_long_duration_limit", 0).takeIf {
-            it > 0
-        }?.let {
+        prefs.getInt("recommended_feed_filter_hide_long_duration_limit", Int.MAX_VALUE).let {
             recommendedFeedFilterDialogBinding.editLongDuration.setText(it.toString())
         }
         recommendedFeedFilterDialogBinding.switchTitleRegex.isChecked = prefs.getBoolean("recommended_feed_filter_title_regex_mode", false)
@@ -80,7 +76,7 @@ class RecommendedFeedFilterDialog(context: Context) : AlertDialog.Builder(contex
             val hideEcomAweme = recommendedFeedFilterDialogBinding.switchHideEcomAweme.isChecked
             val hideGrouponLargeCard = recommendedFeedFilterDialogBinding.switchHideGrouponLargeCard.isChecked
             val hideShortDurationLimit = recommendedFeedFilterDialogBinding.editShortDuration.text.toString().toIntOrNull() ?: 0
-            val hideLongDurationLimit = recommendedFeedFilterDialogBinding.editLongDuration.text.toString().toIntOrNull() ?: 0
+            val hideLongDurationLimit = recommendedFeedFilterDialogBinding.editLongDuration.text.toString().toIntOrNull() ?: Int.MAX_VALUE
 
             val titleRegexMode = recommendedFeedFilterDialogBinding.switchTitleRegex.isChecked
             val titleKeywords = recommendedFeedFilterDialogBinding.groupAwemeTitle.children.map {

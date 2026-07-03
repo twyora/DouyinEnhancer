@@ -26,7 +26,7 @@ object FeedHooker : YukiBaseHooker() {
         FastKVConfigManager.settings.getInt("recommended_feed_filter_hide_short_duration_limit", 0)
     }
     private val hideLongDurationLimit by lazy {
-        FastKVConfigManager.settings.getInt("recommended_feed_filter_hide_long_duration_limit", 0)
+        FastKVConfigManager.settings.getInt("recommended_feed_filter_hide_long_duration_limit", Int.MAX_VALUE)
     }
 
     private val kwdFilterTitleRegexMode by lazy {
