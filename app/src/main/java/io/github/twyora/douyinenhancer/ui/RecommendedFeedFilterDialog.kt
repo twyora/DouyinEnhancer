@@ -101,11 +101,15 @@ class RecommendedFeedFilterDialog(context: Context) : AlertDialog.Builder(contex
 
             val upKeywords = recommendedFeedFilterDialogBinding.groupAuthorNickname.children.map {
                 (it.tag as ItemInputWithDeleteBinding).editInput.text.toString()
+            }.filter {
+                it.isNotBlank()
             }.toSet()
 
             val descRegexMode = recommendedFeedFilterDialogBinding.switchDescRegex.isChecked
             val descKeywords = recommendedFeedFilterDialogBinding.groupAwemeDesc.children.map {
                 (it.tag as ItemInputWithDeleteBinding).editInput.text.toString()
+            }.filter {
+                it.isNotBlank()
             }.toSet()
             if (descRegexMode && runCatching {
                     descKeywords.forEach {
