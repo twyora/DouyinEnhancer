@@ -13,6 +13,7 @@ import com.highcapable.yukihookapi.hook.entity.YukiBaseHooker
 import com.highcapable.yukihookapi.hook.log.YLog
 import com.shakster.gifkt.GifEncoder
 import io.github.twyora.douyinenhancer.config.FastKVConfigManager
+import io.github.twyora.douyinenhancer.config.key.SaveKey
 import io.github.twyora.douyinenhancer.hook.utils.FileTypeDetector
 import io.github.twyora.douyinenhancer.hook.utils.HookTransaction
 import io.github.twyora.douyinenhancer.hook.utils.getField
@@ -32,7 +33,7 @@ object CommentEmojiHooker : YukiBaseHooker() {
     private val TAG = this::class.simpleName
 
     override fun onHook() {
-        if (!FastKVConfigManager.settings.getBoolean("unlock_comment_emoji", false)) {
+        if (!FastKVConfigManager.settings.getBoolean(SaveKey.UNLOCK_COMMENT_EMOJI, false)) {
             return
         }
 
