@@ -23,8 +23,10 @@ class RecommendedFeedFilterDialog(context: Context) : AlertDialog.Builder(contex
 
         // restore state
         recommendedFeedFilterDialogBinding.switchHideAd.isChecked = prefs.getBoolean("recommended_feed_filter_block_ad", false)
-        recommendedFeedFilterDialogBinding.switchHideEcomAweme.isChecked = prefs.getBoolean("recommended_feed_filter_block_ecom_aweme", false)
-        recommendedFeedFilterDialogBinding.switchHideGrouponLargeCard.isChecked = prefs.getBoolean("recommended_feed_filter_block_groupon_large_card", false)
+        recommendedFeedFilterDialogBinding.switchHideEcomAweme.isChecked =
+            prefs.getBoolean("recommended_feed_filter_block_ecom_aweme", false)
+        recommendedFeedFilterDialogBinding.switchHideGrouponLargeCard.isChecked =
+            prefs.getBoolean("recommended_feed_filter_block_groupon_large_card", false)
         prefs.getInt("recommended_feed_filter_hide_short_duration_limit", 0).let {
             recommendedFeedFilterDialogBinding.editShortDuration.setText(it.toString())
         }
