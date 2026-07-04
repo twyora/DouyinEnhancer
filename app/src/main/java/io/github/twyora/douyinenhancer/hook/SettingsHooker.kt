@@ -12,6 +12,7 @@ import io.github.twyora.douyinenhancer.R
 import io.github.twyora.douyinenhancer.hook.utils.getField
 import io.github.twyora.douyinenhancer.hook.utils.invokeMethod
 import io.github.twyora.douyinenhancer.hook.utils.resolveMethod
+import io.github.twyora.douyinenhancer.ui.SettingsDialog
 
 object SettingsHooker : YukiBaseHooker() {
     private val TAG = this::class.simpleName

@@ -6,10 +6,48 @@
     <string name="settings_dialog_confirm_and_restart">Confirm &amp; Restart</string>
 
     <string name="pref_category_save">Save</string>
+    <string name="pref_category_recommend">Recommend</string>
+    <string name="pref_category_misc">Misc</string>
+    <string name="pref_misc_enable_hidden_features_title">✦ Enable hidden features</string>
+    <string name="pref_misc_enable_hidden_features_summary">Enable to use hidden features</string>
+    <string name="pref_misc_enable_hidden_features_steps_remaining">Perform %1$d more steps to enable hidden features</string>
+    <string name="pref_misc_enable_hidden_features_already_enabled">Hidden features are already enabled; no further action required</string>
+    <string name="pref_misc_enable_hidden_features_restart_required">Hidden features are enabled. Restart the app for changes to take effect</string>
     <string name="pref_comment_image_title">Remove Watermark from Comment Images</string>
     <string name="pref_comment_image_summary">Save watermark-free original comment images</string>
     <string name="pref_comment_emoji_title">Unlock Emoji Saving</string>
     <string name="pref_comment_emoji_summary">Remove comment emoji save restrictions</string>
+
+    <string name="recommended_feed_filter_dialog_title">Recommended Feed Filter</string>
+    <string name="pref_recommend_feed_filter">✦ Recommended Feed Filter</string>
+    <string name="save_failed_invalid_regex">Save failed, invalid regex pattern</string>
+    <string name="save_failed_short_duration_exceeds_long">Save failed, minimum duration cannot exceed maximum duration</string>
+    <string name="save_success_restart_required">Saved successfully. Some configurations will take effect after restarting the app</string>
+    <string name="restart_required">Some features will take effect after restarting the app</string>
+
+    <string name="recommended_feed_filter_block_ad_title">✦ Block ads</string>
+    <string name="recommended_feed_filter_block_ad_summary">Attempt to block ads in the feed</string>
+
+    <string name="recommended_feed_filter_block_ecom_aweme_title">✦ Block e-commerce promotions</string>
+    <string name="recommended_feed_filter_block_ecom_aweme_summary">Attempt to block e-commerce promotions in the feed (may affect normal content)</string>
+
+    <string name="recommended_feed_filter_block_groupon_large_card_title">✦ Block group-buying cards</string>
+    <string name="recommended_feed_filter_block_groupon_large_card_summary">Attempt to block large group-buying event cards in the feed</string>
+
+    <string name="recommended_feed_filter_hide_by_duration_title">Hide videos by duration (ms)</string>
+    <string name="recommended_feed_filter_hide_by_short_duration">Hide shorter than</string>
+    <string name="recommended_feed_filter_hide_by_long_duration">Hide longer than</string>
+
+    <string name="recommended_feed_filter_keywords_title">Filter videos by keywords</string>
+
+    <string name="recommended_feed_filter_group_title">Title</string>
+    <string name="recommended_feed_filter_group_uid">UID</string>
+    <string name="recommended_feed_filter_group_author_nickname">Author name</string>
+    <string name="recommended_feed_filter_group_desc">Description</string>
+
+    <string name="add">Add</string>
+    <string name="delete">Delete</string>
+    <string name="regex_mode">Regex mode</string>
 
     <string name="pref_category_about">About</string>
     <string name="pref_about_version_title">Version</string>

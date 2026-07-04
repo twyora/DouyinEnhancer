@@ -6,10 +6,48 @@
     <string name="settings_dialog_back">返回</string>
     <string name="settings_dialog_confirm_and_restart">确定并重启客户端</string>
     <string name="pref_category_save">保存</string>
+    <string name="pref_category_recommend">推荐</string>
+    <string name="pref_category_misc">杂项</string>
+    <string name="pref_misc_enable_hidden_features_title">✦ 启用隐藏功能</string>
+    <string name="pref_misc_enable_hidden_features_summary">打开后可以使用隐藏功能</string>
+    <string name="pref_misc_enable_hidden_features_steps_remaining">再执行 %1$d 步即可开启隐藏功能</string>
+    <string name="pref_misc_enable_hidden_features_already_enabled">隐藏功能已开启，无需执行此操作</string>
+    <string name="pref_misc_enable_hidden_features_restart_required">隐藏功能已开启，重启应用后生效</string>
     <string name="pref_comment_image_title">评论图片去水印</string>
     <string name="pref_comment_image_summary">保存无水印评论原图</string>
     <string name="pref_comment_emoji_title">解锁表情保存</string>
     <string name="pref_comment_emoji_summary">解除评论区表情保存限制</string>
+
+    <string name="recommended_feed_filter_dialog_title">推荐流过滤器</string>
+    <string name="pref_recommend_feed_filter">✦ 推荐流过滤器</string>
+    <string name="save_failed_invalid_regex">保存失败，正则表达式格式错误</string>
+    <string name="save_failed_short_duration_exceeds_long">保存失败，最小时长不能大于最大时长</string>
+    <string name="save_success_restart_required">保存成功，部分配置重启应用后生效</string>
+    <string name="restart_required">部分功能需重启应用后生效</string>
+
+    <string name="recommended_feed_filter_block_ad_title">✦ 屏蔽广告</string>
+    <string name="recommended_feed_filter_block_ad_summary">尝试屏蔽推荐流中的广告</string>
+
+    <string name="recommended_feed_filter_block_ecom_aweme_title">✦ 屏蔽电商推广</string>
+    <string name="recommended_feed_filter_block_ecom_aweme_summary">尝试屏蔽推荐流中的电商带货推广（可能误伤）</string>
+
+    <string name="recommended_feed_filter_block_groupon_large_card_title">✦ 屏蔽团购卡片</string>
+    <string name="recommended_feed_filter_block_groupon_large_card_summary">尝试屏蔽推荐流中的团购活动大卡片</string>
+
+    <string name="recommended_feed_filter_hide_by_duration_title">隐藏指定时长的视频（毫秒）</string>
+    <string name="recommended_feed_filter_hide_by_short_duration">隐藏视频时长小于</string>
+    <string name="recommended_feed_filter_hide_by_long_duration">隐藏视频时长大于</string>
+
+    <string name="recommended_feed_filter_keywords_title">过滤包含指定关键字的视频</string>
+
+    <string name="recommended_feed_filter_group_title">标题</string>
+    <string name="recommended_feed_filter_group_uid">UID</string>
+    <string name="recommended_feed_filter_group_author_nickname">作者昵称</string>
+    <string name="recommended_feed_filter_group_desc">视频文案</string>
+
+    <string name="add">添加</string>
+    <string name="delete">删除</string>
+    <string name="regex_mode">正则模式</string>
 
     <string name="pref_category_about">关于</string>
     <string name="pref_about_version_title">版本</string>
@@ -18,5 +56,4 @@
     <string name="pref_about_author_summary">twyora</string>
     <string name="pref_about_repository_title">仓库地址</string>
     <string name="pref_about_repository_summary">欢迎 Star 和反馈</string>
-
 </resources>
