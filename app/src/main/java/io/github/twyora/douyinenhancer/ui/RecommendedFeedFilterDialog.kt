@@ -1,12 +1,15 @@
 package io.github.twyora.douyinenhancer.ui
 
+import android.app.Activity
 import android.app.AlertDialog
 import android.content.Context
 import android.text.InputType
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.core.content.edit
 import androidx.core.view.children
+import io.github.twyora.douyinenhancer.R
 import io.github.twyora.douyinenhancer.config.FastKVConfigManager
 import io.github.twyora.douyinenhancer.databinding.ItemInputWithDeleteBinding
 import io.github.twyora.douyinenhancer.databinding.RecommendedFeedFilterDialogBinding
@@ -90,6 +93,9 @@ class RecommendedFeedFilterDialog(context: Context) : AlertDialog.Builder(contex
                     }
                 }.isFailure
             ) {
+                (context as? Activity)?.runOnUiThread {
+                    Toast.makeText(context, R.string.save_failed_invalid_regex, Toast.LENGTH_SHORT).show()
+                }
                 return@setPositiveButton
             }
 
@@ -117,6 +123,9 @@ class RecommendedFeedFilterDialog(context: Context) : AlertDialog.Builder(contex
                     }
                 }.isFailure
             ) {
+                (context as? Activity)?.runOnUiThread {
+                    Toast.makeText(context, R.string.save_failed_invalid_regex, Toast.LENGTH_SHORT).show()
+                }
                 return@setPositiveButton
             }
 
@@ -132,6 +141,10 @@ class RecommendedFeedFilterDialog(context: Context) : AlertDialog.Builder(contex
                 putStringSet("recommended_feed_filter_group_author_nickname", upKeywords)
                 putBoolean("recommended_feed_filter_desc_regex_mode", descRegexMode)
                 putStringSet("recommended_feed_filter_group_aweme_desc", descKeywords)
+            }
+
+            (context as? Activity)?.runOnUiThread {
+                Toast.makeText(context, R.string.save_success_restart_required, Toast.LENGTH_SHORT).show()
             }
         }
     }

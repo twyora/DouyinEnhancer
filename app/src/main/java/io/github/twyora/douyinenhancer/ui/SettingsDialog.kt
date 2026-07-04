@@ -8,6 +8,7 @@ import android.content.Context
 import android.os.Bundle
 import android.preference.Preference
 import android.preference.PreferenceFragment
+import android.widget.Toast
 import com.highcapable.yukihookapi.hook.factory.injectModuleAppResources
 import com.highcapable.yukihookapi.hook.log.YLog
 import io.github.twyora.douyinenhancer.R
@@ -64,6 +65,9 @@ class SettingsDialog(context: Context) : AlertDialog.Builder(context) {
             restartApplication(activity)
         }
         setOnDismissListener {
+            activity.runOnUiThread {
+                Toast.makeText(context, R.string.restart_required, Toast.LENGTH_SHORT).show()
+            }
             activity.fragmentManager.beginTransaction().remove(prefsFragment).commitAllowingStateLoss()
         }
     }
