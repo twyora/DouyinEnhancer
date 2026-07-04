@@ -97,6 +97,10 @@ object FeedHooker : YukiBaseHooker() {
                             iter.remove()
                             continue
                         } else if (run {
+                                if (hideShortDurationLimit > hideLongDurationLimit) {
+                                    return@run false
+                                }
+
                                 if (awemeObj.invokeMethod<Boolean?>(
                                         packageInstance.aweme.isNormalVideo()
                                     ) == false
@@ -108,10 +112,7 @@ object FeedHooker : YukiBaseHooker() {
                                     packageInstance.aweme.duration()
                                 ) ?: return@run false
 
-                                if (duration == 0) {
-                                    return@run false
-                                }
-                                duration !in (hideShortDurationLimit + 1) until hideLongDurationLimit
+                                return@run duration != 0 && (duration !in hideShortDurationLimit..hideLongDurationLimit)
                             }
                         ) {
                             YLog.debug("$TAG: filtered by duration")
