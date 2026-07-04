@@ -7,7 +7,7 @@ import io.github.twyora.douyinenhancer.hook.utils.getField
 import io.github.twyora.douyinenhancer.hook.utils.invokeMethod
 import io.github.twyora.douyinenhancer.hook.utils.resolveMethod
 
-object FeedHooker : YukiBaseHooker() {
+object RecommendedFeedHooker : YukiBaseHooker() {
     private val TAG = this::class.simpleName
 
     private val blockAdEnabled by lazy {
