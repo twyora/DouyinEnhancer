@@ -132,27 +132,32 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/recommended_feed_filter_hide_by_duration_title"
-            android:textAppearance="?android:attr/textAppearanceListItem"
+            android:textAppearance="?android:attr/textAppearanceListItemSmall"
+            android:textColor="?android:attr/colorAccent"
             android:layout_marginTop="8dp"
             android:layout_marginBottom="8dp" />
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:background="?android:attr/selectableItemBackground">
+            android:background="?android:attr/selectableItemBackground"
+            android:gravity="center_vertical">
 
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="2"
                 android:text="@string/recommended_feed_filter_hide_by_short_duration"
-                android:textAppearance="?android:attr/textAppearanceListItemSecondary" />
+                android:textAppearance="?android:attr/textAppearanceListItem" />
 
             <EditText
                 android:id="@+id/edit_short_duration"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:inputType="number" />
+                android:layout_weight="3"
+                android:inputType="number"
+                android:textAppearance="?android:attr/textAppearanceListItem" />
         </LinearLayout>
 
         <View
@@ -164,21 +169,25 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:background="?android:attr/selectableItemBackground">
+            android:background="?android:attr/selectableItemBackground"
+            android:gravity="center_vertical">
 
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="2"
                 android:text="@string/recommended_feed_filter_hide_by_long_duration"
-                android:textAppearance="?android:attr/textAppearanceListItemSecondary" />
+                android:textAppearance="?android:attr/textAppearanceListItem" />
 
             <EditText
                 android:id="@+id/edit_long_duration"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:inputType="number" />
+                android:layout_weight="3"
+                android:inputType="number"
+                android:textAppearance="?android:attr/textAppearanceListItem" />
         </LinearLayout>
 
         <View
@@ -191,7 +200,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/recommended_feed_filter_keywords_title"
-            android:textAppearance="?android:attr/textAppearanceListItem"
+            android:textAppearance="?android:attr/textAppearanceListItemSmall"
+            android:textColor="?android:attr/colorAccent"
             android:layout_marginTop="8dp"
             android:layout_marginBottom="8dp" />
 
@@ -229,7 +239,7 @@
                     android:layout_weight="1"
                     android:gravity="center"
                     android:text="@string/regex_mode"
-                    android:textAppearance="?android:attr/textAppearanceListItemSecondary" />
+                    android:textAppearance="?android:attr/textAppearanceListItem" />
 
                 <Switch
                     android:id="@+id/switch_title_regex"
@@ -383,7 +393,7 @@
                     android:layout_weight="1"
                     android:gravity="center"
                     android:text="@string/regex_mode"
-                    android:textAppearance="?android:attr/textAppearanceListItemSecondary" />
+                    android:textAppearance="?android:attr/textAppearanceListItem" />
 
                 <Switch
                     android:id="@+id/switch_desc_regex"
