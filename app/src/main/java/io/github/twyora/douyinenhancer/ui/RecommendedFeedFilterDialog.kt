@@ -105,7 +105,7 @@ class RecommendedFeedFilterDialog(context: Context) : AlertDialog.Builder(contex
                 }.isFailure
             ) {
                 (context as? Activity)?.runOnUiThread {
-                    Toast.makeText(context, R.string.save_failed_invalid_regex, Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, context.getString(R.string.save_failed_invalid_regex), Toast.LENGTH_SHORT).show()
                 }
                 return@setPositiveButton
             }
@@ -135,7 +135,7 @@ class RecommendedFeedFilterDialog(context: Context) : AlertDialog.Builder(contex
                 }.isFailure
             ) {
                 (context as? Activity)?.runOnUiThread {
-                    Toast.makeText(context, R.string.save_failed_invalid_regex, Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, context.getString(R.string.save_failed_invalid_regex), Toast.LENGTH_SHORT).show()
                 }
                 return@setPositiveButton
             }
@@ -155,7 +155,7 @@ class RecommendedFeedFilterDialog(context: Context) : AlertDialog.Builder(contex
             }
 
             (context as? Activity)?.runOnUiThread {
-                Toast.makeText(context, R.string.save_success_restart_required, Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, context.getString(R.string.save_success_restart_required), Toast.LENGTH_SHORT).show()
             }
         }
     }

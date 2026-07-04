@@ -121,7 +121,7 @@ class SettingsDialog(context: Context) : AlertDialog.Builder(context) {
         }
         setOnDismissListener {
             activity.runOnUiThread {
-                Toast.makeText(context, R.string.restart_required, Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, context.getString(R.string.restart_required), Toast.LENGTH_SHORT).show()
             }
             activity.fragmentManager.beginTransaction().remove(prefsFragment).commitAllowingStateLoss()
         }
