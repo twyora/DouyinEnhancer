@@ -1,6 +1,5 @@
 package io.github.twyora.douyinenhancer.hook
 
-import com.highcapable.kavaref.KavaRef.Companion.resolve
 import com.highcapable.yukihookapi.hook.entity.YukiBaseHooker
 import com.highcapable.yukihookapi.hook.log.YLog
 import io.github.twyora.douyinenhancer.config.FastKVConfigManager
