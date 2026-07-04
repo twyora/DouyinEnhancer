@@ -3,6 +3,7 @@ package io.github.twyora.douyinenhancer.hook
 import com.highcapable.yukihookapi.hook.entity.YukiBaseHooker
 import com.highcapable.yukihookapi.hook.log.YLog
 import io.github.twyora.douyinenhancer.config.FastKVConfigManager
+import io.github.twyora.douyinenhancer.config.key.RecommendedFeedFilterKey
 import io.github.twyora.douyinenhancer.hook.utils.getField
 import io.github.twyora.douyinenhancer.hook.utils.invokeMethod
 import io.github.twyora.douyinenhancer.hook.utils.resolveMethod
@@ -11,29 +12,29 @@ object RecommendedFeedHooker : YukiBaseHooker() {
     private val TAG = this::class.simpleName
 
     private val blockAdEnabled by lazy {
-        FastKVConfigManager.settings.getBoolean("recommended_feed_filter_block_ad", false)
+        FastKVConfigManager.settings.getBoolean(RecommendedFeedFilterKey.BLOCK_AD, false)
     }
 
     private val blockEcomEnabled by lazy {
-        FastKVConfigManager.settings.getBoolean("recommended_feed_filter_block_ecom_aweme", false)
+        FastKVConfigManager.settings.getBoolean(RecommendedFeedFilterKey.BLOCK_ECOM, false)
     }
 
     private val blockGrouponLargeCardEnabled by lazy {
-        FastKVConfigManager.settings.getBoolean("recommended_feed_filter_block_groupon_large_card", false)
+        FastKVConfigManager.settings.getBoolean(RecommendedFeedFilterKey.BLOCK_GROUPON, false)
     }
 
     private val hideShortDurationLimit by lazy {
-        FastKVConfigManager.settings.getInt("recommended_feed_filter_hide_short_duration_limit", 0)
+        FastKVConfigManager.settings.getInt(RecommendedFeedFilterKey.SHORT_DURATION_LIMIT, 0)
     }
     private val hideLongDurationLimit by lazy {
-        FastKVConfigManager.settings.getInt("recommended_feed_filter_hide_long_duration_limit", Int.MAX_VALUE)
+        FastKVConfigManager.settings.getInt(RecommendedFeedFilterKey.LONG_DURATION_LIMIT, Int.MAX_VALUE)
     }
 
     private val kwdFilterTitleRegexMode by lazy {
-        FastKVConfigManager.settings.getBoolean("recommended_feed_filter_title_regex_mode", false)
+        FastKVConfigManager.settings.getBoolean(RecommendedFeedFilterKey.TITLE_REGEX_MODE, false)
     }
     private val kwdFilterTitleRegexes by lazy {
-        val titleList = FastKVConfigManager.settings.getStringSet("recommended_feed_filter_group_aweme_title", null)
+        val titleList = FastKVConfigManager.settings.getStringSet(RecommendedFeedFilterKey.TITLE_KEYWORDS, null)
         if (kwdFilterTitleRegexMode) {
             titleList?.map {
                 it.toRegex()
@@ -46,18 +47,18 @@ object RecommendedFeedHooker : YukiBaseHooker() {
     }
 
     private val kwdFilterAuthorUid by lazy {
-        FastKVConfigManager.settings.getStringSet("recommended_feed_filter_group_author_uid", null)
+        FastKVConfigManager.settings.getStringSet(RecommendedFeedFilterKey.AUTHOR_UID_KEYWORDS, null)
     }
 
     private val kwdFilterAuthorNicknames by lazy {
-        FastKVConfigManager.settings.getStringSet("recommended_feed_filter_group_author_nickname", null)
+        FastKVConfigManager.settings.getStringSet(RecommendedFeedFilterKey.AUTHOR_NICKNAME_KEYWORDS, null)
     }
 
     private val kwdFilterDescRegexMode by lazy {
-        FastKVConfigManager.settings.getBoolean("recommended_feed_filter_desc_regex_mode", false)
+        FastKVConfigManager.settings.getBoolean(RecommendedFeedFilterKey.DESC_REGEX_MODE, false)
     }
     private val kwdFilterDescRegexes by lazy {
-        val descList = FastKVConfigManager.settings.getStringSet("recommended_feed_filter_group_aweme_desc", null)
+        val descList = FastKVConfigManager.settings.getStringSet(RecommendedFeedFilterKey.DESC_KEYWORDS, null)
         if (kwdFilterDescRegexMode) {
             descList?.map { it.toRegex() }
         } else {

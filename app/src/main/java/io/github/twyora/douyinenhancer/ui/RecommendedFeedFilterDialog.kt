@@ -12,6 +12,8 @@ import androidx.core.content.edit
 import androidx.core.view.children
 import io.github.twyora.douyinenhancer.R
 import io.github.twyora.douyinenhancer.config.FastKVConfigManager
+import io.github.twyora.douyinenhancer.config.key.MiscKey
+import io.github.twyora.douyinenhancer.config.key.RecommendedFeedFilterKey
 import io.github.twyora.douyinenhancer.databinding.ItemInputWithDeleteBinding
 import io.github.twyora.douyinenhancer.databinding.RecommendedFeedFilterDialogBinding
 
@@ -23,7 +25,7 @@ class RecommendedFeedFilterDialog(context: Context) : AlertDialog.Builder(contex
         val prefs = FastKVConfigManager.settings
 
         // Show hidden block options when feature is enabled
-        val showBlockGroups = prefs.getBoolean("enable_hidden_features", false)
+        val showBlockGroups = prefs.getBoolean(MiscKey.ENABLE_HIDDEN_FEATURES, false)
         if (showBlockGroups) {
             recommendedFeedFilterDialogBinding.groupBlockAd.visibility = View.VISIBLE
             recommendedFeedFilterDialogBinding.groupBlockEcomAweme.visibility = View.VISIBLE
@@ -31,36 +33,36 @@ class RecommendedFeedFilterDialog(context: Context) : AlertDialog.Builder(contex
         }
 
         // restore state
-        recommendedFeedFilterDialogBinding.switchBlockAd.isChecked = prefs.getBoolean("recommended_feed_filter_block_ad", false)
+        recommendedFeedFilterDialogBinding.switchBlockAd.isChecked = prefs.getBoolean(RecommendedFeedFilterKey.BLOCK_AD, false)
         recommendedFeedFilterDialogBinding.switchBlockEcomAweme.isChecked =
-            prefs.getBoolean("recommended_feed_filter_block_ecom_aweme", false)
+            prefs.getBoolean(RecommendedFeedFilterKey.BLOCK_ECOM, false)
         recommendedFeedFilterDialogBinding.switchBlockGrouponLargeCard.isChecked =
-            prefs.getBoolean("recommended_feed_filter_block_groupon_large_card", false)
-        prefs.getInt("recommended_feed_filter_hide_short_duration_limit", 0).let {
+            prefs.getBoolean(RecommendedFeedFilterKey.BLOCK_GROUPON, false)
+        prefs.getInt(RecommendedFeedFilterKey.SHORT_DURATION_LIMIT, 0).let {
             recommendedFeedFilterDialogBinding.editShortDuration.setText(it.toString())
         }
-        prefs.getInt("recommended_feed_filter_hide_long_duration_limit", Int.MAX_VALUE).let {
+        prefs.getInt(RecommendedFeedFilterKey.LONG_DURATION_LIMIT, Int.MAX_VALUE).let {
             recommendedFeedFilterDialogBinding.editLongDuration.setText(it.toString())
         }
-        recommendedFeedFilterDialogBinding.switchTitleRegex.isChecked = prefs.getBoolean("recommended_feed_filter_title_regex_mode", false)
-        prefs.getStringSet("recommended_feed_filter_group_aweme_title", null)?.forEach {
+        recommendedFeedFilterDialogBinding.switchTitleRegex.isChecked = prefs.getBoolean(RecommendedFeedFilterKey.TITLE_REGEX_MODE, false)
+        prefs.getStringSet(RecommendedFeedFilterKey.TITLE_KEYWORDS, null)?.forEach {
             pushKeywordItem(context, recommendedFeedFilterDialogBinding.groupAwemeTitle).apply {
                 editInput.setText(it)
             }
         }
-        prefs.getStringSet("recommended_feed_filter_group_author_uid", null)?.forEach {
+        prefs.getStringSet(RecommendedFeedFilterKey.AUTHOR_UID_KEYWORDS, null)?.forEach {
             pushKeywordItem(context, recommendedFeedFilterDialogBinding.groupAuthorUid).apply {
                 editInput.inputType = InputType.TYPE_CLASS_NUMBER
                 editInput.setText(it)
             }
         }
-        prefs.getStringSet("recommended_feed_filter_group_author_nickname", null)?.forEach {
+        prefs.getStringSet(RecommendedFeedFilterKey.AUTHOR_NICKNAME_KEYWORDS, null)?.forEach {
             pushKeywordItem(context, recommendedFeedFilterDialogBinding.groupAuthorNickname).apply {
                 editInput.setText(it)
             }
         }
-        recommendedFeedFilterDialogBinding.switchDescRegex.isChecked = prefs.getBoolean("recommended_feed_filter_desc_regex_mode", false)
-        prefs.getStringSet("recommended_feed_filter_group_aweme_desc", null)?.forEach {
+        recommendedFeedFilterDialogBinding.switchDescRegex.isChecked = prefs.getBoolean(RecommendedFeedFilterKey.DESC_REGEX_MODE, false)
+        prefs.getStringSet(RecommendedFeedFilterKey.DESC_KEYWORDS, null)?.forEach {
             pushKeywordItem(context, recommendedFeedFilterDialogBinding.groupAwemeDesc).apply {
                 editInput.setText(it)
             }
@@ -141,17 +143,17 @@ class RecommendedFeedFilterDialog(context: Context) : AlertDialog.Builder(contex
             }
 
             prefs.edit(commit = true) {
-                putBoolean("recommended_feed_filter_block_ad", blockAd)
-                putBoolean("recommended_feed_filter_block_ecom_aweme", blockEcomAweme)
-                putBoolean("recommended_feed_filter_block_groupon_large_card", blockGrouponLargeCard)
-                putInt("recommended_feed_filter_hide_short_duration_limit", hideShortDurationLimit)
-                putInt("recommended_feed_filter_hide_long_duration_limit", hideLongDurationLimit)
-                putBoolean("recommended_feed_filter_title_regex_mode", titleRegexMode)
-                putStringSet("recommended_feed_filter_group_aweme_title", titleKeywords)
-                putStringSet("recommended_feed_filter_group_author_uid", uidKeywords)
-                putStringSet("recommended_feed_filter_group_author_nickname", upKeywords)
-                putBoolean("recommended_feed_filter_desc_regex_mode", descRegexMode)
-                putStringSet("recommended_feed_filter_group_aweme_desc", descKeywords)
+                putBoolean(RecommendedFeedFilterKey.BLOCK_AD, blockAd)
+                putBoolean(RecommendedFeedFilterKey.BLOCK_ECOM, blockEcomAweme)
+                putBoolean(RecommendedFeedFilterKey.BLOCK_GROUPON, blockGrouponLargeCard)
+                putInt(RecommendedFeedFilterKey.SHORT_DURATION_LIMIT, hideShortDurationLimit)
+                putInt(RecommendedFeedFilterKey.LONG_DURATION_LIMIT, hideLongDurationLimit)
+                putBoolean(RecommendedFeedFilterKey.TITLE_REGEX_MODE, titleRegexMode)
+                putStringSet(RecommendedFeedFilterKey.TITLE_KEYWORDS, titleKeywords)
+                putStringSet(RecommendedFeedFilterKey.AUTHOR_UID_KEYWORDS, uidKeywords)
+                putStringSet(RecommendedFeedFilterKey.AUTHOR_NICKNAME_KEYWORDS, upKeywords)
+                putBoolean(RecommendedFeedFilterKey.DESC_REGEX_MODE, descRegexMode)
+                putStringSet(RecommendedFeedFilterKey.DESC_KEYWORDS, descKeywords)
             }
 
             (context as? Activity)?.runOnUiThread {

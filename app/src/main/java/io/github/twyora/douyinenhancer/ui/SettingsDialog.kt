@@ -15,6 +15,7 @@ import com.highcapable.yukihookapi.hook.factory.injectModuleAppResources
 import com.highcapable.yukihookapi.hook.log.YLog
 import io.github.twyora.douyinenhancer.R
 import io.github.twyora.douyinenhancer.config.FastKVConfigManager
+import io.github.twyora.douyinenhancer.config.key.MiscKey
 import io.github.twyora.douyinenhancer.generated.AppProperties
 import io.github.twyora.douyinenhancer.hook.DouyinPackage
 import io.github.twyora.douyinenhancer.hook.utils.setField
@@ -41,10 +42,10 @@ class SettingsDialog(context: Context) : AlertDialog.Builder(context) {
             preferenceManager.setField<Any?>(DouyinPackage.Field("mEditor"), null)
             addPreferencesFromResource(R.xml.prefs_setting)
 
-            if (!prefs.getBoolean("enable_hidden_features", false)) {
+            if (!prefs.getBoolean(MiscKey.ENABLE_HIDDEN_FEATURES, false)) {
                 val miscCategory = findPreference("pref_category_misc") as? PreferenceCategory
                 miscCategory?.let { category ->
-                    findPreference("enable_hidden_features")?.let {
+                    findPreference(MiscKey.ENABLE_HIDDEN_FEATURES)?.let {
                         category.removePreference(it)
                     }
                     if (category.preferenceCount == 0) {
@@ -67,10 +68,10 @@ class SettingsDialog(context: Context) : AlertDialog.Builder(context) {
 
             "version" -> {
                 val prefs = FastKVConfigManager.settings
-                if (!prefs.getBoolean("enable_hidden_features", false)) {
+                if (!prefs.getBoolean(MiscKey.ENABLE_HIDDEN_FEATURES, false)) {
                     if (++hiddenFeatureClickCount == 10) {
                         prefs.edit(commit = true) {
-                            putBoolean("enable_hidden_features", true)
+                            putBoolean(MiscKey.ENABLE_HIDDEN_FEATURES, true)
                         }
                         activity.runOnUiThread {
                             Toast.makeText(
