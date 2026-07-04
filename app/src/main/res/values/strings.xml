@@ -6,6 +6,7 @@
     <string name="settings_dialog_confirm_and_restart">Confirm &amp; Restart</string>
 
     <string name="pref_category_save">Save</string>
+    <string name="pref_category_recommend">Recommend</string>
     <string name="pref_comment_image_title">Remove Watermark from Comment Images</string>
     <string name="pref_comment_image_summary">Save watermark-free original comment images</string>
     <string name="pref_comment_emoji_title">Unlock Emoji Saving</string>

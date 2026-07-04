@@ -19,10 +19,10 @@
     </PreferenceCategory>
 
     <PreferenceCategory
-        android:title="推荐">
+        android:title="@string/pref_category_recommend">
         <Preference
             android:key="recommend_feed_filter"
-            android:title="推荐视频流过滤器"/>
+            android:title="@string/recommended_feed_filter_dialog_title"/>
     </PreferenceCategory>
 
     <PreferenceCategory

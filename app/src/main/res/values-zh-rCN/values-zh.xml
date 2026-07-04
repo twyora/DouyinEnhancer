@@ -6,6 +6,7 @@
     <string name="settings_dialog_back">返回</string>
     <string name="settings_dialog_confirm_and_restart">确定并重启客户端</string>
     <string name="pref_category_save">保存</string>
+    <string name="pref_category_recommend">推荐</string>
     <string name="pref_comment_image_title">评论图片去水印</string>
     <string name="pref_comment_image_summary">保存无水印评论原图</string>
     <string name="pref_comment_emoji_title">解锁表情保存</string>
