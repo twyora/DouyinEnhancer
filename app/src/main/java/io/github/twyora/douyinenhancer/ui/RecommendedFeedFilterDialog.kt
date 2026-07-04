@@ -5,6 +5,7 @@ import android.app.AlertDialog
 import android.content.Context
 import android.text.InputType
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.content.edit
@@ -21,11 +22,19 @@ class RecommendedFeedFilterDialog(context: Context) : AlertDialog.Builder(contex
         )
         val prefs = FastKVConfigManager.settings
 
+        // Show hidden block options when feature is enabled
+        val showBlockGroups = prefs.getBoolean("enable_hidden_features", false)
+        if (showBlockGroups) {
+            recommendedFeedFilterDialogBinding.groupBlockAd.visibility = View.VISIBLE
+            recommendedFeedFilterDialogBinding.groupBlockEcomAweme.visibility = View.VISIBLE
+            recommendedFeedFilterDialogBinding.groupBlockGrouponLargeCard.visibility = View.VISIBLE
+        }
+
         // restore state
-        recommendedFeedFilterDialogBinding.switchHideAd.isChecked = prefs.getBoolean("recommended_feed_filter_block_ad", false)
-        recommendedFeedFilterDialogBinding.switchHideEcomAweme.isChecked =
+        recommendedFeedFilterDialogBinding.switchBlockAd.isChecked = prefs.getBoolean("recommended_feed_filter_block_ad", false)
+        recommendedFeedFilterDialogBinding.switchBlockEcomAweme.isChecked =
             prefs.getBoolean("recommended_feed_filter_block_ecom_aweme", false)
-        recommendedFeedFilterDialogBinding.switchHideGrouponLargeCard.isChecked =
+        recommendedFeedFilterDialogBinding.switchBlockGrouponLargeCard.isChecked =
             prefs.getBoolean("recommended_feed_filter_block_groupon_large_card", false)
         prefs.getInt("recommended_feed_filter_hide_short_duration_limit", 0).let {
             recommendedFeedFilterDialogBinding.editShortDuration.setText(it.toString())
@@ -77,9 +86,9 @@ class RecommendedFeedFilterDialog(context: Context) : AlertDialog.Builder(contex
         setTitle(context.getString(R.string.recommended_feed_filter_dialog_title))
         setNegativeButton(android.R.string.cancel, null)
         setPositiveButton(android.R.string.ok) { _, _ ->
-            val blockAd = recommendedFeedFilterDialogBinding.switchHideAd.isChecked
-            val blockEcomAweme = recommendedFeedFilterDialogBinding.switchHideEcomAweme.isChecked
-            val blockGrouponLargeCard = recommendedFeedFilterDialogBinding.switchHideGrouponLargeCard.isChecked
+            val blockAd = recommendedFeedFilterDialogBinding.switchBlockAd.isChecked && showBlockGroups
+            val blockEcomAweme = recommendedFeedFilterDialogBinding.switchBlockEcomAweme.isChecked && showBlockGroups
+            val blockGrouponLargeCard = recommendedFeedFilterDialogBinding.switchBlockGrouponLargeCard.isChecked && showBlockGroups
             val hideShortDurationLimit = recommendedFeedFilterDialogBinding.editShortDuration.text.toString().toIntOrNull() ?: 0
             val hideLongDurationLimit = recommendedFeedFilterDialogBinding.editLongDuration.text.toString().toIntOrNull() ?: Int.MAX_VALUE
 

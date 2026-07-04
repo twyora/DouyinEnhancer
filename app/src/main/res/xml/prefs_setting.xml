@@ -26,6 +26,16 @@
     </PreferenceCategory>
 
     <PreferenceCategory
+        android:key="pref_category_misc"
+        android:title="@string/pref_category_misc">
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="enable_hidden_features"
+            android:summary="@string/pref_misc_enable_hidden_features_summary"
+            android:title="@string/pref_misc_enable_hidden_features_title" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
         android:key="pref_category_about"
         android:title="@string/pref_category_about">
 
