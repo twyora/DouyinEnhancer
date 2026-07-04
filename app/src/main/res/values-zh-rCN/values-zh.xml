@@ -11,14 +11,14 @@
     <string name="pref_comment_emoji_title">解锁表情保存</string>
     <string name="pref_comment_emoji_summary">解除评论区表情保存限制</string>
 
-    <string name="recommended_feed_filter_hide_ad_title">隐藏广告</string>
-    <string name="recommended_feed_filter_hide_ad_summary">尝试隐藏推荐流中的广告</string>
+    <string name="recommended_feed_filter_block_ad_title">屏蔽广告</string>
+    <string name="recommended_feed_filter_block_ad_summary">尝试屏蔽推荐流中的广告</string>
 
-    <string name="recommended_feed_filter_hide_ecom_aweme_title">隐藏电商推广</string>
-    <string name="recommended_feed_filter_hide_ecom_aweme_summary">尝试隐藏推荐流中的电商带货推广（可能误伤）</string>
+    <string name="recommended_feed_filter_block_ecom_aweme_title">屏蔽电商推广</string>
+    <string name="recommended_feed_filter_block_ecom_aweme_summary">尝试屏蔽推荐流中的电商带货推广（可能误伤）</string>
 
-    <string name="recommended_feed_filter_hide_groupon_large_card_title">隐藏团购卡片</string>
-    <string name="recommended_feed_filter_hide_groupon_large_card_summary">尝试隐藏推荐流中的团购活动大卡片</string>
+    <string name="recommended_feed_filter_block_groupon_large_card_title">屏蔽团购卡片</string>
+    <string name="recommended_feed_filter_block_groupon_large_card_summary">尝试屏蔽推荐流中的团购活动大卡片</string>
 
     <string name="recommended_feed_filter_hide_by_duration_title">隐藏指定时长的视频（毫秒）</string>
     <string name="recommended_feed_filter_hide_by_short_duration">隐藏视频时长小于</string>

@@ -10,16 +10,16 @@ import io.github.twyora.douyinenhancer.hook.utils.resolveMethod
 object FeedHooker : YukiBaseHooker() {
     private val TAG = this::class.simpleName
 
-    private val hideAdNeeded by lazy {
-        FastKVConfigManager.settings.getBoolean("recommended_feed_filter_hide_ad", false)
+    private val blockAdEnabled by lazy {
+        FastKVConfigManager.settings.getBoolean("recommended_feed_filter_block_ad", false)
     }
 
-    private val hideEcomNeeded by lazy {
-        FastKVConfigManager.settings.getBoolean("recommended_feed_filter_hide_ecom_aweme", false)
+    private val blockEcomEnabled by lazy {
+        FastKVConfigManager.settings.getBoolean("recommended_feed_filter_block_ecom_aweme", false)
     }
 
-    private val hideGrouponLargeCardNeeded by lazy {
-        FastKVConfigManager.settings.getBoolean("recommended_feed_filter_hide_groupon_large_card", false)
+    private val blockGrouponLargeCardEnabled by lazy {
+        FastKVConfigManager.settings.getBoolean("recommended_feed_filter_block_groupon_large_card", false)
     }
 
     private val hideShortDurationLimit by lazy {
@@ -79,16 +79,16 @@ object FeedHooker : YukiBaseHooker() {
                     while (iter.hasNext()) {
                         val awemeObj = iter.next() ?: continue
 
-                        if (hideAdNeeded && awemeObj.invokeMethod<Boolean?>(packageInstance.aweme.getAd()) == true) {
+                        if (blockAdEnabled && awemeObj.invokeMethod<Boolean?>(packageInstance.aweme.getAd()) == true) {
                             YLog.debug("$TAG: filtered by ad")
                             iter.remove()
                             continue
-                        } else if (hideEcomNeeded && awemeObj.invokeMethod<Boolean?>(packageInstance.aweme.isEcomAweme()) == true) {
+                        } else if (blockEcomEnabled && awemeObj.invokeMethod<Boolean?>(packageInstance.aweme.isEcomAweme()) == true) {
                             // NOTE: this filter logic has not been rigorously verified
                             YLog.debug("$TAG: filtered by ecom aweme")
                             iter.remove()
                             continue
-                        } else if (hideGrouponLargeCardNeeded && awemeObj.getField<Any?>(
+                        } else if (blockGrouponLargeCardEnabled && awemeObj.getField<Any?>(
                                 packageInstance.aweme.grouponLargeCard()
                             ) != null
                         ) {

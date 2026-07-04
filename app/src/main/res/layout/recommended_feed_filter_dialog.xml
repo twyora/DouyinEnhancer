@@ -28,13 +28,13 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/recommended_feed_filter_hide_ad_title"
+                    android:text="@string/recommended_feed_filter_block_ad_title"
                     android:textAppearance="?android:attr/textAppearanceListItem" />
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/recommended_feed_filter_hide_ad_summary"
+                    android:text="@string/recommended_feed_filter_block_ad_summary"
                     android:textAppearance="?android:attr/textAppearanceListItemSecondary" />
             </LinearLayout>
 
@@ -67,13 +67,13 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/recommended_feed_filter_hide_ecom_aweme_title"
+                    android:text="@string/recommended_feed_filter_block_ecom_aweme_title"
                     android:textAppearance="?android:attr/textAppearanceListItem" />
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/recommended_feed_filter_hide_ecom_aweme_summary"
+                    android:text="@string/recommended_feed_filter_block_ecom_aweme_summary"
                     android:textAppearance="?android:attr/textAppearanceListItemSecondary" />
             </LinearLayout>
 
@@ -106,13 +106,13 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/recommended_feed_filter_hide_groupon_large_card_title"
+                    android:text="@string/recommended_feed_filter_block_groupon_large_card_title"
                     android:textAppearance="?android:attr/textAppearanceListItem" />
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/recommended_feed_filter_hide_groupon_large_card_summary"
+                    android:text="@string/recommended_feed_filter_block_groupon_large_card_summary"
                     android:textAppearance="?android:attr/textAppearanceListItemSecondary" />
             </LinearLayout>
 
