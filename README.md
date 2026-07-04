@@ -20,13 +20,16 @@ A small Xposed module that adds quality-of-life features to Douyin.
 
 ## TODO
 
-- Video filtering
+- ~~Video filtering~~
+- [x] Recommended feed filtering
 - Save playing content to album
 - Save favorited emojis to album
 - [x] Module settings UI
 - Clear-screen playback without hiding danmaku
 - [x] Cache obfuscated method lookup results for faster host app startup
 - Save audio comments from comment section
+- Remove copyright restriction of Douyin Audio Mode
+- Backup and restore module settings
 
 ## Usage
 
