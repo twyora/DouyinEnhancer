@@ -11,6 +11,8 @@
     <string name="pref_comment_emoji_title">Unlock Emoji Saving</string>
     <string name="pref_comment_emoji_summary">Remove comment emoji save restrictions</string>
 
+    <string name="recommended_feed_filter_dialog_title">Recommended Feed Filter</string>
+
     <string name="recommended_feed_filter_block_ad_title">Block ads</string>
     <string name="recommended_feed_filter_block_ad_summary">Attempt to block ads in the feed</string>
 

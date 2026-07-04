@@ -69,7 +69,7 @@ class RecommendedFeedFilterDialog(context: Context) : AlertDialog.Builder(contex
         }
 
         setView(recommendedFeedFilterDialogBinding.root)
-        setTitle("首页推荐过滤器")
+        setTitle(context.getString(R.string.recommended_feed_filter_dialog_title))
         setNegativeButton(android.R.string.cancel, null)
         setPositiveButton(android.R.string.ok) { _, _ ->
             val blockAd = recommendedFeedFilterDialogBinding.switchHideAd.isChecked
