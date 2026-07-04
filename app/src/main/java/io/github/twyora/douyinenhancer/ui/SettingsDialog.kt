@@ -53,7 +53,6 @@ class SettingsDialog(context: Context) : AlertDialog.Builder(context) {
                 }
             }
 
-
             findPreference("version")?.summary = AppProperties.PROJECT_VERSION_NAME
             findPreference("version")?.onPreferenceClickListener = this
             findPreference("recommend_feed_filter")?.onPreferenceClickListener = this
