@@ -20,6 +20,9 @@
 
     <string name="recommended_feed_filter_dialog_title">Recommended Feed Filter</string>
     <string name="pref_recommend_feed_filter">✦ Recommended Feed Filter</string>
+    <string name="recommended_feed_filter_main_switch_title">Main switch</string>
+    <string name="recommended_feed_filter_main_switch_summary">Turn on to use recommended feed filtering features</string>
+
     <string name="save_failed_invalid_regex">Save failed, invalid regex pattern</string>
     <string name="save_failed_short_duration_exceeds_long">Save failed, minimum duration cannot exceed maximum duration</string>
     <string name="save_success_restart_required">Saved successfully. Some configurations will take effect after restarting the app</string>

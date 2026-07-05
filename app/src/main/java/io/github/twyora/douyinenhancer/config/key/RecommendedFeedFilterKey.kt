@@ -1,6 +1,7 @@
 package io.github.twyora.douyinenhancer.config.key
 
 object RecommendedFeedFilterKey {
+    const val MAIN_SWITCH = "recommended_feed_filter_main_switch"
     const val BLOCK_AD = "recommended_feed_filter_block_ad"
     const val BLOCK_ECOM = "recommended_feed_filter_block_ecom_aweme"
     const val BLOCK_GROUPON = "recommended_feed_filter_block_groupon_large_card"

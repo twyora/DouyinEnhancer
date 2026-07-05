@@ -25,6 +25,9 @@
     <string name="save_success_restart_required">保存成功，部分配置重启应用后生效</string>
     <string name="restart_required">部分功能需重启应用后生效</string>
 
+    <string name="recommended_feed_filter_main_switch_title">总开关</string>
+    <string name="recommended_feed_filter_main_switch_summary">开启后可以使用推荐流过滤功能</string>
+
     <string name="recommended_feed_filter_block_ad_title">✦ 屏蔽广告</string>
     <string name="recommended_feed_filter_block_ad_summary">尝试屏蔽推荐流中的广告</string>
 

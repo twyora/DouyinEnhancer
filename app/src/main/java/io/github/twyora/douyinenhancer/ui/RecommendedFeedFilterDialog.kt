@@ -33,6 +33,7 @@ class RecommendedFeedFilterDialog(context: Context) : AlertDialog.Builder(contex
         }
 
         // restore state
+        recommendedFeedFilterDialogBinding.switchMainSwitch.isChecked = prefs.getBoolean(RecommendedFeedFilterKey.MAIN_SWITCH, false)
         recommendedFeedFilterDialogBinding.switchBlockAd.isChecked = prefs.getBoolean(RecommendedFeedFilterKey.BLOCK_AD, false)
         recommendedFeedFilterDialogBinding.switchBlockEcomAweme.isChecked =
             prefs.getBoolean(RecommendedFeedFilterKey.BLOCK_ECOM, false)
@@ -88,6 +89,7 @@ class RecommendedFeedFilterDialog(context: Context) : AlertDialog.Builder(contex
         setTitle(context.getString(R.string.recommended_feed_filter_dialog_title))
         setNegativeButton(android.R.string.cancel, null)
         setPositiveButton(android.R.string.ok) { _, _ ->
+            val mainSwitch = recommendedFeedFilterDialogBinding.switchMainSwitch.isChecked
             val blockAd = recommendedFeedFilterDialogBinding.switchBlockAd.isChecked && showBlockGroups
             val blockEcomAweme = recommendedFeedFilterDialogBinding.switchBlockEcomAweme.isChecked && showBlockGroups
             val blockGrouponLargeCard = recommendedFeedFilterDialogBinding.switchBlockGrouponLargeCard.isChecked && showBlockGroups
@@ -143,6 +145,7 @@ class RecommendedFeedFilterDialog(context: Context) : AlertDialog.Builder(contex
             }
 
             prefs.edit(commit = true) {
+                putBoolean(RecommendedFeedFilterKey.MAIN_SWITCH, mainSwitch)
                 putBoolean(RecommendedFeedFilterKey.BLOCK_AD, blockAd)
                 putBoolean(RecommendedFeedFilterKey.BLOCK_ECOM, blockEcomAweme)
                 putBoolean(RecommendedFeedFilterKey.BLOCK_GROUPON, blockGrouponLargeCard)
