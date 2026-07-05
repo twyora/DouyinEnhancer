@@ -24,9 +24,11 @@ message Field {
 }
 
 message Comment {
-  optional Class class      = 1;
-  optional Field emoji      = 2;
-  optional Field image_list = 3;
+  optional Class class         = 1;
+  optional Field emoji         = 2;
+  optional Field image_list    = 3;
+  optional Field comment_audio = 4;
+  optional Field aweme_id      = 5;
 }
 
 message CommentImageStruct {
@@ -148,6 +150,12 @@ message FeedResponseHandler {
   optional Method processAwemeList = 2;
 }
 
+message AwemeService {
+  optional Class class_           = 1;
+  optional Method get_aweme_by_id = 2;
+  optional Method get_instance    = 3;
+}
+
 message HookInfo {
   uint64 last_update_time    = 1;
   uint32 module_version_code = 2;
@@ -173,4 +181,5 @@ message HookInfo {
   optional User                            user                                 = 21;
   optional Aweme                           aweme                                = 22;
   optional FeedResponseHandler             feed_response_handler                = 23;
+  optional AwemeService                    aweme_service                        = 24;
 }

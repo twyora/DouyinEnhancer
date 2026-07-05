@@ -91,6 +91,7 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
     val user = UserModule()
     val aweme = AwemeModule()
     val feedResponseHandler = FeedResponseHandlerModule()
+    val awemeService = AwemeServiceModule()
 
     inner class CommentImageStructModule {
         val selfClass by weak {
@@ -126,6 +127,10 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
         fun emoji() = Field(hookInfo.comment.emoji.nameOrNull)
 
         fun imageList() = Field(hookInfo.comment.imageList.nameOrNull)
+
+        fun commentAudio() = Field(hookInfo.comment.commentAudio.nameOrNull)
+
+        fun awemeId() = Field(hookInfo.comment.awemeId.nameOrNull)
     }
 
     inner class EmojiModule {
@@ -378,6 +383,23 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
         )
     }
 
+    inner class AwemeServiceModule {
+        val selfClass by weak {
+            hookInfo.awemeService.class_.nameOrNull
+                ?.toClass(classLoader)
+        }
+
+        fun getAwemeById() = Method(
+            hookInfo.awemeService.getAwemeById.nameOrNull,
+            hookInfo.awemeService.getAwemeById.parameters.valuesListOrNull
+        )
+
+        fun getInstance() = Method(
+            hookInfo.awemeService.getInstance.nameOrNull,
+            hookInfo.awemeService.getInstance.parameters.valuesListOrNull
+        )
+    }
+
     companion object {
         private val TAG = DouyinPackage::class.simpleName
 
@@ -553,6 +575,14 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
                         imageList =
                             field {
                                 name = "imageList"
+                            }
+                        commentAudio =
+                            field {
+                                name = "commentAudio"
+                            }
+                        awemeId =
+                            field {
+                                name = "awemeId"
                             }
                     }
 
@@ -1202,6 +1232,47 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
                                 "$TAG: Unable to populate ${this::class.simpleName} config, possibly due to unfound obfuscated methods"
                             )
                             return@feedResponseHandler
+                        }
+                    }.onFailure {
+                        YLog.error("$TAG: Unable to populate config", it)
+                    }
+                }
+
+                awemeService = awemeService {
+                    runCatching {
+                        val getInstanceMethodData = bridge.findMethod {
+                            matcher {
+                                declaredClass = "com.ss.android.ugc.aweme.awemeservice.AwemeService"
+                                invokeMethods {
+                                    add {
+                                        descriptor =
+                                            "Lcom/ss/android/ugc/MonsterSingleTon;->getServiceFromMap(Ljava/lang/Class;Z)Ljava/lang/Object;"
+                                    }
+                                }
+                            }
+                        }.singleOrNull() ?: run {
+                            YLog.error(
+                                "$TAG: Unable to populate ${this::class.simpleName} config, possibly due to unfound obfuscated methods"
+                            )
+                            return@awemeService
+                        }
+
+                        class_ = class_ {
+                            name = getInstanceMethodData.className
+                        }
+                        getAwemeById = method {
+                            name = "getAwemeById"
+                            parameters = MethodKt.parameters {
+                                values.clear()
+                                values.add("java.lang.String")
+                            }
+                        }
+                        getInstance = method {
+                            name = getInstanceMethodData.methodName
+                            parameters = MethodKt.parameters {
+                                values.clear()
+                                values.addAll(getInstanceMethodData.paramTypeNames)
+                            }
                         }
                     }.onFailure {
                         YLog.error("$TAG: Unable to populate config", it)
