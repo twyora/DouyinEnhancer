@@ -67,6 +67,10 @@ object RecommendedFeedHooker : YukiBaseHooker() {
     }
 
     override fun onHook() {
+        if (!FastKVConfigManager.settings.getBoolean(RecommendedFeedFilterKey.MAIN_SWITCH, false)) {
+            return
+        }
+
         val packageInstance = DouyinPackage.instance
 
         withProcess(mainProcessName) {
