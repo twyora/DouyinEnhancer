@@ -29,6 +29,12 @@ message Comment {
   optional Field image_list    = 3;
   optional Field comment_audio = 4;
   optional Field aweme_id      = 5;
+  optional Field cid           = 6;
+}
+
+message CommentAudioStruct {
+  optional Class class   = 1;
+  optional Field content = 2;
 }
 
 message CommentImageStruct {
@@ -60,8 +66,9 @@ message CommentLongPressItemModel {
 }
 
 message SaveImageActionItemOnClickExecutor{
-  optional Class  class    = 1;
-  optional Method on_click = 2;
+  optional Class  class     = 1;
+  optional Method on_click  = 2;
+  optional Field  host_item = 3;
 }
 
 message SaveImageActionItem {
@@ -69,7 +76,7 @@ message SaveImageActionItem {
   optional Field                              cmt_action_params      = 2;
   optional Field                              save_img_action_params = 3;
   optional SaveImageActionItemOnClickExecutor on_click_executor      = 4;
-  optional Method                             is_enabled             = 5;
+  optional Method                             is_visible             = 5;
 }
 
 message TokenCert{
@@ -144,6 +151,9 @@ message Aweme {
   optional Method is_normal_video    = 7;
   optional Method is_ecom_aweme      = 8;
   optional Field  groupon_large_card = 9;
+  optional Method get_aid            = 10;
+  optional Field  aid                = 11;
+  optional Field  comment_list       = 12;
 }
 
 message FeedResponseHandler {
@@ -160,6 +170,13 @@ message AwemeService {
 message CommentLongPressWhiteListProvider {
   optional Class  class          = 1;
   optional Method buildWhiteList = 2;
+}
+
+message GalleryShareHelper {
+  optional Class  class                = 1;
+  optional Method start_download       = 2;
+  optional Method submit_download_task = 3;
+  optional Field  download_url         = 4;
 }
 
 message HookInfo {
@@ -189,4 +206,6 @@ message HookInfo {
   optional FeedResponseHandler               feed_response_handler                  = 23;
   optional AwemeService                      aweme_service                          = 24;
   optional CommentLongPressWhiteListProvider comment_long_press_white_list_provider = 25;
+  optional GalleryShareHelper                gallery_share_helper                   = 26;
+  optional CommentAudioStruct                comment_audio_struct                   = 27;
 }
