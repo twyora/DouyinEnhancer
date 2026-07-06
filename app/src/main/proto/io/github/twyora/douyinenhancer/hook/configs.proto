@@ -69,6 +69,7 @@ message SaveImageActionItem {
   optional Field                              cmt_action_params      = 2;
   optional Field                              save_img_action_params = 3;
   optional SaveImageActionItemOnClickExecutor on_click_executor      = 4;
+  optional Method                             is_enabled             = 5;
 }
 
 message TokenCert{
@@ -151,9 +152,14 @@ message FeedResponseHandler {
 }
 
 message AwemeService {
-  optional Class class_           = 1;
+  optional Class  class           = 1;
   optional Method get_aweme_by_id = 2;
   optional Method get_instance    = 3;
+}
+
+message CommentLongPressWhiteListProvider {
+  optional Class  class          = 1;
+  optional Method buildWhiteList = 2;
 }
 
 message HookInfo {
@@ -163,23 +169,24 @@ message HookInfo {
   uint32 host_version_code   = 4;
   uint32 generation          = 5;
 
-  optional CommentImageStruct              comment_image_struct                 = 6;
-  optional UrlModel                        url_model                            = 7;
-  optional Comment                         comment                              = 8;
-  optional Emoji                           emoji                                = 9;
-  optional CommentActionParams             comment_action_params                = 10;
-  optional CommentLongPressItemModel       comment_long_press_item_model        = 11;
-  optional SaveImageActionItem             save_image_action_item               = 12;
-  optional CommentExtensionKt              comment_extension_kt                 = 13;
-  optional CommentImageSaveHelper          comment_image_save_helper            = 14;
-  optional DownloadInfo                    download_info                        = 15;
-  optional DigestUtils                     digest_utils                         = 16;
-  optional UGFileUtilsKt                   ug_file_utils                        = 17;
-  optional TokenCert                       token_cert                           = 18;
-  optional CommonItemView                  common_item_view                     = 19;
-  optional DouYinSettingNewVersionActivity dou_yin_setting_new_version_activity = 20;
-  optional User                            user                                 = 21;
-  optional Aweme                           aweme                                = 22;
-  optional FeedResponseHandler             feed_response_handler                = 23;
-  optional AwemeService                    aweme_service                        = 24;
+  optional CommentImageStruct                comment_image_struct                   = 6;
+  optional UrlModel                          url_model                              = 7;
+  optional Comment                           comment                                = 8;
+  optional Emoji                             emoji                                  = 9;
+  optional CommentActionParams               comment_action_params                  = 10;
+  optional CommentLongPressItemModel         comment_long_press_item_model          = 11;
+  optional SaveImageActionItem               save_image_action_item                 = 12;
+  optional CommentExtensionKt                comment_extension_kt                   = 13;
+  optional CommentImageSaveHelper            comment_image_save_helper              = 14;
+  optional DownloadInfo                      download_info                          = 15;
+  optional DigestUtils                       digest_utils                           = 16;
+  optional UGFileUtilsKt                     ug_file_utils                          = 17;
+  optional TokenCert                         token_cert                             = 18;
+  optional CommonItemView                    common_item_view                       = 19;
+  optional DouYinSettingNewVersionActivity   dou_yin_setting_new_version_activity   = 20;
+  optional User                              user                                   = 21;
+  optional Aweme                             aweme                                  = 22;
+  optional FeedResponseHandler               feed_response_handler                  = 23;
+  optional AwemeService                      aweme_service                          = 24;
+  optional CommentLongPressWhiteListProvider comment_long_press_white_list_provider = 25;
 }

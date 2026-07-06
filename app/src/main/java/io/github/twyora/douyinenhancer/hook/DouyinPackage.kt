@@ -92,6 +92,7 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
     val aweme = AwemeModule()
     val feedResponseHandler = FeedResponseHandlerModule()
     val awemeService = AwemeServiceModule()
+    val commentLongPressWhiteListProvider = CommentLongPressWhiteListProviderModule()
 
     inner class CommentImageStructModule {
         val selfClass by weak {
@@ -184,6 +185,11 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
         }
 
         val onClickExecutor = OnClickExecutorModule()
+
+        fun isEnabled() = Method(
+            hookInfo.saveImageActionItem.isEnabled.nameOrNull,
+            hookInfo.saveImageActionItem.isEnabled.parameters.valuesListOrNull
+        )
     }
 
     inner class CommentExtensionsKtModule {
@@ -397,6 +403,18 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
         fun getInstance() = Method(
             hookInfo.awemeService.getInstance.nameOrNull,
             hookInfo.awemeService.getInstance.parameters.valuesListOrNull
+        )
+    }
+
+    inner class CommentLongPressWhiteListProviderModule {
+        val selfClass by weak {
+            hookInfo.commentLongPressWhiteListProvider.class_.nameOrNull
+                ?.toClass(classLoader)
+        }
+
+        fun buildWhiteList() = Method(
+            hookInfo.commentLongPressWhiteListProvider.buildWhiteList.nameOrNull,
+            hookInfo.commentLongPressWhiteListProvider.buildWhiteList.parameters.valuesListOrNull
         )
     }
 
@@ -704,7 +722,24 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
                                         addUsingString("bpea-comment_save_image_to_album")
                                     }
                                 }.singleOrNull()
-                            if (cmtActionParamsFieldName == null || saveImageActionParamsFieldName == null || onClickMethodData == null) {
+                            val isEnabledMethodData = bridge
+                                .findMethod {
+                                    matcher {
+                                        modifiers=Modifier.PUBLIC or Modifier.FINAL
+                                        declaredClass=saveImageActionItemClsName
+                                        returnType="boolean"
+                                        usingFields{
+                                            add{
+                                                field{
+                                                    cmtActionParamsFieldName?.let{
+                                                        name=it
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }.singleOrNull()
+                            if (cmtActionParamsFieldName == null || saveImageActionParamsFieldName == null || onClickMethodData == null || isEnabledMethodData == null) {
                                 YLog.error(
                                     "$TAG: Unable to populate ${this::class.simpleName} config, possibly due to unfound obfuscated methods"
                                 )
@@ -733,6 +768,13 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
                                         values.clear()
                                         values.addAll(onClickMethodData.paramTypeNames)
                                     }
+                                }
+                            }
+                            isEnabled = method {
+                                name = isEnabledMethodData.methodName
+                                parameters = MethodKt.parameters {
+                                    values.clear()
+                                    values.addAll(isEnabledMethodData.paramTypeNames)
                                 }
                             }
                         }.onFailure {
@@ -1272,6 +1314,42 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
                             parameters = MethodKt.parameters {
                                 values.clear()
                                 values.addAll(getInstanceMethodData.paramTypeNames)
+                            }
+                        }
+                    }.onFailure {
+                        YLog.error("$TAG: Unable to populate config", it)
+                    }
+                }
+
+                commentLongPressWhiteListProvider = commentLongPressWhiteListProvider {
+                    runCatching {
+                        val buildWhiteListMethodData = bridge.findMethod {
+                            matcher {
+                                modifiers= Modifier.PUBLIC or Modifier.STATIC
+                                returnType="java.util.Set"
+                                params{
+                                    add("com.ss.android.ugc.aweme.comment.CommentActionParams")
+                                }
+                                usingStrings{
+                                    add("custom")
+                                    add("default")
+                                }
+                            }
+                        }.singleOrNull() ?: run {
+                            YLog.error(
+                                "$TAG: Unable to populate ${this::class.simpleName} config, possibly due to unfound obfuscated methods"
+                            )
+                            return@commentLongPressWhiteListProvider
+                        }
+
+                        class_ = class_ {
+                            name = buildWhiteListMethodData.className
+                        }
+                        buildWhiteList = method {
+                            name = buildWhiteListMethodData.methodName
+                            parameters = MethodKt.parameters {
+                                values.clear()
+                                values.addAll(buildWhiteListMethodData.paramTypeNames)
                             }
                         }
                     }.onFailure {
