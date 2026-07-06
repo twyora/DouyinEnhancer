@@ -1,13 +1,19 @@
 package io.github.twyora.douyinenhancer.hook
 
+import android.content.Context
+import android.net.Uri
+import com.highcapable.kavaref.KavaRef.Companion.asResolver
 import com.highcapable.yukihookapi.hook.core.YukiMemberHookCreator
 import com.highcapable.yukihookapi.hook.entity.YukiBaseHooker
 import com.highcapable.yukihookapi.hook.log.YLog
 import io.github.twyora.douyinenhancer.hook.utils.HookTransaction
 import io.github.twyora.douyinenhancer.hook.utils.getField
+import io.github.twyora.douyinenhancer.hook.utils.invokeMethod
+import io.github.twyora.douyinenhancer.hook.utils.invokeStaticMethod
 import io.github.twyora.douyinenhancer.hook.utils.resolveMethod
 import io.github.twyora.douyinenhancer.hook.utils.setField
 import org.json.JSONObject
+import java.io.FileInputStream
 
 object CommentVideoHooker : YukiBaseHooker() {
     private val TAG = this::class.simpleName
@@ -24,6 +30,9 @@ object CommentVideoHooker : YukiBaseHooker() {
             }
             transaction.add(::installInjectAudioUrlOnSaveClickHook.name) {
                 installInjectAudioUrlOnSaveClickHook()
+            }
+            transaction.add(::installSaveDownloadedAudioHook.name) {
+                installSaveDownloadedAudioHook()
             }
 
             transaction.commit()
@@ -171,6 +180,94 @@ object CommentVideoHooker : YukiBaseHooker() {
             onConductFailure { _, throwable ->
                 YLog.error("$TAG: hook failed to inject audio url on save click", throwable)
             }
+        }
+    }
+
+    private fun installSaveDownloadedAudioHook(): YukiMemberHookCreator.MemberHookCreator.Result? {
+        val packageInstance = DouyinPackage.instance
+
+        return packageInstance.commentImageSaveHelper.selfClass?.resolveMethod(
+            packageInstance.commentImageSaveHelper.onSuccessed()
+        )?.hook {
+            before {
+                val downloadInfo = args[0] ?: return@before
+
+                val dlUrl = downloadInfo.getField<String>(
+                    packageInstance.downloadInfo.url()
+                ) ?: return@before
+                if (!dlUrl.contains("&mime_type=audio")) {
+                    return@before
+                }
+
+                val dlInfoMimeType = downloadInfo.invokeMethod<String>(
+                    DouyinPackage.Method(
+                        name = "getMimeType",
+                        parameters = null
+                    )
+                )
+                YLog.debug("$TAG: dlInfoMimeType: $dlInfoMimeType")
+
+                val sourcePath = downloadInfo.invokeMethod<String>(
+                    packageInstance.downloadInfo.getTargetFilePath()
+                ) ?: return@before
+                val targetFileName = "audio_${
+                    packageInstance.digestUtils.selfClass?.invokeStaticMethod<String>(
+                        packageInstance.digestUtils.md5Hex(),
+                        dlUrl + System.currentTimeMillis().toString()
+                    )
+                }.m4a"
+
+                val context = instance.asResolver().firstFieldOrNull()?.get()?.asResolver()?.firstFieldOrNull {
+                    type = Context::class.java
+                }?.get<Context>() ?: run {
+                    YLog.error("$TAG: hook failed to extract context from download info")
+                    return@before
+                }
+
+                val targetUri = packageInstance.ugFileUtils.selfClass?.invokeStaticMethod<Uri>(
+                    DouyinPackage.Method(
+                        name = "getAudioUri",
+                        parameters = null
+                    ),
+                    context,
+                    targetFileName,
+                    "audio/mp4",
+                    "Music/douyin/audio",
+                    packageInstance.tokenCert.selfClass?.getConstructor(
+                        String::class.java
+                    )?.newInstance(
+                        "bpea-comment_save_image_to_album"
+                    )
+                ) ?: run {
+                    YLog.error("$TAG: hook failed to create audio media uri")
+                    return@before
+                }
+                if (targetUri == Uri.EMPTY) {
+                    YLog.error("$TAG: hook failed to create audio media uri, uri is empty")
+                    return@before
+                }
+
+                val copyState = runCatching {
+                    context.contentResolver.openOutputStream(targetUri)?.use { outputStream ->
+                        FileInputStream(sourcePath).use { inputStream ->
+                            inputStream.copyTo(outputStream)
+                        }
+                    }
+                    true
+                }.onFailure {
+                    YLog.error("$TAG: hook failed to copy audio to media store", it)
+                }.getOrDefault(false)
+
+                instance.invokeMethod<Any?>(
+                    packageInstance.commentImageSaveHelper.notifyResult(),
+                    context,
+                    copyState
+                )
+
+                resultNull()
+            }
+        }?.onConductFailure { _, throwable ->
+            YLog.error("$TAG: hook failed to save downloaded audio", throwable)
         }
     }
 
