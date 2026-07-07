@@ -102,6 +102,7 @@ message UGFileUtilsKt {
   optional Method get_external_storage_dir = 5;
   optional Method get_image_uri            = 6;
   optional Method create_uri               = 7;
+  optional Method get_audio_uri            = 8;
 }
 
 message CommentExtensionKt{
@@ -114,10 +115,17 @@ message CmtSaveToAlbumBtnClickedCallback{
   optional Method clicked_callback = 2;
 }
 
+message ListenerProviderParam{
+  optional Class class   = 1;
+  optional Field context = 2;
+  optional Field cert    = 3;
+}
+
 message CommentImageSaveHelper{
-  optional Class  class         = 1;
-  optional Method on_successed  = 2;
-  optional Method notify_result = 3;
+  optional Class  class                   = 1;
+  optional Method on_successed            = 2;
+  optional Method notify_result           = 3;
+  optional Field  listener_provider_param = 4;
 }
 
 message CommonItemView{
@@ -208,4 +216,5 @@ message HookInfo {
   optional CommentLongPressWhiteListProvider comment_long_press_white_list_provider = 25;
   optional GalleryShareHelper                gallery_share_helper                   = 26;
   optional CommentAudioStruct                comment_audio_struct                   = 27;
+  optional ListenerProviderParam             listener_provider_param                = 28;
 }

@@ -82,6 +82,7 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
     val commentLongPressItemModel = CommentLongPressItemModelModule()
     val saveImageActionItem = SaveImageActionItemModule()
     val commentExtensionsKt = CommentExtensionsKtModule()
+    val listenerProviderParam = ListenerProviderParamModule()
     val commentImageSaveHelper = CommentImageSaveHelperModule()
     val downloadInfo = DownloadInfoModule()
     val digestUtils = DigestUtilsModule()
@@ -219,6 +220,17 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
         )
     }
 
+    inner class ListenerProviderParamModule {
+        val selfClass by weak {
+            hookInfo.listenerProviderParam.class_.nameOrNull
+                ?.toClass(classLoader)
+        }
+
+        fun context() = Field(hookInfo.listenerProviderParam.context.nameOrNull)
+
+        fun cert() = Field(hookInfo.listenerProviderParam.cert.nameOrNull)
+    }
+
     inner class CommentImageSaveHelperModule {
         val selfClass by weak {
             hookInfo.commentImageSaveHelper.class_.nameOrNull
@@ -234,6 +246,8 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
             hookInfo.commentImageSaveHelper.notifyResult.nameOrNull,
             hookInfo.commentImageSaveHelper.notifyResult.parameters.valuesListOrNull
         )
+
+        fun listenerProviderParam() = Field(hookInfo.commentImageSaveHelper.listenerProviderParam.nameOrNull)
     }
 
     inner class DownloadInfoModule {
@@ -293,6 +307,11 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
         fun createUri() = Method(
             hookInfo.ugFileUtils.createUri.nameOrNull,
             hookInfo.ugFileUtils.createUri.parameters.valuesListOrNull
+        )
+
+        fun getAudioUri() = Method(
+            hookInfo.ugFileUtils.getAudioUri.nameOrNull,
+            hookInfo.ugFileUtils.getAudioUri.parameters.valuesListOrNull
         )
     }
 
@@ -901,10 +920,73 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
                     }
                 }
 
+                listenerProviderParam = listenerProviderParam {
+                    runCatching {
+                        val clsData = bridge.findClass {
+                            matcher {
+                                modifiers = Modifier.PUBLIC or Modifier.FINAL
+                                fields {
+                                    add {
+                                        type {
+                                            descriptor = "Landroid/content/Context;"
+                                        }
+                                    }
+                                    add {
+                                        type {
+                                            descriptor = "Lcom/bytedance/bpea/cert/token/TokenCert;"
+                                        }
+                                    }
+                                }
+                                method {
+                                    name = "toString"
+                                    usingStrings {
+                                        add("ListenerProviderParam(context=")
+                                    }
+                                }
+                            }
+                        }.singleOrNull()
+
+                        val clsName = clsData?.name
+
+                        val contextFieldName = clsName
+                            ?.toClass(hostAppClassLoader)
+                            ?.resolve()
+                            ?.firstFieldOrNull {
+                                type = "android.content.Context"
+                            }?.self?.name
+
+                        val certFieldName = clsName
+                            ?.toClass(hostAppClassLoader)
+                            ?.resolve()
+                            ?.firstFieldOrNull {
+                                type = "com.bytedance.bpea.cert.token.TokenCert"
+                            }?.self?.name
+
+                        if (clsName == null || contextFieldName == null || certFieldName == null) {
+                            YLog.error(
+                                "$TAG: Unable to populate ${this::class.simpleName} config, possibly due to unfound obfuscated fields"
+                            )
+                            return@listenerProviderParam
+                        }
+
+                        class_ = class_ {
+                            name = clsName
+                        }
+                        this.context = field {
+                            name = contextFieldName
+                        }
+                        cert = field {
+                            name = certFieldName
+                        }
+                    }.onFailure {
+                        YLog.error("$TAG: Unable to populate config", it)
+                    }
+                }
+
                 commentImageSaveHelper =
                     commentImageSaveHelper {
                         runCatching {
-                            bridge
+                            val onSuccessedMethodData = bridge
                                 .findMethod {
                                     matcher {
                                         name = "onSuccessed"
@@ -925,49 +1007,53 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
                                         }
                                     }
                                 }.singleOrNull()
-                                ?.also { match ->
-                                    val notifyResultMethod =
-                                        match.className
-                                            .toClass(hostAppClassLoader)
-                                            .resolve()
-                                            .firstMethodOrNull {
-                                                modifiers(Modifiers.PUBLIC, Modifiers.FINAL)
-                                                parameters(Context::class, Boolean::class)
-                                                parameterCount = 2
-                                                superclass()
-                                            }?.self
-                                    if (notifyResultMethod == null) {
-                                        return@commentImageSaveHelper
-                                    }
 
-                                    class_ =
-                                        class_ {
-                                            name = match.className
-                                        }
-                                    onSuccessed =
-                                        method {
-                                            name = match.methodName
-                                            parameters =
-                                                MethodKt.parameters {
-                                                    values.clear()
-                                                    values.addAll(match.paramTypeNames)
-                                                }
-                                        }
-                                    notifyResult =
-                                        method {
-                                            name = notifyResultMethod.name
-                                            parameters =
-                                                MethodKt.parameters {
-                                                    values.clear()
-                                                    notifyResultMethod.parameterTypes.forEach { paramType ->
-                                                        values.add(paramType.name)
-                                                    }
-                                                }
-                                        }
-                                } ?: run {
+                            val clsName = onSuccessedMethodData?.declaredClassName
+
+                            val notifyResultMethod =
+                                clsName?.toClass(hostAppClassLoader)?.resolve()
+                                    ?.firstMethodOrNull {
+                                        modifiers(Modifiers.PUBLIC, Modifiers.FINAL)
+                                        parameters(Context::class, Boolean::class)
+                                        parameterCount = 2
+                                        superclass()
+                                    }?.self
+                            val listenerProviderParamFieldName = clsName?.toClass(hostAppClassLoader)?.resolve()?.firstFieldOrNull {
+                                type = this@hookInfo.listenerProviderParam.class_.nameOrNull
+                            }?.self?.name
+                            if (onSuccessedMethodData == null || notifyResultMethod == null || listenerProviderParamFieldName == null) {
                                 YLog.error(
                                     "$TAG: Unable to populate ${this::class.simpleName} config, possibly due to unfound obfuscated methods"
                                 )
+                                return@commentImageSaveHelper
+                            }
+
+                            class_ =
+                                class_ {
+                                    name = clsName
+                                }
+                            onSuccessed =
+                                method {
+                                    name = onSuccessedMethodData.name
+                                    parameters =
+                                        MethodKt.parameters {
+                                            values.clear()
+                                            values.addAll(onSuccessedMethodData.paramTypeNames)
+                                        }
+                                }
+                            notifyResult =
+                                method {
+                                    name = notifyResultMethod.name
+                                    parameters =
+                                        MethodKt.parameters {
+                                            values.clear()
+                                            notifyResultMethod.parameterTypes.forEach { paramType ->
+                                                values.add(paramType.name)
+                                            }
+                                        }
+                                }
+                            listenerProviderParam = field {
+                                name = listenerProviderParamFieldName
                             }
                             return@commentImageSaveHelper
                         }.onFailure {
@@ -1102,8 +1188,18 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
                                 )
                                 parameterCount = 4
                             }?.self
+                            val getAudioUriMethod = ugFileUtilsClsName.toClass(hostAppClassLoader).resolve().firstMethodOrNull {
+                                name = "getAudioUri"
+                                parameters(
+                                    Context::class,
+                                    String::class,
+                                    String::class,
+                                    String::class,
+                                    "com.bytedance.bpea.cert.token.TokenCert"
+                                )
+                            }?.self
                             if (copyFileMethod == null || getStorageDirMethod == null || getExternalStorageDirectoryMethod == null ||
-                                getImageUriMethod == null || createUriMethod == null
+                                getImageUriMethod == null || createUriMethod == null || getAudioUriMethod == null
                             ) {
                                 YLog.error(
                                     "$TAG: Unable to populate ${this::class.simpleName} config, possibly due to unfound obfuscated methods"
@@ -1169,6 +1265,16 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
                                     MethodKt.parameters {
                                         values.clear()
                                         createUriMethod.parameterTypes.forEach { paramType ->
+                                            values.add(paramType.name)
+                                        }
+                                    }
+                            }
+                            getAudioUri = method {
+                                name = getAudioUriMethod.name
+                                parameters =
+                                    MethodKt.parameters {
+                                        values.clear()
+                                        getAudioUriMethod.parameterTypes.forEach { paramType ->
                                             values.add(paramType.name)
                                         }
                                     }

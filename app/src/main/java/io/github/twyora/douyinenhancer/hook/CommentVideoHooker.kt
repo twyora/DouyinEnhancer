@@ -2,10 +2,10 @@ package io.github.twyora.douyinenhancer.hook
 
 import android.content.Context
 import android.net.Uri
-import com.highcapable.kavaref.KavaRef.Companion.asResolver
 import com.highcapable.yukihookapi.hook.core.YukiMemberHookCreator
 import com.highcapable.yukihookapi.hook.entity.YukiBaseHooker
 import com.highcapable.yukihookapi.hook.log.YLog
+import io.github.twyora.douyinenhancer.hook.utils.FileTypeDetector
 import io.github.twyora.douyinenhancer.hook.utils.HookTransaction
 import io.github.twyora.douyinenhancer.hook.utils.getField
 import io.github.twyora.douyinenhancer.hook.utils.invokeMethod
@@ -192,51 +192,44 @@ object CommentVideoHooker : YukiBaseHooker() {
             before {
                 val downloadInfo = args[0] ?: return@before
 
-                val dlUrl = downloadInfo.getField<String>(
-                    packageInstance.downloadInfo.url()
-                ) ?: return@before
-                if (!dlUrl.contains("&mime_type=audio")) {
-                    return@before
-                }
-
-                val dlInfoMimeType = downloadInfo.invokeMethod<String>(
-                    DouyinPackage.Method(
-                        name = "getMimeType",
-                        parameters = null
-                    )
-                )
-                YLog.debug("$TAG: dlInfoMimeType: $dlInfoMimeType")
-
                 val sourcePath = downloadInfo.invokeMethod<String>(
                     packageInstance.downloadInfo.getTargetFilePath()
                 ) ?: return@before
+                val ftypeInfo = FileTypeDetector.detect(sourcePath)
+                val dlUrl = downloadInfo.getField<String>(
+                    packageInstance.downloadInfo.url()
+                ) ?: return@before
+
+                if (!dlUrl.contains("mime_type=audio") || !ftypeInfo.mimeType.startsWith("audio/")) {
+                    return@before
+                }
+
                 val targetFileName = "audio_${
                     packageInstance.digestUtils.selfClass?.invokeStaticMethod<String>(
                         packageInstance.digestUtils.md5Hex(),
                         dlUrl + System.currentTimeMillis().toString()
                     )
-                }.m4a"
+                }.${ftypeInfo.extensions.first()}"
 
-                val context = instance.asResolver().firstFieldOrNull()?.get()?.asResolver()?.firstFieldOrNull {
-                    type = Context::class.java
-                }?.get<Context>() ?: run {
+                val context = instance.getField<Any>(
+                    packageInstance.commentImageSaveHelper.listenerProviderParam()
+                )?.getField<Context>(
+                    packageInstance.listenerProviderParam.context()
+                ) ?: run {
                     YLog.error("$TAG: hook failed to extract context from download info")
                     return@before
                 }
 
                 val targetUri = packageInstance.ugFileUtils.selfClass?.invokeStaticMethod<Uri>(
-                    DouyinPackage.Method(
-                        name = "getAudioUri",
-                        parameters = null
-                    ),
+                    packageInstance.ugFileUtils.getAudioUri(),
                     context,
                     targetFileName,
-                    "audio/mp4",
+                    ftypeInfo.mimeType,
                     "Music/douyin/audio",
-                    packageInstance.tokenCert.selfClass?.getConstructor(
-                        String::class.java
-                    )?.newInstance(
-                        "bpea-comment_save_image_to_album"
+                    instance.getField<Any>(
+                        packageInstance.commentImageSaveHelper.listenerProviderParam()
+                    )?.getField<Any>(
+                        packageInstance.listenerProviderParam.cert()
                     )
                 ) ?: run {
                     YLog.error("$TAG: hook failed to create audio media uri")
