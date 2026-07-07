@@ -108,11 +108,6 @@ message CommentExtensionKt{
   optional Method has_valid_image_url = 2;
 }
 
-message CmtSaveToAlbumBtnClickedCallback{
-  optional Class  class            = 1;
-  optional Method clicked_callback = 2;
-}
-
 message ListenerProviderParam{
   optional Class class   = 1;
   optional Field context = 2;
