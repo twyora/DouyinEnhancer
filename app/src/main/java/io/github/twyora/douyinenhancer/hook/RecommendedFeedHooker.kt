@@ -11,17 +11,14 @@ import io.github.twyora.douyinenhancer.hook.utils.resolveMethod
 object RecommendedFeedHooker : YukiBaseHooker() {
     private val TAG = this::class.simpleName
 
-    private val blockAdEnabled by lazy {
-        FastKVConfigManager.settings.getBoolean(RecommendedFeedFilterKey.BLOCK_AD, false)
-    }
+    private val blockAdEnabled
+        get() = FastKVConfigManager.settings.getBoolean(RecommendedFeedFilterKey.BLOCK_AD, false)
 
-    private val blockEcomEnabled by lazy {
-        FastKVConfigManager.settings.getBoolean(RecommendedFeedFilterKey.BLOCK_ECOM, false)
-    }
+    private val blockEcomEnabled
+        get() = FastKVConfigManager.settings.getBoolean(RecommendedFeedFilterKey.BLOCK_ECOM, false)
 
-    private val blockGrouponLargeCardEnabled by lazy {
-        FastKVConfigManager.settings.getBoolean(RecommendedFeedFilterKey.BLOCK_GROUPON, false)
-    }
+    private val blockGrouponLargeCardEnabled
+        get() = FastKVConfigManager.settings.getBoolean(RecommendedFeedFilterKey.BLOCK_GROUPON, false)
 
     private val hideShortDurationLimit by lazy {
         FastKVConfigManager.settings.getInt(RecommendedFeedFilterKey.SHORT_DURATION_LIMIT, 0)
