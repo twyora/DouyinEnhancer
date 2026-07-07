@@ -14,8 +14,8 @@ import io.github.twyora.douyinenhancer.hook.utils.invokeMethod
 import io.github.twyora.douyinenhancer.hook.utils.invokeStaticMethod
 import io.github.twyora.douyinenhancer.hook.utils.resolveMethod
 import io.github.twyora.douyinenhancer.hook.utils.setField
-import org.json.JSONObject
 import java.io.FileInputStream
+import org.json.JSONObject
 
 object CommentAudioHooker : YukiBaseHooker() {
     private val TAG = this::class.simpleName
