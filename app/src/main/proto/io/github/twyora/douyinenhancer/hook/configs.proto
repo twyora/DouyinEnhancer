@@ -28,8 +28,6 @@ message Comment {
   optional Field emoji         = 2;
   optional Field image_list    = 3;
   optional Field comment_audio = 4;
-  optional Field aweme_id      = 5;
-  optional Field cid           = 6;
 }
 
 message CommentAudioStruct {
@@ -159,9 +157,6 @@ message Aweme {
   optional Method is_normal_video    = 7;
   optional Method is_ecom_aweme      = 8;
   optional Field  groupon_large_card = 9;
-  optional Method get_aid            = 10;
-  optional Field  aid                = 11;
-  optional Field  comment_list       = 12;
 }
 
 message FeedResponseHandler {
@@ -169,22 +164,9 @@ message FeedResponseHandler {
   optional Method processAwemeList = 2;
 }
 
-message AwemeService {
-  optional Class  class           = 1;
-  optional Method get_aweme_by_id = 2;
-  optional Method get_instance    = 3;
-}
-
 message CommentLongPressWhiteListProvider {
   optional Class  class          = 1;
   optional Method buildWhiteList = 2;
-}
-
-message GalleryShareHelper {
-  optional Class  class                = 1;
-  optional Method start_download       = 2;
-  optional Method submit_download_task = 3;
-  optional Field  download_url         = 4;
 }
 
 message HookInfo {
@@ -212,9 +194,7 @@ message HookInfo {
   optional User                              user                                   = 21;
   optional Aweme                             aweme                                  = 22;
   optional FeedResponseHandler               feed_response_handler                  = 23;
-  optional AwemeService                      aweme_service                          = 24;
-  optional CommentLongPressWhiteListProvider comment_long_press_white_list_provider = 25;
-  optional GalleryShareHelper                gallery_share_helper                   = 26;
-  optional CommentAudioStruct                comment_audio_struct                   = 27;
-  optional ListenerProviderParam             listener_provider_param                = 28;
+  optional CommentLongPressWhiteListProvider comment_long_press_white_list_provider = 24;
+  optional CommentAudioStruct                comment_audio_struct                   = 25;
+  optional ListenerProviderParam             listener_provider_param                = 26;
 }

@@ -93,9 +93,7 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
     val user = UserModule()
     val aweme = AwemeModule()
     val feedResponseHandler = FeedResponseHandlerModule()
-    val awemeService = AwemeServiceModule()
     val commentLongPressWhiteListProvider = CommentLongPressWhiteListProviderModule()
-    val galleryShareHelper = GalleryShareHelperModule()
 
     inner class CommentImageStructModule {
         val selfClass by weak {
@@ -133,10 +131,6 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
         fun imageList() = Field(hookInfo.comment.imageList.nameOrNull)
 
         fun commentAudio() = Field(hookInfo.comment.commentAudio.nameOrNull)
-
-        fun awemeId() = Field(hookInfo.comment.awemeId.nameOrNull)
-
-        fun cid() = Field(hookInfo.comment.cid.nameOrNull)
     }
 
     inner class CommentAudioStructModule {
@@ -410,15 +404,6 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
         )
 
         fun grouponLargeCard() = Field(hookInfo.aweme.grouponLargeCard.nameOrNull)
-
-        fun getAid() = Method(
-            hookInfo.aweme.getAid.nameOrNull,
-            hookInfo.aweme.getAid.parameters.valuesListOrNull
-        )
-
-        fun aid() = Field(hookInfo.aweme.aid.nameOrNull)
-
-        fun commentList() = Field(hookInfo.aweme.commentList.nameOrNull)
     }
 
     inner class FeedResponseHandlerModule {
@@ -433,23 +418,6 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
         )
     }
 
-    inner class AwemeServiceModule {
-        val selfClass by weak {
-            hookInfo.awemeService.class_.nameOrNull
-                ?.toClass(classLoader)
-        }
-
-        fun getAwemeById() = Method(
-            hookInfo.awemeService.getAwemeById.nameOrNull,
-            hookInfo.awemeService.getAwemeById.parameters.valuesListOrNull
-        )
-
-        fun getInstance() = Method(
-            hookInfo.awemeService.getInstance.nameOrNull,
-            hookInfo.awemeService.getInstance.parameters.valuesListOrNull
-        )
-    }
-
     inner class CommentLongPressWhiteListProviderModule {
         val selfClass by weak {
             hookInfo.commentLongPressWhiteListProvider.class_.nameOrNull
@@ -460,25 +428,6 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
             hookInfo.commentLongPressWhiteListProvider.buildWhiteList.nameOrNull,
             hookInfo.commentLongPressWhiteListProvider.buildWhiteList.parameters.valuesListOrNull
         )
-    }
-
-    inner class GalleryShareHelperModule {
-        val selfClass by weak {
-            hookInfo.galleryShareHelper.class_.nameOrNull
-                ?.toClass(classLoader)
-        }
-
-        fun startDownload() = Method(
-            hookInfo.galleryShareHelper.startDownload.nameOrNull,
-            hookInfo.galleryShareHelper.startDownload.parameters.valuesListOrNull
-        )
-
-        fun submitDownloadTask() = Method(
-            hookInfo.galleryShareHelper.submitDownloadTask.nameOrNull,
-            hookInfo.galleryShareHelper.submitDownloadTask.parameters.valuesListOrNull
-        )
-
-        fun downloadUrl() = Field(hookInfo.galleryShareHelper.downloadUrl.nameOrNull)
     }
 
     companion object {
@@ -660,14 +609,6 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
                         commentAudio =
                             field {
                                 name = "commentAudio"
-                            }
-                        awemeId =
-                            field {
-                                name = "awemeId"
-                            }
-                        cid =
-                            field {
-                                name = "cid"
                             }
                     }
 
@@ -1402,15 +1343,6 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
                     grouponLargeCard = field {
                         name = "grouponLargeCard"
                     }
-                    getAid = method {
-                        name = "getAid"
-                    }
-                    aid = field {
-                        name = "aid"
-                    }
-                    commentList = field {
-                        name = "commentList"
-                    }
                 }
 
                 feedResponseHandler = feedResponseHandler {
@@ -1465,47 +1397,6 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
                     }
                 }
 
-                awemeService = awemeService {
-                    runCatching {
-                        val getInstanceMethodData = bridge.findMethod {
-                            matcher {
-                                declaredClass = "com.ss.android.ugc.aweme.awemeservice.AwemeService"
-                                invokeMethods {
-                                    add {
-                                        descriptor =
-                                            "Lcom/ss/android/ugc/MonsterSingleTon;->getServiceFromMap(Ljava/lang/Class;Z)Ljava/lang/Object;"
-                                    }
-                                }
-                            }
-                        }.singleOrNull() ?: run {
-                            YLog.error(
-                                "$TAG: Unable to populate ${this::class.simpleName} config, possibly due to unfound obfuscated methods"
-                            )
-                            return@awemeService
-                        }
-
-                        class_ = class_ {
-                            name = getInstanceMethodData.className
-                        }
-                        getAwemeById = method {
-                            name = "getAwemeById"
-                            parameters = MethodKt.parameters {
-                                values.clear()
-                                values.add("java.lang.String")
-                            }
-                        }
-                        getInstance = method {
-                            name = getInstanceMethodData.methodName
-                            parameters = MethodKt.parameters {
-                                values.clear()
-                                values.addAll(getInstanceMethodData.paramTypeNames)
-                            }
-                        }
-                    }.onFailure {
-                        YLog.error("$TAG: Unable to populate config", it)
-                    }
-                }
-
                 commentLongPressWhiteListProvider = commentLongPressWhiteListProvider {
                     runCatching {
                         val buildWhiteListMethodData = bridge.findMethod {
@@ -1536,99 +1427,6 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
                                 values.clear()
                                 values.addAll(buildWhiteListMethodData.paramTypeNames)
                             }
-                        }
-                    }.onFailure {
-                        YLog.error("$TAG: Unable to populate config", it)
-                    }
-                }
-
-                galleryShareHelper = galleryShareHelper {
-                    runCatching {
-                        val startDownloadMethodData = bridge.findMethod {
-                            matcher {
-                                modifiers = Modifier.PUBLIC or Modifier.FINAL
-                                returnType = "void"
-                                params {
-                                    add("com.ss.android.ugc.aweme.feed.model.Aweme")
-                                    add("java.lang.String")
-                                }
-                                usingFields {
-                                    add {
-                                        descriptor =
-                                            $$"Lcom/ss/android/ugc/aweme/app/DownloadMessageMonitorUtils$ForbidType;->NETWORK:Lcom/ss/android/ugc/aweme/app/DownloadMessageMonitorUtils$ForbidType;"
-                                    }
-                                }
-                                invokeMethods {
-                                    add {
-                                        descriptor =
-                                            "Lcom/ss/android/ugc/aweme/feed/model/Aweme;->getVideo()Lcom/ss/android/ugc/aweme/feed/model/Video;"
-                                    }
-                                    add {
-                                        descriptor =
-                                            "Lcom/ss/android/common/util/NetworkUtils;->isNetworkAvailable(Landroid/content/Context;)Z"
-                                    }
-                                }
-                            }
-                        }.singleOrNull() ?: run {
-                            YLog.error(
-                                "$TAG: Unable to populate ${this::class.simpleName} config, possibly due to unfound obfuscated methods"
-                            )
-                            return@galleryShareHelper
-                        }
-
-                        val submitDownloadTaskMethodData = bridge.findMethod {
-                            matcher {
-                                declaredClass = startDownloadMethodData.declaredClassName
-                                usingStrings {
-                                    add(".mp4\"")
-                                    add("download_start")
-                                }
-                            }
-                        }.singleOrNull() ?: run {
-                            YLog.error(
-                                "$TAG: Unable to populate ${this::class.simpleName} config, possibly due to unfound obfuscated methods"
-                            )
-                            return@galleryShareHelper
-                        }
-                        val downloadUrlFieldData = bridge.findField {
-                            matcher {
-                                modifiers = Modifier.PUBLIC
-                                declaredClass = submitDownloadTaskMethodData.declaredClassName
-                                type = "java.lang.String"
-                                readMethods {
-                                    add {
-                                        descriptor = submitDownloadTaskMethodData.descriptor
-                                    }
-                                }
-                            }
-                        }.singleOrNull()
-
-                        if (downloadUrlFieldData == null) {
-                            YLog.error(
-                                "$TAG: Unable to populate ${this::class.simpleName} config, possibly due to unfound obfuscated methods"
-                            )
-                            return@galleryShareHelper
-                        }
-
-                        class_ = class_ {
-                            name = startDownloadMethodData.className
-                        }
-                        startDownload = method {
-                            name = startDownloadMethodData.methodName
-                            parameters = MethodKt.parameters {
-                                values.clear()
-                                values.addAll(startDownloadMethodData.paramTypeNames)
-                            }
-                        }
-                        submitDownloadTask = method {
-                            name = submitDownloadTaskMethodData.methodName
-                            parameters = MethodKt.parameters {
-                                values.clear()
-                                values.addAll(submitDownloadTaskMethodData.paramTypeNames)
-                            }
-                        }
-                        downloadUrl = field {
-                            name = downloadUrlFieldData.fieldName
                         }
                     }.onFailure {
                         YLog.error("$TAG: Unable to populate config", it)
