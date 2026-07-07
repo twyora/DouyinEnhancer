@@ -39,6 +39,12 @@
     <string name="recommended_feed_filter_block_groupon_large_card_title">✦ Block group-buying cards</string>
     <string name="recommended_feed_filter_block_groupon_large_card_summary">Attempt to block large group-buying event cards in the feed</string>
 
+    <string name="recommended_feed_filter_block_live_title">✦ Block livestreams</string>
+    <string name="recommended_feed_filter_block_live_summary">Attempt to block livestream content in the feed (Experimental)</string>
+
+    <string name="recommended_feed_filter_block_multi_image_title">✦ Block multi-image posts</string>
+    <string name="recommended_feed_filter_block_multi_image_summary">Attempt to block multi-image posts in the feed (Experimental)</string>
+
     <string name="recommended_feed_filter_hide_by_duration_title">Hide videos by duration (ms)</string>
     <string name="recommended_feed_filter_hide_by_short_duration">Hide shorter than</string>
     <string name="recommended_feed_filter_hide_by_long_duration">Hide longer than</string>

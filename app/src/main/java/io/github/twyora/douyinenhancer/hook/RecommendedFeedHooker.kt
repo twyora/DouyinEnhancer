@@ -20,6 +20,12 @@ object RecommendedFeedHooker : YukiBaseHooker() {
     private val blockGrouponLargeCardEnabled
         get() = FastKVConfigManager.settings.getBoolean(RecommendedFeedFilterKey.BLOCK_GROUPON, false)
 
+    private val blockLiveEnabled
+        get() = FastKVConfigManager.settings.getBoolean(RecommendedFeedFilterKey.BLOCK_LIVE, false)
+
+    private val blockMultiImageEnabled
+        get() = FastKVConfigManager.settings.getBoolean(RecommendedFeedFilterKey.BLOCK_MULTI_IMAGE, false)
+
     private val hideShortDurationLimit by lazy {
         FastKVConfigManager.settings.getInt(RecommendedFeedFilterKey.SHORT_DURATION_LIMIT, 0)
     }
@@ -96,6 +102,16 @@ object RecommendedFeedHooker : YukiBaseHooker() {
                         ) {
                             // NOTE: this filter logic has not been rigorously verified
                             YLog.debug("$TAG: filtered by groupon large card")
+                            iter.remove()
+                            continue
+                        } else if (blockLiveEnabled && awemeObj.invokeMethod<Boolean?>(packageInstance.aweme.isLive()) == true) {
+                            // NOTE: this filter logic has not been rigorously verified
+                            YLog.debug("$TAG: filtered by live")
+                            iter.remove()
+                            continue
+                        } else if (blockMultiImageEnabled && awemeObj.invokeMethod<Boolean?>(packageInstance.aweme.isMultiImage()) == true) {
+                            // NOTE: this filter logic has not been rigorously verified
+                            YLog.debug("$TAG: filtered by multi image")
                             iter.remove()
                             continue
                         } else if (run {

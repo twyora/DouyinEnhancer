@@ -39,6 +39,12 @@
     <string name="recommended_feed_filter_block_groupon_large_card_title">✦ 屏蔽团购卡片</string>
     <string name="recommended_feed_filter_block_groupon_large_card_summary">尝试屏蔽推荐流中的团购活动大卡片</string>
 
+    <string name="recommended_feed_filter_block_live_title">✦ 屏蔽直播</string>
+    <string name="recommended_feed_filter_block_live_summary">尝试屏蔽推荐流中的直播内容（实验性功能）</string>
+
+    <string name="recommended_feed_filter_block_multi_image_title">✦ 屏蔽图文</string>
+    <string name="recommended_feed_filter_block_multi_image_summary">尝试屏蔽推荐流中的图文内容（实验性功能）</string>
+
     <string name="recommended_feed_filter_hide_by_duration_title">隐藏指定时长的视频（毫秒）</string>
     <string name="recommended_feed_filter_hide_by_short_duration">隐藏视频时长小于</string>
     <string name="recommended_feed_filter_hide_by_long_duration">隐藏视频时长大于</string>

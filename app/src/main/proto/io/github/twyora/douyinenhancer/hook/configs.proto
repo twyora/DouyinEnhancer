@@ -152,6 +152,8 @@ message Aweme {
   optional Method is_normal_video    = 7;
   optional Method is_ecom_aweme      = 8;
   optional Field  groupon_large_card = 9;
+  optional Method is_live            = 10;
+  optional Method is_multi_image     = 11;
 }
 
 message FeedResponseHandler {

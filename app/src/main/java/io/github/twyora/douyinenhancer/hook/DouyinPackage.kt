@@ -404,6 +404,16 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
         )
 
         fun grouponLargeCard() = Field(hookInfo.aweme.grouponLargeCard.nameOrNull)
+
+        fun isLive() = Method(
+            hookInfo.aweme.isLive.nameOrNull,
+            hookInfo.aweme.isLive.parameters.valuesListOrNull
+        )
+
+        fun isMultiImage() = Method(
+            hookInfo.aweme.isMultiImage.nameOrNull,
+            hookInfo.aweme.isMultiImage.parameters.valuesListOrNull
+        )
     }
 
     inner class FeedResponseHandlerModule {
@@ -1342,6 +1352,12 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
                     }
                     grouponLargeCard = field {
                         name = "grouponLargeCard"
+                    }
+                    isLive = method {
+                        name = "isLive"
+                    }
+                    isMultiImage = method {
+                        name = "isMultiImage"
                     }
                 }
 
