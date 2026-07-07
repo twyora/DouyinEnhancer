@@ -134,8 +134,19 @@ object CommentVideoHooker : YukiBaseHooker() {
                 }.getOrNull() ?: return@before
                 val commentAudioList = commentAudioJson.optJSONArray("video_list") ?: return@before
                 val firstCommentAudio = commentAudioList.optJSONObject(0) ?: return@before
-                val commentAudioMainUrl = firstCommentAudio.optString("main_url") ?: return@before
-                val commentAudioBackupUrl = firstCommentAudio.optString("backup_url") ?: return@before
+                val commentAudioMainUrl = firstCommentAudio.optString("main_url")
+                val commentAudioBackupUrl = firstCommentAudio.optString("backup_url")
+                val audioUrlsToInject = listOf(
+                    commentAudioMainUrl,
+                    commentAudioBackupUrl
+                ).filter {
+                    !it.isNullOrBlank()
+                }.takeIf {
+                    it.isNotEmpty()
+                } ?: run {
+                    YLog.error("$TAG: no valid audio url found in comment")
+                    return@before
+                }
 
                 // store and override image index
                 originImageIndex = overrideImageIndex(saveImageActionItem, 0)
@@ -145,7 +156,7 @@ object CommentVideoHooker : YukiBaseHooker() {
                     packageInstance.comment.imageList()
                 )
                 // inject audio url into image url list
-                if (!injectAudioUrl(comment, listOf(commentAudioMainUrl, commentAudioBackupUrl))) {
+                if (!injectAudioUrl(comment, audioUrlsToInject)) {
                     YLog.error("$TAG: failed to inject audio url(s) into comment")
                     return@before
                 }
