@@ -64,7 +64,7 @@ object CommentAudioHooker : YukiBaseHooker() {
             }
         }?.result {
             onConductFailure { _, throwable ->
-                YLog.error("$TAG: hook failed to show save image button for audio comment", throwable)
+                YLog.error("$TAG: making save button visible for audio comments", throwable)
             }
         }
     }
@@ -78,7 +78,7 @@ object CommentAudioHooker : YukiBaseHooker() {
             after {
                 @Suppress("UNCHECKED_CAST")
                 val whiteList = result as? MutableSet<String> ?: run {
-                    YLog.warn("$TAG: whiteList is not a mutable set")
+                    YLog.warn("$TAG: white list result is not a MutableSet, cannot add save action")
                     return@after
                 }
                 if (whiteList.contains("save_image")) {
@@ -96,7 +96,7 @@ object CommentAudioHooker : YukiBaseHooker() {
             }
         }?.result {
             onConductFailure { _, throwable ->
-                YLog.error("$TAG: hook failed to add \"save_image\" to comment white list", throwable)
+                YLog.error("$TAG: failed to add \"save_image\" to white list", throwable)
             }
         }
     }
@@ -130,7 +130,7 @@ object CommentAudioHooker : YukiBaseHooker() {
                 val commentAudioJson = runCatching {
                     JSONObject(commentAudioContent)
                 }.onFailure {
-                    YLog.error("$TAG: failed to parse comment audio content", it)
+                    YLog.error("$TAG: failed to parse comment audio content as JSON", it)
                 }.getOrNull() ?: return@before
                 val commentAudioList = commentAudioJson.optJSONArray("video_list") ?: return@before
                 val firstCommentAudio = commentAudioList.optJSONObject(0) ?: return@before
@@ -144,7 +144,7 @@ object CommentAudioHooker : YukiBaseHooker() {
                 }.takeIf {
                     it.isNotEmpty()
                 } ?: run {
-                    YLog.error("$TAG: no valid audio url found in comment")
+                    YLog.error("$TAG: no valid audio URL found in comment audio content, cannot inject")
                     return@before
                 }
 
@@ -157,7 +157,7 @@ object CommentAudioHooker : YukiBaseHooker() {
                 )
                 // inject audio url into image url list
                 if (!injectAudioUrl(comment, audioUrlsToInject)) {
-                    YLog.error("$TAG: failed to inject audio url(s) into comment")
+                    YLog.error("$TAG: failed to inject audio URLs into comment image list")
                     return@before
                 }
 
@@ -189,7 +189,7 @@ object CommentAudioHooker : YukiBaseHooker() {
             }
         }?.result {
             onConductFailure { _, throwable ->
-                YLog.error("$TAG: hook failed to inject audio url on save click", throwable)
+                YLog.error("$TAG: failed to inject audio URL on save button click", throwable)
             }
         }
     }
@@ -227,7 +227,7 @@ object CommentAudioHooker : YukiBaseHooker() {
                 )?.getField<Context>(
                     packageInstance.listenerProviderParam.context()
                 ) ?: run {
-                    YLog.error("$TAG: hook failed to extract context from download info")
+                    YLog.error("$TAG: unable to get Context from download listener")
                     return@before
                 }
 
@@ -243,11 +243,11 @@ object CommentAudioHooker : YukiBaseHooker() {
                         packageInstance.listenerProviderParam.cert()
                     )
                 ) ?: run {
-                    YLog.error("$TAG: hook failed to create audio media uri")
+                    YLog.error("$TAG: unable to create audio media URI for saving")
                     return@before
                 }
                 if (targetUri == Uri.EMPTY) {
-                    YLog.error("$TAG: hook failed to create audio media uri, uri is empty")
+                    YLog.error("$TAG: audio media URI is empty")
                     return@before
                 }
 
@@ -259,7 +259,7 @@ object CommentAudioHooker : YukiBaseHooker() {
                     }
                     true
                 }.onFailure {
-                    YLog.error("$TAG: hook failed to copy audio to media store", it)
+                    YLog.error("$TAG: failed to copy audio file to media store", it)
                 }.getOrDefault(false)
 
                 instance.invokeMethod<Any?>(
@@ -271,7 +271,7 @@ object CommentAudioHooker : YukiBaseHooker() {
                 resultNull()
             }
         }?.onConductFailure { _, throwable ->
-            YLog.error("$TAG: hook failed to save downloaded audio", throwable)
+            YLog.error("$TAG: failed to save downloaded audio to media store", throwable)
         }
     }
 
