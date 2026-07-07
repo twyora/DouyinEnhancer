@@ -15,7 +15,7 @@ import io.github.twyora.douyinenhancer.hook.utils.setField
 import org.json.JSONObject
 import java.io.FileInputStream
 
-object CommentVideoHooker : YukiBaseHooker() {
+object CommentAudioHooker : YukiBaseHooker() {
     private val TAG = this::class.simpleName
 
     override fun onHook() {
