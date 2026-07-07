@@ -113,7 +113,9 @@ object RecommendedFeedHooker : YukiBaseHooker() {
                             YLog.debug("$TAG: filtered by live")
                             iter.remove()
                             continue
-                        } else if (blockMultiImageEnabled && awemeObj.invokeMethod<Boolean?>(packageInstance.aweme.isMultiImage()) == true) {
+                        } else if (blockMultiImageEnabled &&
+                            awemeObj.invokeMethod<Boolean?>(packageInstance.aweme.isMultiImage()) == true
+                        ) {
                             // NOTE: this filter logic has not been rigorously verified
                             YLog.debug("$TAG: filtered by multi image")
                             iter.remove()
