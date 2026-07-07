@@ -5,6 +5,8 @@ import android.net.Uri
 import com.highcapable.yukihookapi.hook.core.YukiMemberHookCreator
 import com.highcapable.yukihookapi.hook.entity.YukiBaseHooker
 import com.highcapable.yukihookapi.hook.log.YLog
+import io.github.twyora.douyinenhancer.config.FastKVConfigManager
+import io.github.twyora.douyinenhancer.config.key.SaveKey
 import io.github.twyora.douyinenhancer.hook.utils.FileTypeDetector
 import io.github.twyora.douyinenhancer.hook.utils.HookTransaction
 import io.github.twyora.douyinenhancer.hook.utils.getField
@@ -19,6 +21,10 @@ object CommentAudioHooker : YukiBaseHooker() {
     private val TAG = this::class.simpleName
 
     override fun onHook() {
+        if (!FastKVConfigManager.settings.getBoolean(SaveKey.DOWNLOAD_COMMENT_AUDIO, false)) {
+            return
+        }
+
         withProcess(name = mainProcessName) {
             val transaction = HookTransaction(TAG)
 

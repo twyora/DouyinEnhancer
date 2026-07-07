@@ -17,6 +17,8 @@
     <string name="pref_comment_image_summary">Save watermark-free original comment images</string>
     <string name="pref_comment_emoji_title">Unlock Emoji Saving</string>
     <string name="pref_comment_emoji_summary">Remove comment emoji save restrictions</string>
+    <string name="pref_comment_audio_title">Download Comment Audio</string>
+    <string name="pref_comment_audio_summary">Save to Music/douyin/audio directory</string>
 
     <string name="recommended_feed_filter_dialog_title">Recommended Feed Filter</string>
     <string name="pref_recommend_feed_filter">✦ Recommended Feed Filter</string>
