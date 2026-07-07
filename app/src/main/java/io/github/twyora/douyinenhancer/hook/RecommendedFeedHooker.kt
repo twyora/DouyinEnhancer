@@ -3,6 +3,7 @@ package io.github.twyora.douyinenhancer.hook
 import com.highcapable.yukihookapi.hook.entity.YukiBaseHooker
 import com.highcapable.yukihookapi.hook.log.YLog
 import io.github.twyora.douyinenhancer.config.FastKVConfigManager
+import io.github.twyora.douyinenhancer.config.key.MiscKey
 import io.github.twyora.douyinenhancer.config.key.RecommendedFeedFilterKey
 import io.github.twyora.douyinenhancer.hook.utils.getField
 import io.github.twyora.douyinenhancer.hook.utils.invokeMethod
@@ -11,20 +12,23 @@ import io.github.twyora.douyinenhancer.hook.utils.resolveMethod
 object RecommendedFeedHooker : YukiBaseHooker() {
     private val TAG = this::class.simpleName
 
+    private val hiddenFeaturesEnabled
+        get() = FastKVConfigManager.settings.getBoolean(MiscKey.ENABLE_HIDDEN_FEATURES, false)
+
     private val blockAdEnabled
-        get() = FastKVConfigManager.settings.getBoolean(RecommendedFeedFilterKey.BLOCK_AD, false)
+        get() = FastKVConfigManager.settings.getBoolean(RecommendedFeedFilterKey.BLOCK_AD, false) && hiddenFeaturesEnabled
 
     private val blockEcomEnabled
-        get() = FastKVConfigManager.settings.getBoolean(RecommendedFeedFilterKey.BLOCK_ECOM, false)
+        get() = FastKVConfigManager.settings.getBoolean(RecommendedFeedFilterKey.BLOCK_ECOM, false) && hiddenFeaturesEnabled
 
     private val blockGrouponLargeCardEnabled
-        get() = FastKVConfigManager.settings.getBoolean(RecommendedFeedFilterKey.BLOCK_GROUPON, false)
+        get() = FastKVConfigManager.settings.getBoolean(RecommendedFeedFilterKey.BLOCK_GROUPON, false) && hiddenFeaturesEnabled
 
     private val blockLiveEnabled
-        get() = FastKVConfigManager.settings.getBoolean(RecommendedFeedFilterKey.BLOCK_LIVE, false)
+        get() = FastKVConfigManager.settings.getBoolean(RecommendedFeedFilterKey.BLOCK_LIVE, false) && hiddenFeaturesEnabled
 
     private val blockMultiImageEnabled
-        get() = FastKVConfigManager.settings.getBoolean(RecommendedFeedFilterKey.BLOCK_MULTI_IMAGE, false)
+        get() = FastKVConfigManager.settings.getBoolean(RecommendedFeedFilterKey.BLOCK_MULTI_IMAGE, false) && hiddenFeaturesEnabled
 
     private val hideShortDurationLimit by lazy {
         FastKVConfigManager.settings.getInt(RecommendedFeedFilterKey.SHORT_DURATION_LIMIT, 0)

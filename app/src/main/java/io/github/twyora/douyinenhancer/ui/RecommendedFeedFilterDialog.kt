@@ -96,11 +96,11 @@ class RecommendedFeedFilterDialog(context: Context) : AlertDialog.Builder(contex
         setNegativeButton(android.R.string.cancel, null)
         setPositiveButton(android.R.string.ok) { _, _ ->
             val mainSwitch = recommendedFeedFilterDialogBinding.switchMainSwitch.isChecked
-            val blockAd = recommendedFeedFilterDialogBinding.switchBlockAd.isChecked && showBlockGroups
-            val blockEcomAweme = recommendedFeedFilterDialogBinding.switchBlockEcomAweme.isChecked && showBlockGroups
-            val blockGrouponLargeCard = recommendedFeedFilterDialogBinding.switchBlockGrouponLargeCard.isChecked && showBlockGroups
-            val blockLive = recommendedFeedFilterDialogBinding.switchBlockLive.isChecked && showBlockGroups
-            val blockMultiImage = recommendedFeedFilterDialogBinding.switchBlockMultiImage.isChecked && showBlockGroups
+            val blockAd = recommendedFeedFilterDialogBinding.switchBlockAd.isChecked
+            val blockEcomAweme = recommendedFeedFilterDialogBinding.switchBlockEcomAweme.isChecked
+            val blockGrouponLargeCard = recommendedFeedFilterDialogBinding.switchBlockGrouponLargeCard.isChecked
+            val blockLive = recommendedFeedFilterDialogBinding.switchBlockLive.isChecked
+            val blockMultiImage = recommendedFeedFilterDialogBinding.switchBlockMultiImage.isChecked
             val hideShortDurationLimit = recommendedFeedFilterDialogBinding.editShortDuration.text.toString().toIntOrNull() ?: 0
             val hideLongDurationLimit = recommendedFeedFilterDialogBinding.editLongDuration.text.toString().toIntOrNull() ?: Int.MAX_VALUE
 
