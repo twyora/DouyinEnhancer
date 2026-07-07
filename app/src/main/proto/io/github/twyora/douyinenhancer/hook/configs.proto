@@ -24,9 +24,15 @@ message Field {
 }
 
 message Comment {
-  optional Class class      = 1;
-  optional Field emoji      = 2;
-  optional Field image_list = 3;
+  optional Class class         = 1;
+  optional Field emoji         = 2;
+  optional Field image_list    = 3;
+  optional Field comment_audio = 4;
+}
+
+message CommentAudioStruct {
+  optional Class class   = 1;
+  optional Field content = 2;
 }
 
 message CommentImageStruct {
@@ -58,8 +64,9 @@ message CommentLongPressItemModel {
 }
 
 message SaveImageActionItemOnClickExecutor{
-  optional Class  class    = 1;
-  optional Method on_click = 2;
+  optional Class  class     = 1;
+  optional Method on_click  = 2;
+  optional Field  host_item = 3;
 }
 
 message SaveImageActionItem {
@@ -67,6 +74,7 @@ message SaveImageActionItem {
   optional Field                              cmt_action_params      = 2;
   optional Field                              save_img_action_params = 3;
   optional SaveImageActionItemOnClickExecutor on_click_executor      = 4;
+  optional Method                             is_visible             = 5;
 }
 
 message TokenCert{
@@ -92,6 +100,7 @@ message UGFileUtilsKt {
   optional Method get_external_storage_dir = 5;
   optional Method get_image_uri            = 6;
   optional Method create_uri               = 7;
+  optional Method get_audio_uri            = 8;
 }
 
 message CommentExtensionKt{
@@ -99,10 +108,17 @@ message CommentExtensionKt{
   optional Method has_valid_image_url = 2;
 }
 
+message ListenerProviderParam{
+  optional Class class   = 1;
+  optional Field context = 2;
+  optional Field cert    = 3;
+}
+
 message CommentImageSaveHelper{
-  optional Class  class         = 1;
-  optional Method on_successed  = 2;
-  optional Method notify_result = 3;
+  optional Class  class                   = 1;
+  optional Method on_successed            = 2;
+  optional Method notify_result           = 3;
+  optional Field  listener_provider_param = 4;
 }
 
 message CommonItemView{
@@ -143,6 +159,11 @@ message FeedResponseHandler {
   optional Method processAwemeList = 2;
 }
 
+message CommentLongPressWhiteListProvider {
+  optional Class  class          = 1;
+  optional Method buildWhiteList = 2;
+}
+
 message HookInfo {
   uint64 last_update_time    = 1;
   uint32 module_version_code = 2;
@@ -150,22 +171,25 @@ message HookInfo {
   uint32 host_version_code   = 4;
   uint32 generation          = 5;
 
-  optional CommentImageStruct              comment_image_struct                 = 6;
-  optional UrlModel                        url_model                            = 7;
-  optional Comment                         comment                              = 8;
-  optional Emoji                           emoji                                = 9;
-  optional CommentActionParams             comment_action_params                = 10;
-  optional CommentLongPressItemModel       comment_long_press_item_model        = 11;
-  optional SaveImageActionItem             save_image_action_item               = 12;
-  optional CommentExtensionKt              comment_extension_kt                 = 13;
-  optional CommentImageSaveHelper          comment_image_save_helper            = 14;
-  optional DownloadInfo                    download_info                        = 15;
-  optional DigestUtils                     digest_utils                         = 16;
-  optional UGFileUtilsKt                   ug_file_utils                        = 17;
-  optional TokenCert                       token_cert                           = 18;
-  optional CommonItemView                  common_item_view                     = 19;
-  optional DouYinSettingNewVersionActivity dou_yin_setting_new_version_activity = 20;
-  optional User                            user                                 = 21;
-  optional Aweme                           aweme                                = 22;
-  optional FeedResponseHandler             feed_response_handler                = 23;
+  optional CommentImageStruct                comment_image_struct                   = 6;
+  optional UrlModel                          url_model                              = 7;
+  optional Comment                           comment                                = 8;
+  optional Emoji                             emoji                                  = 9;
+  optional CommentActionParams               comment_action_params                  = 10;
+  optional CommentLongPressItemModel         comment_long_press_item_model          = 11;
+  optional SaveImageActionItem               save_image_action_item                 = 12;
+  optional CommentExtensionKt                comment_extension_kt                   = 13;
+  optional CommentImageSaveHelper            comment_image_save_helper              = 14;
+  optional DownloadInfo                      download_info                          = 15;
+  optional DigestUtils                       digest_utils                           = 16;
+  optional UGFileUtilsKt                     ug_file_utils                          = 17;
+  optional TokenCert                         token_cert                             = 18;
+  optional CommonItemView                    common_item_view                       = 19;
+  optional DouYinSettingNewVersionActivity   dou_yin_setting_new_version_activity   = 20;
+  optional User                              user                                   = 21;
+  optional Aweme                             aweme                                  = 22;
+  optional FeedResponseHandler               feed_response_handler                  = 23;
+  optional CommentLongPressWhiteListProvider comment_long_press_white_list_provider = 24;
+  optional CommentAudioStruct                comment_audio_struct                   = 25;
+  optional ListenerProviderParam             listener_provider_param                = 26;
 }

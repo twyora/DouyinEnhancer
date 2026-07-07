@@ -17,6 +17,8 @@
     <string name="pref_comment_image_summary">保存无水印评论原图</string>
     <string name="pref_comment_emoji_title">解锁表情保存</string>
     <string name="pref_comment_emoji_summary">解除评论区表情保存限制</string>
+    <string name="pref_comment_audio_title">下载评论语音</string>
+    <string name="pref_comment_audio_summary">保存至 Music/douyin/audio 目录</string>
 
     <string name="recommended_feed_filter_dialog_title">推荐流过滤器</string>
     <string name="pref_recommend_feed_filter">✦ 推荐流过滤器</string>
