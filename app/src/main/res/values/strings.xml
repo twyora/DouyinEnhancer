@@ -31,13 +31,13 @@
     <string name="restart_required">Some features will take effect after restarting the app</string>
 
     <string name="recommended_feed_filter_block_ad_title">✦ Block ads</string>
-    <string name="recommended_feed_filter_block_ad_summary">Attempt to block ads in the feed</string>
+    <string name="recommended_feed_filter_block_ad_summary">Attempt to block ads in the feed (Experimental)</string>
 
     <string name="recommended_feed_filter_block_ecom_aweme_title">✦ Block e-commerce promotions</string>
-    <string name="recommended_feed_filter_block_ecom_aweme_summary">Attempt to block e-commerce promotions in the feed (may affect normal content)</string>
+    <string name="recommended_feed_filter_block_ecom_aweme_summary">Attempt to block e-commerce promotions in the feed (Experimental)</string>
 
     <string name="recommended_feed_filter_block_groupon_large_card_title">✦ Block group-buying cards</string>
-    <string name="recommended_feed_filter_block_groupon_large_card_summary">Attempt to block large group-buying event cards in the feed</string>
+    <string name="recommended_feed_filter_block_groupon_large_card_summary">Attempt to block large group-buying event cards in the feed (Experimental)</string>
 
     <string name="recommended_feed_filter_block_live_title">✦ Block livestreams</string>
     <string name="recommended_feed_filter_block_live_summary">Attempt to block livestream content in the feed (Experimental)</string>
