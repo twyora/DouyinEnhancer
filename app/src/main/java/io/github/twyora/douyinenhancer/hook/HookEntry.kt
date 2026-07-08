@@ -28,7 +28,7 @@ object HookEntry : IYukiHookXposedInit {
         } catch (e: Throwable) {
             YLog.error("Failed to load DexKit native library: ${e.message}")
         }
-        
+
         loadApp(name = "com.ss.android.ugc.aweme") {
             withProcess(mainProcessName) {
                 Instrumentation::class.resolve().firstMethod {
