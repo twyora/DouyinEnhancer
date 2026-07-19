@@ -20,29 +20,14 @@ A small Xposed module that adds quality-of-life features to Douyin
 
 ## Features
 
-- [x] Download comment images without watermark
-- [x] Save comment emojis to album
-- [x] ~~Video filtering~~ Recommended feed filtering
-- [x] Save playing content to album (restricted content downloads not yet supported)
-- Save favorited emojis to album
-- [x] Module settings UI
-- Clear-screen playback without hiding danmaku
-- [x] Cache obfuscated method lookup results for faster host app startup
-- [x] Save audio comments from comment section
-- Remove copyright restriction of Douyin Audio Mode
-- [x] Backup and restore module settings
-- Add dark mode support for module settings page
-- Pause video after opening the comment panel
-- Disable double-tap-to-like gesture while watching videos
-- Hide specific overlays on video during playback (e.g. like button, caption)
-- Hide the "Post" button in the center of the tab bar
-- Auto-advance to next video when feed video ends
-- Pause when current feed video ends
-- Play videos at a specified initial playback speed
-- More reliable way to inject module settings into the host app's settings page
-- [x] Add more entry points to module settings
-- Try to support more new versions
-- ......
+- Download comment images without watermark
+- Save comment emojis to album
+- ~~Video filtering~~ Recommended feed filtering
+- Save playing content to album (restricted content downloads not yet supported)
+- Save audio comments from comment section
+
+---
+See PM.md for future development plans: [PM.md](PM.md)
 
 ## Usage
 
