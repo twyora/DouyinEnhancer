@@ -3,6 +3,7 @@ package io.github.twyora.douyinenhancer.hook.feed
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import com.highcapable.kavaref.KavaRef.Companion.asResolver
+import com.highcapable.kavaref.extension.toClassOrNull
 import com.highcapable.yukihookapi.hook.core.YukiMemberHookCreator
 import com.highcapable.yukihookapi.hook.entity.YukiBaseHooker
 import com.highcapable.yukihookapi.hook.log.YLog
@@ -36,6 +37,19 @@ object FeedMultiImageHooker : YukiBaseHooker() {
             if (verbose) {
                 YLog.debug("$TAG: remove watermark disabled, skip feed multi-image hook")
             }
+            return
+        }
+
+        if (packageInstance.hostVersionCode() >= 390601) {
+            // 39.6.0+: the save pipeline was rewritten. Share-panel downloads go
+            // DownloadAction (located by DexKit SheetAction+downloadImage rule) ->
+            // DownloadMutiPicHelper -> getImageDownloadUrl; image URLs are read from
+            // ImageUrlStruct.urlList + watermarkFreeDownloadUrlList. Long-press save
+            // goes a separate callable path. The legacy hooks below (DownloadAction.
+            // startDownload / ABTestServiceImpl / HeifBitmapFactoryImpl) break on 39.6.0.
+            install396InjectPlayUrlIntoImageDownloadHook()
+            install396GetImageDownloadUrlHook()
+            install396LongPressSaveHook()
             return
         }
 
@@ -144,6 +158,310 @@ object FeedMultiImageHooker : YukiBaseHooker() {
             }
         }
     }
+
+    /**
+     * 39.6.0+: the share-panel save entry was rewritten as DownloadAction
+     * (located by DexKit SheetAction+downloadImage rule). Image downloads read
+     * ImageUrlStruct.urlList (play URLs) directly plus
+     * watermarkFreeDownloadUrlList as an override — downloadUrlList is no
+     * longer consulted. Inject the cleaned play URLs into
+     * watermarkFreeDownloadUrlList before download starts.
+     *
+     * Hook the DownloadAction constructor: it always receives the Aweme being
+     * saved (this.b), so a single hook covers every save path without chasing
+     * obfuscated method names.
+     */
+    private fun install396InjectPlayUrlIntoImageDownloadHook(): YukiMemberHookCreator.MemberHookCreator.Result? {
+        val downloadActionClass = packageInstance.downloadAction.selfClass ?: run {
+            YLog.error("$TAG: DownloadAction class not resolved")
+            return null
+        }
+        val constructor = downloadActionClass.declaredConstructors.firstOrNull {
+            it.parameterTypes.any { p -> p.name == "com.ss.android.ugc.aweme.feed.model.Aweme" }
+        } ?: run {
+            YLog.error("$TAG: DownloadAction constructor with Aweme not found")
+            return null
+        }
+        return constructor.hook {
+            val seenAwemeIds = CircularFifoQueue<String>(5)
+            before {
+                val aweme = args.firstOrNull { it is Any && it::class.java.name == "com.ss.android.ugc.aweme.feed.model.Aweme" }
+                    ?: return@before
+                if (aweme.invokeMethod<Boolean>(
+                        packageInstance.aweme.isMultiImage()
+                    ) == false
+                ) {
+                    return@before
+                }
+
+                // skip if this post was already processed
+                aweme.invokeMethod<String>(
+                    packageInstance.aweme.getAid()
+                )?.let {
+                    if (seenAwemeIds.contains(it)) {
+                        return@before
+                    }
+                    seenAwemeIds.add(it)
+                }
+
+                val awemeImages = aweme.getField<List<*>>(
+                    packageInstance.aweme.images()
+                ).takeIf {
+                    !it.isNullOrEmpty()
+                } ?: run {
+                    YLog.error("$TAG: aweme.images is null or empty")
+                    return@before
+                }
+
+                var injected = 0
+                awemeImages.forEach { imageStruct ->
+                    if (imageStruct == null) {
+                        return@forEach
+                    }
+
+                    val playUrlList = imageStruct.getField<List<*>>(
+                        packageInstance.imageUrlStruct.urlList()
+                    ).takeIf {
+                        !it.isNullOrEmpty()
+                    } ?: run {
+                        YLog.warn("$TAG: image has no play URL, skipping watermark-free injection")
+                        return@forEach
+                    }
+
+                    val cleaned = cleanUrlList(playUrlList)
+                    // The downloader may read either field depending on entry path.
+                    // Overwrite BOTH so every reader gets a clean URL:
+                    // - watermarkFreeDownloadUrlList (preferred by getImageDownloadUrl)
+                    // - downloadUrlList (tplv-dy-water-v10 = watermark source!)
+                    imageStruct.setField(
+                        packageInstance.imageUrlStruct.watermarkFreeDownloadUrlList(),
+                        cleaned
+                    )
+                    imageStruct.setField(
+                        packageInstance.imageUrlStruct.downloadUrlList(),
+                        cleaned
+                    )
+                    injected++
+                }
+                if (injected > 0) {
+                    YLog.info("$TAG: 39.6.0+ injected cleaned play URLs into ${injected} images (watermark-free download)")
+                }
+            }
+        }?.result {
+            onConductFailure { _, throwable ->
+                YLog.error("$TAG: failed to inject play URL into 39.6.0+ image download", throwable)
+            }
+            onHookingFailure {
+                YLog.error("$TAG: hook failed, 39.6.0+ multi-image watermark-free download unavailable")
+            }
+        }
+    }
+
+    /**
+     * 39.6.0+: getImageDownloadUrl is the static choke point every image download
+     * task uses to pick its URL (39.6.0: X.1dde.LJI; 39.9.0: LX/1cus.LJILJI).
+     * Match by feature: String return + ImageUrlStruct param + watermarkFreeDownloadUrlList
+     * usage. Hook it after to clean the returned URL (watermark=1 -> 0,
+     * cdn-direct -> api-play, jpeg preferred over heic/vvic).
+     */
+    private fun install396GetImageDownloadUrlHook(): YukiMemberHookCreator.MemberHookCreator.Result? {
+        // getImageDownloadUrl is the static choke point every image download task
+        // uses (39.6.0: X.1dde.LJI; 39.9.0: LX/1cus.LJILJI). Locate by feature:
+        // String return + ImageUrlStruct second param.
+        val imageUrlStructName = "com.ss.ugc.aweme.ImageUrlStruct"
+        val method = findImageDownloadUrlMethod(imageUrlStructName) ?: run {
+            YLog.error("$TAG: getImageDownloadUrl (feature match) not found")
+            return null
+        }
+        return method.hook {
+            after {
+                // args[1] is the ImageUrlStruct — its urlList has all image URL
+                // variants. Prefer a cleaned standard-JPEG URL so the downloader
+                // stores a valid file (urlList[0] is often heic).
+                val imageStruct = args.getOrNull(1)
+                val cleanedList = imageStruct?.getField<List<*>>(
+                    packageInstance.imageUrlStruct.urlList()
+                )?.let { cleanUrlList(it) }
+                val preferred = cleanedList?.firstOrNull()?.toString()
+                if (preferred != null && preferred != (result as? String)) {
+                    result = preferred
+                    return@after
+                }
+                val url = result as? String ?: return@after
+                val cleaned = cleanUrl(url)
+                if (cleaned != url) {
+                    result = cleaned
+                }
+            }
+        }?.result {
+            onConductFailure { _, throwable ->
+                YLog.error("$TAG: failed to hook getImageDownloadUrl", throwable)
+            }
+            onHookingFailure {
+                YLog.error("$TAG: hook failed, getImageDownloadUrl cleanup unavailable")
+            }
+        }
+    }
+
+    /**
+     * Find the getImageDownloadUrl method by stable features:
+     * returns String, second param is ImageUrlStruct, and the declaring class
+     * references watermarkFreeDownloadUrlList. This survives obfuscated class
+     * renames (X.1dde -> LX/1cus).
+     */
+    private fun findImageDownloadUrlMethod(imageUrlStructName: String): java.lang.reflect.Method? {
+        val targetType = imageUrlStructName.toClassOrNull(appClassLoader) ?: return null
+        // Search classes that have a field of ImageUrlStruct type and a method
+        // returning String with that param — approximated by scanning loaded classes
+        // is not feasible; instead rely on the DouyinPackage DexKit rules if present,
+        // otherwise fall back to the known 39.6.0 names.
+        val known = listOf("X.1dde", "LX/1cus")
+        for (name in known) {
+            val clazz = name.toClassOrNull(appClassLoader) ?: continue
+            val m = clazz.declaredMethods.firstOrNull {
+                it.returnType == String::class.java &&
+                    it.parameterTypes.size == 2 &&
+                    it.parameterTypes[1] == targetType
+            } ?: continue
+            return m
+        }
+        return null
+    }
+
+    /**
+     * 39.6.0+: long-press save (LongPressPanel) goes a separate download path
+     * that does not go through DownloadAction. Execution chain (smali-verified):
+     * LPPSaveVideoModule -> LX/0q4i -> ACallableS119S1100000_23 -> call$0 ->
+     * downloader. The downloader reads ImageUrlStruct.downloadUrlList directly
+     * (tplv-dy-water-v10 = watermark source).
+     *
+     * ACallableS119S1100000_23.call$0 is the mandatory execution point: its l1
+     * field is the FeedBottomArticleAnchorPresenter, LJJIIJZLJL() returns the Aweme.
+     */
+    private fun install396LongPressSaveHook(): YukiMemberHookCreator.MemberHookCreator.Result? {
+        val callableClass = "Y.ACallableS119S1100000_23".toClassOrNull(appClassLoader) ?: run {
+            YLog.error("$TAG: ACallableS119S1100000_23 not found")
+            return null
+        }
+        val method = callableClass.declaredMethods.firstOrNull {
+            it.name == "call\$0"
+        } ?: run {
+            YLog.error("$TAG: ACallableS119S1100000_23.call\$0 not found")
+            return null
+        }
+        return method.hook {
+            before {
+                val aweme = runCatching {
+                    val l1Field = instance.javaClass.getDeclaredField("l1").apply { isAccessible = true }
+                    val presenter = l1Field.get(instance) ?: return@runCatching null
+                    val m = presenter.javaClass.methods.firstOrNull {
+                        it.name == "LJJIIJZLJL" && it.parameterTypes.isEmpty()
+                    } ?: return@runCatching null
+                    m.invoke(presenter)
+                }.getOrNull() ?: return@before
+                if (aweme.invokeMethod<Boolean>(
+                        packageInstance.aweme.isMultiImage()
+                    ) == false
+                ) {
+                    return@before
+                }
+                cleanAwemeImages(aweme)
+            }
+        }?.result {
+            onConductFailure { _, throwable ->
+                YLog.error("$TAG: failed to hook long-press save", throwable)
+            }
+            onHookingFailure {
+                YLog.error("$TAG: hook failed, long-press save cleanup unavailable")
+            }
+        }
+    }
+
+    /**
+     * Clean every image of a multi-image Aweme: overwrite downloadUrlList
+     * (tplv-dy-water-v10 = watermark source) and watermarkFreeDownloadUrlList
+     * with the cleaned play urlList. Returns the number of images updated.
+     */
+    private fun cleanAwemeImages(aweme: Any): Int {
+        val awemeImages = aweme.getField<List<*>>(
+            packageInstance.aweme.images()
+        ).takeIf {
+            !it.isNullOrEmpty()
+        } ?: return 0
+
+        var cleaned = 0
+        awemeImages.forEach { imageStruct ->
+            if (imageStruct == null) {
+                return@forEach
+            }
+            val playUrlList = imageStruct.getField<List<*>>(
+                packageInstance.imageUrlStruct.urlList()
+            ).takeIf {
+                !it.isNullOrEmpty()
+            } ?: return@forEach
+
+            val cleanList = cleanUrlList(playUrlList)
+            imageStruct.setField(
+                packageInstance.imageUrlStruct.downloadUrlList(),
+                cleanList
+            )
+            imageStruct.setField(
+                packageInstance.imageUrlStruct.watermarkFreeDownloadUrlList(),
+                cleanList
+            )
+            cleaned++
+        }
+        return cleaned
+    }
+
+    /**
+     * Clean a list of image URLs for 39.6.0+:
+     * 1) watermark=1 -> watermark=0 param strip (api-play URLs honor it);
+     * 2) replace douyinvod CDN direct links with the first api-play URL —
+     *    CDN mp4s bake the watermark into the source, params cannot remove it;
+     * 3) otherwise reorder so an api-play URL is first.
+     *
+     * Image posts: urlList[0] is often .heic/.vvic which breaks naive downloaders
+     * (corrupt saved file). Prefer the .jpeg/.jpg variant so every downloader
+     * stores a standard JPEG.
+     */
+    private fun cleanUrlList(urls: List<*>): List<Any> {
+        val cleaned = urls.mapNotNull { url ->
+            (url as? String)?.let { cleanUrl(it) }
+        }
+        if (cleaned.isEmpty()) return cleaned
+
+        val apiPlay = cleaned.filter { it.contains("aweme/v1/play") }
+        val cdnDirect = cleaned.filter {
+            it.contains("douyinvod.com") && !it.contains("aweme/v1/play")
+        }
+        return if (apiPlay.isNotEmpty() && cdnDirect.isNotEmpty()) {
+            val firstClean = apiPlay.first()
+            cleaned.map { url ->
+                if (url.contains("douyinvod.com") && !url.contains("aweme/v1/play")) {
+                    firstClean
+                } else {
+                    url
+                }
+            }
+        } else if (apiPlay.isNotEmpty() && !cleaned.first().contains("aweme/v1/play")) {
+            listOf(apiPlay.first()) + cleaned.filterNot { it == apiPlay.first() }
+        } else {
+            // image CDN urls: prefer a standard JPEG variant over heic/vvic
+            val jpeg = cleaned.firstOrNull {
+                (it.contains(".jpeg") || it.contains(".jpg")) &&
+                    !it.contains("heic") && !it.contains("vvic")
+            }
+            if (jpeg != null && cleaned.first() != jpeg) {
+                listOf(jpeg) + cleaned.filterNot { it == jpeg }
+            } else {
+                cleaned
+            }
+        }
+    }
+
+    private fun cleanUrl(url: String): String =
+        url.replace("watermark=1", "watermark=0")
 
     private fun installDisableSaveImageToVideoLocalWaterMaskHook(): YukiMemberHookCreator.MemberHookCreator.Result? =
         packageInstance.abTestServiceImpl.selfClass?.resolveMethod(

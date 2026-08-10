@@ -910,21 +910,63 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
                         runCatching {
                             val cmtImgClsName =
                                 "com.ss.android.ugc.aweme.comment.model.CommentImageStruct"
-                            val originUrlFieldName = "originUrl"
-                            val downloadUrlFieldName = "downloadUrl"
+                            val urlModelTypeName =
+                                "com.ss.android.ugc.aweme.base.model.UrlModel"
+                            // 37.6/38.8 and earlier: field names not obfuscated, match by name.
+                            var originUrlFieldName = "originUrl"
+                            var downloadUrlFieldName = "downloadUrl"
                             val getDownloadUrlMethodData =
                                 bridge
                                     .findMethod {
                                         matcher {
                                             declaredClass =
-                                                "com.ss.android.ugc.aweme.comment.model.CommentImageStruct"
-                                            returnType = "com.ss.android.ugc.aweme.base.model.UrlModel"
+                                                cmtImgClsName
+                                            returnType = urlModelTypeName
                                             paramCount = 0
                                             addUsingField {
                                                 name = "downloadUrl"
                                             }
                                         }
-                                    }.singleOrNull() ?: run {
+                                    }.singleOrNull()
+                                    ?: run {
+                                        // 39.6+ fallback: all fields obfuscated (a/b/d/e/f/g/h/i).
+                                        // Parcel slot order = source declaration order = R8 rename
+                                        // order (verified against 38.8, confirmed identical on 39.9.0):
+                                        //   slot 1 = originUrl  (39.6: a)
+                                        //   slot 5 = downloadUrl (39.6: f)
+                                        val urlModelFields =
+                                            cmtImgClsName
+                                                .toClass(hostAppClassLoader)
+                                                .declaredFields
+                                                .filter {
+                                                    it.type.name == urlModelTypeName &&
+                                                        !Modifier.isTransient(it.modifiers) &&
+                                                        !Modifier.isStatic(it.modifiers)
+                                                }
+                                        if (urlModelFields.size < 5) {
+                                            YLog.error(
+                                                "$TAG: CommentImageStruct UrlModel fields too few for fallback: ${urlModelFields.map { it.name }}"
+                                            )
+                                            return@commentImageStruct
+                                        }
+                                        originUrlFieldName = urlModelFields[0].name
+                                        downloadUrlFieldName = urlModelFields[4].name
+                                        YLog.info(
+                                            "$TAG: CommentImageStruct obfuscated field fallback: originUrl=$originUrlFieldName downloadUrl=$downloadUrlFieldName"
+                                        )
+                                        bridge
+                                            .findMethod {
+                                                matcher {
+                                                    declaredClass =
+                                                        cmtImgClsName
+                                                    returnType = urlModelTypeName
+                                                    paramCount = 0
+                                                    addUsingField {
+                                                        name = downloadUrlFieldName
+                                                    }
+                                                }
+                                            }.singleOrNull()
+                                    } ?: run {
                                     YLog.error(
                                         "$TAG: unable to populate ${this::class.java.enclosingClass?.simpleName} config, possibly due to unfound obfuscated methods"
                                     )
@@ -2153,13 +2195,24 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
 
                 downloadAction = downloadAction {
                     runCatching {
+                        // 39.6.0+: DownloadAction class name is obfuscated (X.1Vkh on 39.6.0,
+                        // X.1DM8 on 39.9.0). Match by stable features instead of name suffix:
+                        // implements SheetAction (unobfuscated interface) + downloadImage string.
                         val downloadActionClassData = bridge.findClass {
                             matcher {
-                                className("DownloadAction", StringMatchType.EndsWith)
+                                addInterface("com.ss.android.ugc.aweme.sharer.ui.SheetAction", StringMatchType.Equals, false)
+                                usingStrings {
+                                    add("downloadImage")
+                                }
                             }
-                        }.singleOrNull { classData ->
-                            classData.simpleName == "DownloadAction"
-                        }
+                        }.singleOrNull()
+                            ?: bridge.findClass {
+                                matcher {
+                                    className("DownloadAction", StringMatchType.EndsWith)
+                                }
+                            }.singleOrNull { classData ->
+                                classData.simpleName == "DownloadAction"
+                            }
                         val startDownloadMethodData = downloadActionClassData?.let {
                             bridge.findMethod {
                                 searchClasses = listOf(it)
@@ -2449,6 +2502,23 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
                                 }
                             }
                         }.singleOrNull()
+                            // 39.6.0+: BgPlayWithHaveCopyrightConfig was removed (renamed /
+                            // relocated), breaking the invokeMethods anchor. Fall back to the
+                            // anchor-less rule — verified unique across 37.6/38.8/39.6: only
+                            // the LIZJ(Aweme,String)Z holder matches PUBLIC/FINAL + boolean +
+                            // (Aweme,String) + listen_video_status; other referrers are fields
+                            // or methods with mismatched params.
+                            ?: bridge.findMethod {
+                                matcher {
+                                    modifiers = Modifier.PUBLIC or Modifier.FINAL
+                                    returnType = "boolean"
+                                    params {
+                                        add("com.ss.android.ugc.aweme.feed.model.Aweme")
+                                        add("java.lang.String")
+                                    }
+                                    addUsingString("listen_video_status")
+                                }
+                            }.singleOrNull()
 
                         if (acceptMethodData == null) {
                             YLog.error(
