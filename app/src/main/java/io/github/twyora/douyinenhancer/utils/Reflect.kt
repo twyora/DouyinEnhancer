@@ -54,9 +54,19 @@ fun Iterable<String>.toClasses(loader: ClassLoader? = null, initialize: Boolean 
 }.toTypedArray()
 
 @JvmOverloads
+fun Iterable<String>.toClassesOrNull(loader: ClassLoader? = null, initialize: Boolean = false): Array<Class<*>>? = runCatching {
+    this.toClasses(loader, initialize)
+}.getOrNull()
+
+@JvmOverloads
 fun Array<String>.toClasses(loader: ClassLoader? = null, initialize: Boolean = false): Array<Class<*>> = Array(size) {
     get(it).toClass(loader, initialize)
 }
+
+@JvmOverloads
+fun Array<String>.toClassesOrNull(loader: ClassLoader? = null, initialize: Boolean = false): Array<Class<*>>? = runCatching {
+    this.toClasses(loader, initialize)
+}.getOrNull()
 
 fun <T : Any> Class<T>.resolveMethod(method: Method): MethodResolver<T>? {
     if (method.name.isNullOrBlank()) {
