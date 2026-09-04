@@ -2510,12 +2510,6 @@ class DouyinPackage(classLoader: ClassLoader, context: Context) {
                                     add("java.lang.String")
                                 }
                                 addUsingString("listen_video_status")
-                                invokeMethods {
-                                    add {
-                                        declaredClass("com.ss.android.ugc.aweme.back_ground_play.settings.BgPlayWithHaveCopyrightConfig")
-                                        returnType = "boolean"
-                                    }
-                                }
                             }
                         }.singleOrNull()
 
