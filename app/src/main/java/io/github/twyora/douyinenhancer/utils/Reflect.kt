@@ -5,6 +5,7 @@ import com.highcapable.kavaref.extension.toClass as KavaRefExt_toClass
 import com.highcapable.kavaref.resolver.FieldResolver
 import com.highcapable.kavaref.resolver.MethodResolver
 import com.highcapable.yukihookapi.hook.log.YLog
+import kotlin.reflect.KClass
 
 data class Field(val name: String?)
 
@@ -53,9 +54,19 @@ fun Iterable<String>.toClasses(loader: ClassLoader? = null, initialize: Boolean 
 }.toTypedArray()
 
 @JvmOverloads
+fun Iterable<String>.toClassesOrNull(loader: ClassLoader? = null, initialize: Boolean = false): Array<Class<*>>? = runCatching {
+    this.toClasses(loader, initialize)
+}.getOrNull()
+
+@JvmOverloads
 fun Array<String>.toClasses(loader: ClassLoader? = null, initialize: Boolean = false): Array<Class<*>> = Array(size) {
     get(it).toClass(loader, initialize)
 }
+
+@JvmOverloads
+fun Array<String>.toClassesOrNull(loader: ClassLoader? = null, initialize: Boolean = false): Array<Class<*>>? = runCatching {
+    this.toClasses(loader, initialize)
+}.getOrNull()
 
 fun <T : Any> Class<T>.resolveMethod(method: Method): MethodResolver<T>? {
     if (method.name.isNullOrBlank()) {
@@ -102,6 +113,10 @@ fun <T : Any> Class<T>.resolveField(field: Field): FieldResolver<T>? {
     }
 }
 
+fun <T : Any> KClass<T>.resolveMethod(method: Method): MethodResolver<T>? = this.java.resolveMethod(method)
+
+fun <T : Any> KClass<T>.resolveField(field: Field): FieldResolver<T>? = this.java.resolveField(field)
+
 fun <T : Any> T.resolveMethod(method: Method): MethodResolver<T>? {
     @Suppress("UNCHECKED_CAST")
     val thisClass = this::class.java as Class<T>
@@ -116,6 +131,8 @@ fun <T : Any> T.resolveField(field: Field): FieldResolver<T>? {
 
 inline fun <reified T> Class<*>.invokeStaticMethod(method: Method, vararg args: Any?): T? = this.resolveMethod(method)?.invoke(*args) as? T
 
+inline fun <reified T> KClass<*>.invokeStaticMethod(method: Method, vararg args: Any?): T? = this.java.invokeStaticMethod(method, *args)
+
 inline fun <reified T> Any.invokeMethod(method: Method, vararg args: Any?): T? = this.resolveMethod(method)?.invoke(*args) as? T
 
 fun Any.invokeMethodOnly(method: Method, vararg args: Any?) {
@@ -124,8 +141,12 @@ fun Any.invokeMethodOnly(method: Method, vararg args: Any?) {
 
 inline fun <reified T> Class<*>.getStaticField(field: Field): T? = this.resolveField(field)?.get() as? T
 
+inline fun <reified T> KClass<*>.getStaticField(field: Field): T? = this.java.getStaticField(field)
+
 inline fun <reified T> Any.getField(field: Field): T? = this.resolveField(field)?.get() as? T
 
 fun Class<*>.setStaticField(field: Field, value: Any?) = this.resolveField(field)?.set(value)
+
+fun KClass<*>.setStaticField(field: Field, value: Any?) = this.java.setStaticField(field, value)
 
 fun Any.setField(field: Field, value: Any?) = this.resolveField(field)?.set(value)
