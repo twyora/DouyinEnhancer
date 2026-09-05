@@ -55,7 +55,6 @@ message UrlModel {
 message CommentActionParams {
   optional Class class = 1;
   optional Field comment = 2;
-  optional Field image_index = 3;
 }
 
 message CommentLongPressItemModel {
@@ -63,18 +62,12 @@ message CommentLongPressItemModel {
   optional Field comment_action_params = 2;
 }
 
-message SaveImageActionItemOnClickExecutor {
-  optional Class class = 1;
-  optional Method on_click = 2;
-  optional Field host_item = 3;
-}
-
 message SaveImageActionItem {
   optional Class class = 1;
-  optional Field cmt_action_params = 2;
-  optional Field save_img_action_params = 3;
-  optional SaveImageActionItemOnClickExecutor on_click_executor = 4;
   optional Method is_visible = 5;
+  optional Method on_click = 6;
+
+  reserved 2, 3, 4;
 }
 
 message DigestUtils {

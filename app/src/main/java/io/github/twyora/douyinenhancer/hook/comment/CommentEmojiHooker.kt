@@ -85,7 +85,7 @@ object CommentEmojiHooker : YukiBaseHooker() {
         )?.hook {
             before {
                 val comment = instance.getField<Any>(
-                    packageInstance.saveImageActionItem.commentActionParams()
+                    packageInstance.commentLongPressItemModel.commentActionParams()
                 )?.getField<Any>(
                     packageInstance.commentActionParams.comment()
                 ) ?: run {
@@ -119,27 +119,16 @@ object CommentEmojiHooker : YukiBaseHooker() {
     }
 
     private fun installClickSaveEmojiToAlbumButtonCallbackHook(): YukiMemberHookCreator.MemberHookCreator.Result? {
-        return packageInstance.saveImageActionItem.onClickExecutor.selfClass?.resolveMethod(
-            packageInstance.saveImageActionItem.onClickExecutor.onClick()
+        return packageInstance.saveImageActionItem.selfClass?.resolveMethod(
+            packageInstance.saveImageActionItem.onClick()
         )?.hook {
-            var savedComment: Any? = null
-            var savedActionItem: Any? = null
-            var originImageUrlList: List<*>? = null
-            var originImageIndex = -1
             before {
-                val actionItem = args[0]?.getField<Any>(
-                    packageInstance.saveImageActionItem.onClickExecutor.hostItem()
-                ) ?: run {
-                    YLog.error("$TAG: ${args[0]?.javaClass?.name} is not the click executor held by save image action item")
-                    return@before
-                }
-
-                val comment = actionItem.getField<Any>(
-                    packageInstance.saveImageActionItem.commentActionParams()
+                val comment = instance.getField<Any>(
+                    packageInstance.commentLongPressItemModel.commentActionParams()
                 )?.getField<Any>(
                     packageInstance.commentActionParams.comment()
                 ) ?: run {
-                    YLog.error("$TAG: failed to get comment from ${actionItem::class.qualifiedName}")
+                    YLog.error("$TAG: failed to get comment from ${instance::class.qualifiedName}")
                     return@before
                 }
                 val emojiUrls = comment.getField<Any>(
@@ -158,39 +147,12 @@ object CommentEmojiHooker : YukiBaseHooker() {
                     return@before
                 }
 
-                // temporarily install emoji URLs so the downloader sees them
-                // save original state to be restored in after{}
-                originImageUrlList = comment.getField<List<*>>(
-                    packageInstance.comment.imageList()
-                )
-                // target the first (just-injected) image
-                originImageIndex = overrideImageIndex(actionItem, 0)
-                savedActionItem = actionItem
-                savedComment = comment
-
                 injectEmojiUrls(comment, emojiUrls)
+                args[0] = 0
 
                 if (verbose) {
                     YLog.debug("$TAG: injected ${emojiUrls.size} emoji URL(s) into comment")
                 }
-            }
-            // undo temporary edits — restore comment.imageList and actionItem.imageIndex
-            after {
-                savedComment?.let { comment ->
-                    comment.setField(
-                        packageInstance.comment.imageList(),
-                        originImageUrlList
-                    )
-                    if (originImageIndex >= 0) {
-                        savedActionItem?.let {
-                            overrideImageIndex(it, originImageIndex)
-                        }
-                    }
-                }
-                savedComment = null
-                savedActionItem = null
-                originImageUrlList = null
-                originImageIndex = -1
             }
         }?.result {
             onConductFailure { _, throwable ->
@@ -432,33 +394,7 @@ object CommentEmojiHooker : YukiBaseHooker() {
                 urlModel
             )
         }
-
-        val finalUrls: List<String> = run {
-            val imageUrls = urlModel?.getField<List<String>>(
-                packageInstance.urlModel.urlList()
-            )
-            if (imageUrls.isNullOrEmpty()) {
-                emojiUrls
-            } else {
-                emojiUrls + imageUrls
-            }
-        }
-        urlModel?.setField(packageInstance.urlModel.urlList(), finalUrls)
-    }
-
-    // Sets a new image index on the save-image action, returns the previous one
-    private fun overrideImageIndex(actionItem: Any, index: Int): Int {
-        val params = actionItem.getField<Any>(
-            packageInstance.saveImageActionItem.saveImageActionParams()
-        ) ?: return -1
-        val originImageIndex = params.getField<Int>(
-            packageInstance.commentActionParams.imageIndex()
-        ) ?: return 0
-        params.setField(
-            packageInstance.commentActionParams.imageIndex(),
-            index
-        )
-        return originImageIndex
+        urlModel?.setField(packageInstance.urlModel.urlList(), emojiUrls)
     }
 
     private fun convertMedia2Gif(mediaPath: String, gifPath: String): Boolean {

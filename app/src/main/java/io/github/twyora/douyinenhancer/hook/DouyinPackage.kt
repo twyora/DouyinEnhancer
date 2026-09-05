@@ -185,8 +185,6 @@ class DouyinPackage(classLoader: ClassLoader, context: Context) {
         }
 
         fun comment() = Field(configs.comment.nameOrNull)
-
-        fun imageIndex() = Field(configs.imageIndex.nameOrNull)
     }
 
     class CommentLongPressItemModelModule internal constructor(
@@ -208,31 +206,14 @@ class DouyinPackage(classLoader: ClassLoader, context: Context) {
             configs.class_.nameOrNull?.toClass(classLoader)
         }
 
-        fun commentActionParams() = Field(configs.cmtActionParams.nameOrNull)
-
-        fun saveImageActionParams() = Field(configs.saveImgActionParams.nameOrNull)
-
-        class OnClickExecutorModule internal constructor(
-            private val configs: Configs.SaveImageActionItemOnClickExecutor,
-            private val classLoader: ClassLoader
-        ) {
-            val selfClass by weak {
-                configs.class_.nameOrNull?.toClass(classLoader)
-            }
-
-            fun onClick() = Method(
-                configs.onClick.nameOrNull,
-                configs.onClick.parameters.valuesListOrNull
-            )
-
-            fun hostItem() = Field(configs.hostItem.nameOrNull)
-        }
-
-        val onClickExecutor = OnClickExecutorModule(configs.onClickExecutor, classLoader)
-
         fun isVisible() = Method(
             configs.isVisible.nameOrNull,
             configs.isVisible.parameters.valuesListOrNull
+        )
+
+        fun onClick() = Method(
+            configs.onClick.nameOrNull,
+            configs.onClick.parameters.valuesListOrNull
         )
     }
 
@@ -1249,34 +1230,68 @@ class DouyinPackage(classLoader: ClassLoader, context: Context) {
 
                 commentActionParams = commentActionParams {
                     runCatching {
-                        val cmtActionParamsClsName = "com.ss.android.ugc.aweme.comment.CommentActionParams"
-                        val commentFieldName = cmtActionParamsClsName
-                            .toClass(hostAppClassLoader)
-                            .resolve()
-                            .firstFieldOrNull {
-                                type = "com.ss.android.ugc.aweme.comment.model.Comment"
-                            }?.self
-                            ?.name
-                        val imageFieldName = cmtActionParamsClsName
-                            .toClass(hostAppClassLoader)
-                            .resolve()
-                            .firstFieldOrNull {
-                                type = Int::class
-                            }?.self
-                            ?.name
-                        if (commentFieldName == null || imageFieldName == null) {
+                        val saveImageMethodData = bridge.findMethod {
+                            matcher {
+                                modifiers = Modifier.PUBLIC or Modifier.FINAL
+                                usingStrings {
+                                    add("bpea-comment_save_image_to_album")
+                                    add("/comment/images")
+                                    add("comment_save_image")
+                                }
+                                usingFields {
+                                    add {
+                                        descriptor =
+                                            "Lcom/ss/android/ugc/aweme/download/component_api/DownloadScene;->IMAGE:Lcom/ss/android/ugc/aweme/download/component_api/DownloadScene;"
+                                    }
+                                }
+                            }
+                        }.singleOrNull()
+                        val commentActionParamsClassData = bridge.findClass {
+                            matcher {
+                                modifiers = Modifier.PUBLIC or Modifier.FINAL
+                                fields {
+                                    add {
+                                        modifiers = Modifier.PUBLIC or Modifier.FINAL
+                                        type = "androidx.fragment.app.FragmentActivity"
+                                    }
+                                    add {
+                                        type = "com.ss.android.ugc.aweme.comment.model.Comment"
+                                        saveImageMethodData?.let {
+                                            readMethods {
+                                                add {
+                                                    descriptor = it.descriptor
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }.singleOrNull()
+                        val commentFieldData = commentActionParamsClassData?.let {
+                            bridge.findField {
+                                searchClasses = listOf(it)
+                                matcher {
+                                    type = "com.ss.android.ugc.aweme.comment.model.Comment"
+                                    saveImageMethodData?.let {
+                                        readMethods {
+                                            add {
+                                                descriptor = it.descriptor
+                                            }
+                                        }
+                                    }
+                                }
+                            }.singleOrNull()
+                        }
+                        if (commentActionParamsClassData == null || commentFieldData == null) {
                             YLog.error(symbolNotFoundMsg.format(TAG, this::class.java.enclosingClass?.simpleName))
                             return@commentActionParams
                         }
 
                         class_ = class_ {
-                            name = cmtActionParamsClsName
+                            name = commentActionParamsClassData.name
                         }
                         comment = field {
-                            name = commentFieldName
-                        }
-                        imageIndex = field {
-                            name = imageFieldName
+                            name = commentFieldData.name
                         }
                     }.onFailure {
                         YLog.error(populateFailedMsg.format(TAG), it)
@@ -1285,25 +1300,30 @@ class DouyinPackage(classLoader: ClassLoader, context: Context) {
 
                 commentLongPressItemModel = commentLongPressItemModel {
                     runCatching {
-                        val commentLongPressItemModelClsName = "com.ss.android.ugc.aweme.comment.ui.longpress.CommentLongPressItemModel"
-                        val commentActionParamsFieldName = commentLongPressItemModelClsName
-                            .toClass(hostAppClassLoader)
-                            .resolve()
-                            .firstFieldOrNull {
-                                type = "com.ss.android.ugc.aweme.comment.CommentActionParams"
-                            }?.self
-                            ?.name
+                        val commentLongPressItemModelClassData =
+                            bridge.getClassData("com.ss.android.ugc.aweme.comment.ui.longpress.CommentLongPressItemModel")
+                        val commentActionParamsFieldData = commentLongPressItemModelClassData?.let {
+                            bridge.findField {
+                                searchClasses = listOf(it)
+                                matcher {
+                                    modifiers = Modifier.PUBLIC or Modifier.FINAL
+                                    this@hookInfo.commentActionParams.class_.nameOrNull?.let { commentActionParamsClassTypeName ->
+                                        type = commentActionParamsClassTypeName
+                                    }
+                                }
+                            }.singleOrNull()
+                        }
 
-                        if (commentActionParamsFieldName == null) {
+                        if (commentLongPressItemModelClassData == null || commentActionParamsFieldData == null) {
                             YLog.error(symbolNotFoundMsg.format(TAG, this::class.java.enclosingClass?.simpleName))
                             return@commentLongPressItemModel
                         }
 
                         class_ = class_ {
-                            name = commentLongPressItemModelClsName
+                            name = commentLongPressItemModelClassData.name
                         }
                         commentActionParams = field {
-                            name = commentActionParamsFieldName
+                            name = commentActionParamsFieldData.name
                         }
                     }.onFailure {
                         YLog.error(populateFailedMsg.format(TAG), it)
@@ -1312,86 +1332,63 @@ class DouyinPackage(classLoader: ClassLoader, context: Context) {
 
                 saveImageActionItem = saveImageActionItem {
                     runCatching {
-                        val saveImageActionItemClsName =
+                        val saveImageActionItemClassData = bridge.getClassData(
                             "com.ss.android.ugc.aweme.comment.manager.longclickaction.actions.SaveImageActionItem"
-                        // SaveImageActionItem extends CommentLongPressItemModel, ensure commentLongPressItemModel is populated first!
-                        val cmtActionParamsFieldName = this@hookInfo.commentLongPressItemModel.commentActionParams?.name
-                        val saveImageActionParamsFieldName = saveImageActionItemClsName
-                            .toClass(hostAppClassLoader)
-                            .resolve()
-                            .firstFieldOrNull {
-                                type = "com.ss.android.ugc.aweme.comment.CommentActionParams"
-                            }?.self
-                            ?.name
-                        val onClickMethodData = bridge
-                            .findMethod {
-                                matcher {
-                                    modifiers = Modifier.STATIC + Modifier.FINAL + Modifier.PUBLIC
-                                    returnType = "java.lang.Object"
-                                    params {
-                                        count = 1
-                                    }
-                                    addUsingString("bpea-comment_save_image_to_album")
-                                }
-                            }.singleOrNull()
-                        val onClickHostItemFieldName =
-                            onClickMethodData?.declaredClassName?.toClass(hostAppClassLoader)?.resolve()?.firstFieldOrNull {
-                                type = Object::class
-                            }?.self?.name
-                        val isVisibleMethodData = bridge
-                            .findMethod {
+                        )
+                        val isVisibleMethodData = saveImageActionItemClassData?.let {
+                            bridge.findMethod {
+                                searchClasses = listOf(it)
                                 matcher {
                                     modifiers = Modifier.PUBLIC or Modifier.FINAL
-                                    declaredClass = saveImageActionItemClsName
                                     returnType = "boolean"
                                     usingFields {
                                         add {
                                             field {
-                                                cmtActionParamsFieldName?.let {
-                                                    name = it
-                                                }
+                                                this@hookInfo.commentLongPressItemModel.commentActionParams.nameOrNull
+                                                    ?.let { commentActionParamsFieldName ->
+                                                        name = commentActionParamsFieldName
+                                                    }
                                             }
                                         }
                                     }
                                 }
                             }.singleOrNull()
-                        if (cmtActionParamsFieldName == null || saveImageActionParamsFieldName == null || onClickMethodData == null ||
-                            onClickHostItemFieldName == null ||
-                            isVisibleMethodData == null
-                        ) {
+                        }
+                        val onClickMethodData = saveImageActionItemClassData?.let {
+                            bridge.findMethod {
+                                searchClasses = listOf(it)
+                                matcher {
+                                    modifiers = Modifier.PUBLIC or Modifier.FINAL
+                                    returnType = "void"
+                                    params {
+                                        add("int")
+                                    }
+                                    usingStrings {
+                                        add("bpea-comment_save_image_to_album")
+                                    }
+                                }
+                            }.singleOrNull()
+                        }
+                        if (saveImageActionItemClassData == null || isVisibleMethodData == null || onClickMethodData == null) {
                             YLog.error(symbolNotFoundMsg.format(TAG, this::class.java.enclosingClass?.simpleName))
                             return@saveImageActionItem
                         }
 
                         class_ = class_ {
-                            name = saveImageActionItemClsName
-                        }
-                        cmtActionParams = field {
-                            name = cmtActionParamsFieldName
-                        }
-                        saveImgActionParams = field {
-                            name = saveImageActionParamsFieldName
-                        }
-                        onClickExecutor = saveImageActionItemOnClickExecutor {
-                            class_ = class_ {
-                                name = onClickMethodData.className
-                            }
-                            onClick = method {
-                                name = onClickMethodData.methodName
-                                parameters = MethodKt.parameters {
-                                    values.clear()
-                                    values.addAll(onClickMethodData.paramTypeNames)
-                                }
-                            }
-                            hostItem = field {
-                                name = onClickHostItemFieldName
-                            }
+                            name = saveImageActionItemClassData.name
                         }
                         isVisible = method {
                             name = isVisibleMethodData.methodName
                             parameters = MethodKt.parameters {
                                 values.clear()
                                 values.addAll(isVisibleMethodData.paramTypeNames)
+                            }
+                        }
+                        onClick = method {
+                            name = onClickMethodData.name
+                            parameters = MethodKt.parameters {
+                                values.clear()
+                                values.addAll(onClickMethodData.paramTypeNames)
                             }
                         }
                     }.onFailure {
