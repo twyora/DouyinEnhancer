@@ -36,6 +36,13 @@ fun String.toClass(loader: ClassLoader? = null, initialize: Boolean = false): Cl
         else -> {
             if (this.startsWith("L") && this.endsWith(";")) {
                 this.substring(1, this.length - 1).replace("/", ".").KavaRefExt_toClass(loader, initialize)
+            } else if (this.endsWith("[]")) {
+                val dimensionCount = Regex("(\\[])+$").find(this)?.value?.length?.div(2) ?: 0
+                var arrayClass = this.substring(0, this.length - dimensionCount * 2).toClass(loader, initialize)
+                repeat(dimensionCount) {
+                    arrayClass = java.lang.reflect.Array.newInstance(arrayClass, 0).javaClass
+                }
+                arrayClass
             } else {
                 this.KavaRefExt_toClass(loader, initialize)
             }
