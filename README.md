@@ -32,12 +32,17 @@ A small Xposed module that adds quality-of-life features to Douyin
 - Open comment panel by double-tap in feed
 - Keep danmaku visible when entering clean mode (After enabling this, some scenarios in clear‑screen
   mode may unexpectedly make unrelated components visible)
+- Clean mode (OLED anti burn-in): hide top tabs, bottom navigation, the right action bar, author info and captions while a video is playing, keeping only the video and the progress bar; pausing restores the controls and playback hides them again
 - Automatically pause video on playback completion
 - Block auto video resumption on foreground return
 - Block specific playback‑page components
 
 ---
 See more about future development: [PM.md](PM.md)
+
+## Known Issues
+
+- Known BUG: the first video shows a rounded-corner remnant at the bottom of the screen; pausing and resuming the video removes it. This BUG has proven very hard to fix and is harmless enough to live with. （已知 BUG：首个视频屏幕底部会有圆角残留，暂停并继续视频可消除圆角，此 BUG 实在无力修复，无伤大雅将就用吧。）
 
 ## Usage
 
