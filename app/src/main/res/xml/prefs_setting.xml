@@ -91,6 +91,14 @@
             android:title="@string/pref_ui_keep_danmaku_visible_title" />
     </PreferenceCategory>
 
+    <PreferenceCategory android:title="@string/pref_category_clean_mode">
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="clean_mode_main_switch"
+            android:summary="@string/pref_clean_mode_main_summary"
+            android:title="@string/pref_clean_mode_main_title" />
+    </PreferenceCategory>
+
     <PreferenceCategory
         android:key="pref_category_backup"
         android:title="@string/pref_category_backup">

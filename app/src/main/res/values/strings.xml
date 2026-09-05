@@ -193,4 +193,7 @@
     <string name="pref_about_activation_status_deactivated_summary">Douyin Enhancer not activated</string>
     <string name="pref_about_activation_status_activated_title">Enabled</string>
     <string name="pref_about_activation_status_activated_summary">Douyin Enhancer activated</string>
+    <string name="pref_category_clean_mode">Clean Mode</string>
+    <string name="pref_clean_mode_main_title">Clean Mode (OLED anti burn-in)</string>
+    <string name="pref_clean_mode_main_summary">While playing, hide top tabs, bottom navigation, the right action bar, author info and captions so only the video and the progress bar remain; pausing restores all controls and playback hides them again (OLED burn-in protection)</string>
 </resources>

@@ -193,4 +193,7 @@
     <string name="pref_about_activation_status_deactivated_summary">抖柚未激活</string>
     <string name="pref_about_activation_status_activated_title">已启用</string>
     <string name="pref_about_activation_status_activated_summary">抖柚已激活</string>
+    <string name="pref_category_clean_mode">清爽模式</string>
+    <string name="pref_clean_mode_main_title">清爽模式(防烧屏模式 OLED救星)</string>
+    <string name="pref_clean_mode_main_summary">播放视频时隐藏顶部标签、底部导航、右侧互动栏、作者与文案等全部悬浮控件，仅保留视频画面与进度条；暂停时自动恢复显示，继续播放后再次隐藏（防 OLED 烧屏）</string>
 </resources>
