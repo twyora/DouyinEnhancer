@@ -1574,132 +1574,208 @@ class DouyinPackage(classLoader: ClassLoader, context: Context) {
 
                 ugFileUtils = uGFileUtilsKt {
                     runCatching {
-                        val ugFileUtilsClsName = "com.bytedance.android.ug.UGFileUtilsKt"
-                        val copyFileMethod = ugFileUtilsClsName.toClass(hostAppClassLoader).resolve().firstMethodOrNull {
-                            name = "copyFile"
-                            returnType = Boolean::class
-                            modifiers(Modifiers.PUBLIC, Modifiers.STATIC, Modifiers.FINAL)
-                            parameters(
-                                String::class,
-                                String::class,
-                                "com.bytedance.bpea.cert.token.TokenCert"
-                            )
-                            parameterCount = 3
-                        }?.self
-                        val getStorageDirMethod = ugFileUtilsClsName.toClass(hostAppClassLoader).resolve().firstMethodOrNull {
-                            name = "getStorageDir"
-                            returnType = String::class
-                            modifiers(Modifiers.PUBLIC, Modifiers.STATIC, Modifiers.FINAL)
-                            parameters(String::class, Boolean::class)
-                            parameterCount = 2
-                        }?.self
-                        val getExternalStorageDirectoryMethod = ugFileUtilsClsName.toClass(hostAppClassLoader).resolve().firstMethodOrNull {
-                            name = "getExternalStorageDirectory"
-                            returnType = String::class
-                            modifiers(Modifiers.PUBLIC, Modifiers.STATIC, Modifiers.FINAL)
-                            parameters(String::class, Boolean::class)
-                            parameterCount = 2
-                        }?.self
-                        val getImageUriMethod = ugFileUtilsClsName.toClass(hostAppClassLoader).resolve().firstMethodOrNull {
-                            name = "getImageUri"
-                            returnType = android.net.Uri::class
-                            modifiers(Modifiers.PUBLIC, Modifiers.STATIC, Modifiers.FINAL)
-                            parameters(
-                                Context::class,
-                                String::class,
-                                String::class,
-                                String::class,
-                                "com.bytedance.bpea.cert.token.TokenCert"
-                            )
-                            parameterCount = 5
-                        }?.self
-                        val createUriMethod = ugFileUtilsClsName.toClass(hostAppClassLoader).resolve().firstMethodOrNull {
-                            name = "createUri"
-                            returnType = android.net.Uri::class
-                            modifiers(Modifiers.PUBLIC, Modifiers.STATIC, Modifiers.FINAL)
-                            parameters(
-                                String::class,
-                                Boolean::class,
-                                Array<android.net.Uri>::class,
-                                "com.bytedance.bpea.cert.token.TokenCert"
-                            )
-                            parameterCount = 4
-                        }?.self
-                        val getAudioUriMethod = ugFileUtilsClsName.toClass(hostAppClassLoader).resolve().firstMethodOrNull {
-                            name = "getAudioUri"
-                            parameters(
-                                Context::class,
-                                String::class,
-                                String::class,
-                                String::class,
-                                "com.bytedance.bpea.cert.token.TokenCert"
-                            )
-                        }?.self
-                        if (copyFileMethod == null || getStorageDirMethod == null || getExternalStorageDirectoryMethod == null ||
-                            getImageUriMethod == null || createUriMethod == null || getAudioUriMethod == null
+                        val ugFileUtilsClassData = bridge.getClassData("com.bytedance.android.ug.UGFileUtilsKt")
+                        val contextFieldData = ugFileUtilsClassData?.let {
+                            bridge.findField {
+                                searchClasses = listOf(it)
+                                matcher {
+                                    modifiers = Modifier.PUBLIC or Modifier.STATIC or Modifier.FINAL
+                                    type = "android.content.Context"
+                                }
+                            }.singleOrNull()
+                        }
+                        val copyFileMethodData = ugFileUtilsClassData?.let {
+                            bridge.findMethod {
+                                searchClasses = listOf(it)
+                                matcher {
+                                    modifiers = Modifier.PUBLIC or Modifier.STATIC or Modifier.FINAL
+                                    returnType = "boolean"
+                                    params {
+                                        add("java.lang.String")
+                                        add("java.lang.String")
+                                        add("boolean")
+                                        add("android.net.Uri[]")
+                                        add("com.bytedance.bpea.cert.token.TokenCert")
+                                    }
+                                }
+                            }.singleOrNull()
+                        }
+                        val getStorageDirMethodData = ugFileUtilsClassData?.let {
+                            bridge.findMethod {
+                                searchClasses = listOf(it)
+                                matcher {
+                                    modifiers = Modifier.PUBLIC or Modifier.FINAL or Modifier.STATIC
+                                    returnType = "java.lang.String"
+                                    params {
+                                        add("java.lang.String")
+                                        add("boolean")
+                                    }
+                                    callerMethods {
+                                        add {
+                                            descriptor =
+                                                "Lcom/ss/android/ugc/aweme/share/dialog/BaseQRCodeShareDialog;->saveImageToFile(Ljava/lang/String;Landroid/graphics/Bitmap;)Ljava/lang/String;"
+                                        }
+                                    }
+                                }
+                            }.singleOrNull()
+                        }
+                        val getAudioUriMethodData = ugFileUtilsClassData?.let {
+                            bridge.findMethod {
+                                searchClasses = listOf(it)
+                                matcher {
+                                    modifiers = Modifier.PUBLIC or Modifier.FINAL or Modifier.STATIC
+                                    returnType = "android.net.Uri"
+                                    params {
+                                        add("android.content.Context")
+                                        add("java.lang.String")
+                                        add("java.lang.String")
+                                        add("java.lang.String")
+                                        add("com.bytedance.bpea.cert.token.TokenCert")
+                                    }
+                                    usingFields {
+                                        add {
+                                            descriptor =
+                                                $$"Landroid/provider/MediaStore$Audio$Media;->EXTERNAL_CONTENT_URI:Landroid/net/Uri;"
+                                        }
+                                    }
+                                }
+                            }.singleOrNull()
+                        }
+                        val getExternalStorageDirectoryMethodData = ugFileUtilsClassData?.let {
+                            bridge.findMethod {
+                                searchClasses = listOf(it)
+                                matcher {
+                                    modifiers = Modifier.PUBLIC or Modifier.FINAL or Modifier.STATIC
+                                    returnType = "java.lang.String"
+                                    params {
+                                        add("java.lang.String")
+                                        add("boolean")
+                                        add("boolean")
+                                    }
+                                    usingStrings {
+                                        add {
+                                            value = "DCIM"
+                                            matchType = StringMatchType.Equals
+                                        }
+                                        add {
+                                            value = "Pictures"
+                                            matchType = StringMatchType.Equals
+                                        }
+                                    }
+                                }
+                            }.singleOrNull()
+                        }
+                        val createUriMethodData = ugFileUtilsClassData?.let {
+                            bridge.findMethod {
+                                searchClasses = listOf(it)
+                                matcher {
+                                    modifiers = Modifier.PUBLIC or Modifier.FINAL or Modifier.STATIC
+                                    returnType = "android.net.Uri"
+                                    params {
+                                        add("java.lang.String")
+                                        add("boolean")
+                                        add("android.net.Uri[]")
+                                        add("com.bytedance.bpea.cert.token.TokenCert")
+                                    }
+                                    usingStrings {
+                                        add {
+                                            value = "image/jpeg"
+                                            matchType = StringMatchType.Equals
+                                        }
+                                        add {
+                                            value = "image/png"
+                                            matchType = StringMatchType.Equals
+                                        }
+                                        add {
+                                            value = "audio/mp3"
+                                            matchType = StringMatchType.Equals
+                                        }
+                                    }
+                                }
+                            }.singleOrNull()
+                        }
+                        val getImageUriMethodData = ugFileUtilsClassData?.let {
+                            bridge.findMethod {
+                                searchClasses = listOf(it)
+                                matcher {
+                                    modifiers = Modifier.PUBLIC or Modifier.FINAL or Modifier.STATIC
+                                    returnType = "android.net.Uri"
+                                    params {
+                                        add("android.content.Context")
+                                        add("java.lang.String")
+                                        add("java.lang.String")
+                                        add("java.lang.String")
+                                        add("com.bytedance.bpea.cert.token.TokenCert")
+                                    }
+                                    usingFields {
+                                        add {
+                                            descriptor =
+                                                $$"Landroid/provider/MediaStore$Images$Media;->EXTERNAL_CONTENT_URI:Landroid/net/Uri;"
+                                        }
+                                    }
+                                    invokeMethods {
+                                        add {
+                                            descriptor =
+                                                $$"Lcom/bytedance/bpea/entry/api/content/provider/ContentResolverEntry$Companion;->insert(Landroid/content/ContentResolver;Landroid/net/Uri;Landroid/content/ContentValues;Lcom/bytedance/bpea/basics/Cert;)Landroid/net/Uri;"
+                                        }
+                                    }
+                                }
+                            }.singleOrNull()
+                        }
+                        if (contextFieldData == null || copyFileMethodData == null || getStorageDirMethodData == null ||
+                            getExternalStorageDirectoryMethodData == null ||
+                            getImageUriMethodData == null || createUriMethodData == null || getAudioUriMethodData == null
                         ) {
                             YLog.error(symbolNotFoundMsg.format(TAG, this::class.java.enclosingClass?.simpleName))
                             return@uGFileUtilsKt
                         }
 
                         class_ = class_ {
-                            name = ugFileUtilsClsName
+                            name = ugFileUtilsClassData.name
                         }
                         this.context = field {
-                            name = "context"
+                            name = contextFieldData.name
                         }
                         copyFile = method {
-                            name = copyFileMethod.name
+                            name = copyFileMethodData.name
                             parameters = MethodKt.parameters {
                                 values.clear()
-                                copyFileMethod.parameterTypes.forEach { paramType ->
-                                    values.add(paramType.name)
-                                }
+                                values.addAll(copyFileMethodData.paramTypeNames)
                             }
                         }
                         getStorageDir = method {
-                            name = getStorageDirMethod.name
+                            name = getStorageDirMethodData.name
                             parameters = MethodKt.parameters {
                                 values.clear()
-                                getStorageDirMethod.parameterTypes.forEach { paramType ->
-                                    values.add(paramType.name)
-                                }
+                                values.addAll(getStorageDirMethodData.paramTypeNames)
                             }
                         }
                         getExternalStorageDir = method {
-                            name = getExternalStorageDirectoryMethod.name
+                            name = getExternalStorageDirectoryMethodData.name
                             parameters = MethodKt.parameters {
                                 values.clear()
-                                getExternalStorageDirectoryMethod.parameterTypes.forEach { paramType ->
-                                    values.add(paramType.name)
-                                }
+                                values.addAll(getExternalStorageDirectoryMethodData.paramTypeNames)
                             }
                         }
                         getImageUri = method {
-                            name = getImageUriMethod.name
+                            name = getImageUriMethodData.name
                             parameters = MethodKt.parameters {
                                 values.clear()
-                                getImageUriMethod.parameterTypes.forEach { paramType ->
-                                    values.add(paramType.name)
-                                }
+                                values.addAll(getImageUriMethodData.paramTypeNames)
                             }
                         }
                         createUri = method {
-                            name = createUriMethod.name
+                            name = createUriMethodData.name
                             parameters = MethodKt.parameters {
                                 values.clear()
-                                createUriMethod.parameterTypes.forEach { paramType ->
-                                    values.add(paramType.name)
-                                }
+                                values.addAll(createUriMethodData.paramTypeNames)
                             }
                         }
                         getAudioUri = method {
-                            name = getAudioUriMethod.name
+                            name = getAudioUriMethodData.name
                             parameters = MethodKt.parameters {
                                 values.clear()
-                                getAudioUriMethod.parameterTypes.forEach { paramType ->
-                                    values.add(paramType.name)
-                                }
+                                values.addAll(getAudioUriMethodData.paramTypeNames)
                             }
                         }
                     }.onFailure {

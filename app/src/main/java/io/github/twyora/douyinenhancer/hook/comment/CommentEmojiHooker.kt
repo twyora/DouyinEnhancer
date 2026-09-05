@@ -279,6 +279,7 @@ object CommentEmojiHooker : YukiBaseHooker() {
                         ?.invokeStaticMethod<String>(
                             packageInstance.ugFileUtils.getExternalStorageDir(),
                             "/douyin/comment",
+                            false,
                             false
                         )
                 }${File.separator}$saveFilePrefix.$saveFileExt"
@@ -291,6 +292,8 @@ object CommentEmojiHooker : YukiBaseHooker() {
                     packageInstance.ugFileUtils.copyFile(),
                     fileToSave,
                     saveFilePath,
+                    false,
+                    null,
                     instance.getField<Any>(
                         packageInstance.commentImageSaveDownloadListener.listenerProviderParam()
                     )?.getField<Any>(
