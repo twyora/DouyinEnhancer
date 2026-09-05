@@ -2258,7 +2258,9 @@ class DouyinPackage(classLoader: ClassLoader, context: Context) {
                                 modifiers = Modifier.PUBLIC or Modifier.STATIC
                                 returnType = "java.util.Set"
                                 params {
-                                    add("com.ss.android.ugc.aweme.comment.CommentActionParams")
+                                    this@hookInfo.commentActionParams.class_.nameOrNull?.let {
+                                        add(it)
+                                    }
                                 }
                                 usingStrings {
                                     add("custom")
