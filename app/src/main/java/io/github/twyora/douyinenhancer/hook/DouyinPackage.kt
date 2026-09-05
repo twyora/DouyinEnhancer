@@ -2889,13 +2889,8 @@ class DouyinPackage(classLoader: ClassLoader, context: Context) {
                             bridge.findMethod {
                                 searchClasses = listOf(it)
                                 matcher {
-                                    params {
-                                        add("int")
-                                        add("int")
-                                        add("java.lang.String")
-                                        add("boolean")
-                                        add("java.util.List")
-                                    }
+                                    // in some of the newer versions, the parameter order has changed
+                                    paramCount = 5
                                     invokeMethods {
                                         add {
                                             descriptor =
