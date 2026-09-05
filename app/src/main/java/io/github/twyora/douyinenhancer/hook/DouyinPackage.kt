@@ -1128,31 +1128,70 @@ class DouyinPackage(classLoader: ClassLoader, context: Context) {
             DexKitBridge.create(context.applicationInfo.sourceDir).use { bridge ->
                 commentImageStruct = commentImageStruct {
                     runCatching {
-                        val cmtImgClsName = "com.ss.android.ugc.aweme.comment.model.CommentImageStruct"
-                        val originUrlFieldName = "originUrl"
-                        val downloadUrlFieldName = "downloadUrl"
-                        val getDownloadUrlMethodData = bridge.findMethod {
-                            matcher {
-                                declaredClass = "com.ss.android.ugc.aweme.comment.model.CommentImageStruct"
-                                returnType = "com.ss.android.ugc.aweme.base.model.UrlModel"
-                                paramCount = 0
-                                addUsingField {
-                                    name = "downloadUrl"
+                        val commentImageStructClassData = bridge.getClassData("com.ss.android.ugc.aweme.comment.model.CommentImageStruct")
+                        val originUrlFieldData = commentImageStructClassData?.let {
+                            bridge.findField {
+                                searchClasses = listOf(it)
+                                matcher {
+                                    type = "com.ss.android.ugc.aweme.base.model.UrlModel"
+                                    annotations {
+                                        add {
+                                            type = "com.google.gson.annotations.SerializedName"
+                                            addElement {
+                                                name = "value"
+                                                stringValue("origin_url")
+                                            }
+                                        }
+                                    }
                                 }
-                            }
-                        }.singleOrNull() ?: run {
+                            }.singleOrNull()
+                        }
+                        val downloadUrlFieldData = commentImageStructClassData?.let {
+                            bridge.findField {
+                                searchClasses = listOf(it)
+                                matcher {
+                                    type = "com.ss.android.ugc.aweme.base.model.UrlModel"
+                                    annotations {
+                                        add {
+                                            type = "com.google.gson.annotations.SerializedName"
+                                            addElement {
+                                                name = "value"
+                                                stringValue("download_url")
+                                            }
+                                        }
+                                    }
+                                }
+                            }.singleOrNull()
+                        }
+                        val getDownloadUrlMethodData = commentImageStructClassData?.let {
+                            bridge.findMethod {
+                                searchClasses = listOf(it)
+                                matcher {
+                                    paramCount = 0
+                                    returnType = "com.ss.android.ugc.aweme.base.model.UrlModel"
+                                    addUsingField {
+                                        downloadUrlFieldData?.descriptor?.let { dlUrlDescriptor ->
+                                            descriptor = dlUrlDescriptor
+                                        }
+                                    }
+                                }
+                            }.singleOrNull()
+                        }
+                        if (commentImageStructClassData == null || originUrlFieldData == null ||
+                            downloadUrlFieldData == null || getDownloadUrlMethodData == null
+                        ) {
                             YLog.error(symbolNotFoundMsg.format(TAG, this::class.java.enclosingClass?.simpleName))
                             return@commentImageStruct
                         }
 
                         class_ = class_ {
-                            name = cmtImgClsName
+                            name = commentImageStructClassData.name
                         }
                         originUrl = field {
-                            name = originUrlFieldName
+                            name = originUrlFieldData.name
                         }
                         downloadUrl = field {
-                            name = downloadUrlFieldName
+                            name = downloadUrlFieldData.name
                         }
                         getDownloadUrl = method {
                             name = getDownloadUrlMethodData.methodName
