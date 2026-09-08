@@ -306,6 +306,7 @@ message BaseListFragmentPanel {
   optional Method pause_current_player_with_listener = 5;
   optional Method show_iv_when_pause = 6;
   optional Method on_video_player_event = 7;
+  optional Method handle_big_digg_view_click = 8;
 }
 
 message VideoPlayerEvent {
