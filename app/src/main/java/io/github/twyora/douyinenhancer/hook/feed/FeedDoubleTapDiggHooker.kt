@@ -28,7 +28,7 @@ object FeedDoubleTapDiggHooker : YukiBaseHooker() {
         }
 
         packageInstance.baseListFragmentPanel.selfClass?.resolveMethod(
-            packageInstance.baseListFragmentPanel.handleDoubleClick()
+            packageInstance.baseListFragmentPanel.handleBigDiggViewClick()
         )?.hook {
             before {
                 if (verbose) {
