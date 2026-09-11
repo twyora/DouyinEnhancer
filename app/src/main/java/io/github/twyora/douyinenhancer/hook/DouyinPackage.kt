@@ -10,6 +10,7 @@ import com.highcapable.kavaref.KavaRef.Companion.resolve
 import com.highcapable.kavaref.condition.matcher.extension.parameterizedBy
 import com.highcapable.kavaref.condition.matcher.extension.toTypeMatcher
 import com.highcapable.kavaref.condition.type.Modifiers
+import com.highcapable.kavaref.extension.asParameterizedTypeOrNull
 import com.highcapable.yukihookapi.hook.log.YLog
 import io.github.twyora.douyinenhancer.BuildConfig
 import io.github.twyora.douyinenhancer.config.FastKVConfigManager
@@ -2446,50 +2447,114 @@ class DouyinPackage(classLoader: ClassLoader, context: Context) {
                     }
                 }
 
-                absPermissionChecker = absPermissionChecker {
+                actionStatus = actionStatus {
                     runCatching {
-                        val clsName = "com.ss.android.ugc.aweme.permission.AbsPermissionChecker"
-                        val getActionCheckResultData = bridge.findMethod {
+                        val actionStatusClassData = bridge.findClass {
                             matcher {
-                                declaredClass = clsName
-                                modifiers = Modifier.PUBLIC or Modifier.FINAL
-                                addUsingField {
-                                    descriptor =
-                                        "Lcom/ss/android/ugc/aweme/privacy/model/ActionStatus;->NORMAL:Lcom/ss/android/ugc/aweme/privacy/model/ActionStatus;"
+                                superClass = "java.lang.Enum"
+                                usingStrings {
+                                    add("NORMAL")
+                                    add("GRAYED")
+                                    add("HIDDEN")
                                 }
                             }
-                        }.singleOrNull() ?: run {
+                        }.singleOrNull()
+                        if (actionStatusClassData == null) {
+                            YLog.error(symbolNotFoundMsg.format(TAG, this::class.java.enclosingClass?.simpleName))
+                            return@actionStatus
+                        }
+
+                        class_ = class_ {
+                            name = actionStatusClassData.name
+                        }
+                        grayed = field {
+                            name = "GRAYED"
+                        }
+                        hidden = field {
+                            name = "HIDDEN"
+                        }
+                        normal = field {
+                            name = "NORMAL"
+                        }
+                    }.onFailure {
+                        YLog.error(populateFailedMsg.format(TAG), it)
+                    }
+                }
+
+                absPermissionChecker = absPermissionChecker {
+                    runCatching {
+                        val getActionCheckResultMethodData = bridge.findMethod {
+                            matcher {
+                                modifiers = Modifier.PUBLIC or Modifier.FINAL
+                                declaredClass {
+                                    modifiers = Modifier.ABSTRACT
+                                }
+                                paramCount = 1
+                                usingFields {
+                                    // Messy code. Just keep out of sight so long as upper layers stay fine
+                                    this@hookInfo.actionStatus.class_.nameOrNull?.let { actionStatusClassName ->
+                                        this@hookInfo.actionStatus.normal.nameOrNull?.let { normalFieldName ->
+                                            add {
+                                                name = normalFieldName
+                                                type = actionStatusClassName
+                                            }
+                                        }
+                                        this@hookInfo.actionStatus.grayed.nameOrNull?.let { grayedFieldName ->
+                                            add {
+                                                name = grayedFieldName
+                                                type = actionStatusClassName
+                                            }
+                                        }
+                                        this@hookInfo.actionStatus.hidden.nameOrNull?.let { hiddenFieldName ->
+                                            add {
+                                                name = hiddenFieldName
+                                                type = actionStatusClassName
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }.singleOrNull()
+                        if (getActionCheckResultMethodData == null) {
                             YLog.error(symbolNotFoundMsg.format(TAG, this::class.java.enclosingClass?.simpleName))
                             return@absPermissionChecker
                         }
 
                         class_ = class_ {
-                            name = clsName
+                            name = getActionCheckResultMethodData.className
                         }
                         getActionCheckResult = method {
-                            name = getActionCheckResultData.methodName
+                            name = getActionCheckResultMethodData.name
                             parameters = MethodKt.parameters {
                                 values.clear()
-                                values.addAll(getActionCheckResultData.paramTypeNames)
+                                values.addAll(getActionCheckResultMethodData.paramTypeNames)
                             }
                         }
 
                         this@hookInfo.actionCheckResult = actionCheckResult {
                             runCatching {
-                                val actionCheckResultClsName = getActionCheckResultData.returnType!!.name
-                                val actionCheckResultActionStatusFieldName =
-                                    actionCheckResultClsName.toClass(hostAppClassLoader).resolve().firstFieldOrNull {
-                                        type = "com.ss.android.ugc.aweme.privacy.model.ActionStatus"
-                                    }?.self?.name ?: run {
-                                        YLog.error(symbolNotFoundMsg.format(TAG, this::class.java.enclosingClass?.simpleName))
-                                        return@actionCheckResult
-                                    }
+                                val actionCheckResultClassData = getActionCheckResultMethodData.returnType
+                                val actionStatusFieldData = actionCheckResultClassData?.let {
+                                    bridge.findField {
+                                        searchClasses = listOf(it)
+                                        matcher {
+                                            this@hookInfo.actionStatus.class_.nameOrNull?.let { actionStatusClassName ->
+                                                type = actionStatusClassName
+                                            }
+                                        }
+                                    }.singleOrNull()
+                                }
+
+                                if (actionCheckResultClassData == null || actionStatusFieldData == null) {
+                                    YLog.error(symbolNotFoundMsg.format(TAG, this::class.java.enclosingClass?.simpleName))
+                                    return@actionCheckResult
+                                }
 
                                 class_ = class_ {
-                                    name = actionCheckResultClsName
+                                    name = actionCheckResultClassData.name
                                 }
                                 actionStatus = field {
-                                    name = actionCheckResultActionStatusFieldName
+                                    name = actionStatusFieldData.name
                                 }
                             }.onFailure {
                                 YLog.error(populateFailedMsg.format(TAG), it)
@@ -2497,21 +2562,6 @@ class DouyinPackage(classLoader: ClassLoader, context: Context) {
                         }
                     }.onFailure {
                         YLog.error(populateFailedMsg.format(TAG), it)
-                    }
-                }
-
-                actionStatus = actionStatus {
-                    class_ = class_ {
-                        name = "com.ss.android.ugc.aweme.privacy.model.ActionStatus"
-                    }
-                    grayed = field {
-                        name = "GRAYED"
-                    }
-                    hidden = field {
-                        name = "HIDDEN"
-                    }
-                    normal = field {
-                        name = "NORMAL"
                     }
                 }
 
@@ -2532,7 +2582,7 @@ class DouyinPackage(classLoader: ClassLoader, context: Context) {
                                     }
                                     add {
                                         descriptor =
-                                            "Lcom/ss/android/common/util/NetworkUtils;->isNetworkAvailable(Landroid/content/Context;)Z"
+                                            "Lcom/ss/android/ugc/aweme/feed/model/Aweme;->isAwemeFromXiGua()Z"
                                     }
                                     add {
                                         descriptor = "Lcom/ss/android/ugc/aweme/feed/model/Aweme;->getDownloadStatus()I"
@@ -2573,33 +2623,100 @@ class DouyinPackage(classLoader: ClassLoader, context: Context) {
 
                 sharePrivacyVideoApi = sharePrivacyVideoApi {
                     runCatching {
-                        val getDownloadStatusMethodName =
-                            "com.ss.android.ugc.aweme.feed.share.video.SharePrivacyVideoApi".toClass(hostAppClassLoader).resolve()
-                                .firstMethodOrNull {
-                                    modifiers(Modifiers.PUBLIC, Modifiers.STATIC, Modifiers.FINAL)
-                                    returnType = "io.reactivex.Observable"
-                                }?.self?.name
-                        if (getDownloadStatusMethodName == null) {
+                        val getDownloadStatusMethodData = bridge.findMethod {
+                            matcher {
+                                modifiers = Modifier.PUBLIC or Modifier.STATIC or Modifier.FINAL
+                                declaredClass {
+                                    usingStrings {
+                                        add("https://www.snssdk.com")
+                                    }
+                                }
+                                returnType = "io.reactivex.Observable"
+                                params {
+                                    add("java.lang.String")
+                                }
+                            }
+                        }.singleOrNull()
+                        val videoResponseClassData = bridge.findMethod {
+                            matcher {
+                                returnType = "io.reactivex.Observable"
+                                params {
+                                    add("java.lang.String")
+                                }
+                                annotations {
+                                    add {
+                                        type = "retrofit2.http.GET"
+                                        addElement {
+                                            name = "value"
+                                            stringValue("/aweme/privacy_platform/api/privacy/permission/download")
+                                        }
+                                    }
+                                }
+                            }
+                        }.singleOrNull()?.let { realApiGetDownloadMethodData ->
+                            realApiGetDownloadMethodData.className.toClass(hostAppClassLoader).resolve().firstMethodOrNull {
+                                name = realApiGetDownloadMethodData.name
+                            }?.self?.genericReturnType?.asParameterizedTypeOrNull()?.actualTypeArguments?.firstOrNull()?.let {
+                                (it as? Class<*>)?.name
+                            }?.let {
+                                bridge.getClassData(it)
+                            }
+                        }
+                        val msgFieldData = videoResponseClassData?.let {
+                            bridge.findField {
+                                searchClasses = listOf(it)
+                                matcher {
+                                    annotations {
+                                        add {
+                                            type = "com.google.gson.annotations.SerializedName"
+                                            addElement {
+                                                name = "value"
+                                                stringValue("msg")
+                                            }
+                                        }
+                                    }
+                                }
+                            }.singleOrNull()
+                        }
+                        val statusFieldData = videoResponseClassData?.let {
+                            bridge.findField {
+                                searchClasses = listOf(it)
+                                matcher {
+                                    annotations {
+                                        add {
+                                            type = "com.google.gson.annotations.SerializedName"
+                                            addElement {
+                                                name = "value"
+                                                stringValue("status")
+                                            }
+                                        }
+                                    }
+                                }
+                            }.singleOrNull()
+                        }
+                        if (getDownloadStatusMethodData == null || videoResponseClassData == null ||
+                            msgFieldData == null || statusFieldData == null
+                        ) {
                             YLog.error(symbolNotFoundMsg.format(TAG, this::class.java.enclosingClass?.simpleName))
                             return@sharePrivacyVideoApi
                         }
 
                         class_ = class_ {
-                            name = "com.ss.android.ugc.aweme.feed.share.video.SharePrivacyVideoApi"
+                            name = getDownloadStatusMethodData.className
                         }
                         privacyVideoResponse = sharePrivacyVideoResponse {
                             class_ = class_ {
-                                name = $$"com.ss.android.ugc.aweme.feed.share.video.SharePrivacyVideoApi$PrivacyVideoResponse"
+                                name = videoResponseClassData.name
                             }
                             msg = field {
-                                name = "msg"
+                                name = msgFieldData.name
                             }
                             status = field {
-                                name = "status"
+                                name = statusFieldData.name
                             }
                         }
                         getDownloadStatus = method {
-                            name = getDownloadStatusMethodName
+                            name = getDownloadStatusMethodData.name
                         }
                     }.onFailure {
                         YLog.error(populateFailedMsg.format(TAG), it)
