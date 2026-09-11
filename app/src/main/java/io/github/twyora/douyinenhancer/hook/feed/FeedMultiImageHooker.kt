@@ -1,7 +1,6 @@
 package io.github.twyora.douyinenhancer.hook.feed
 
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import com.highcapable.kavaref.KavaRef.Companion.asResolver
 import com.highcapable.yukihookapi.hook.core.YukiMemberHookCreator
 import com.highcapable.yukihookapi.hook.entity.YukiBaseHooker
@@ -13,8 +12,8 @@ import io.github.twyora.douyinenhancer.hook.DouyinPackage
 import io.github.twyora.douyinenhancer.hook.HookOnMainProcess
 import io.github.twyora.douyinenhancer.utils.FileTypeDetector
 import io.github.twyora.douyinenhancer.utils.getField
-import io.github.twyora.douyinenhancer.utils.getStaticField
 import io.github.twyora.douyinenhancer.utils.invokeMethod
+import io.github.twyora.douyinenhancer.utils.invokeStaticMethod
 import io.github.twyora.douyinenhancer.utils.resolveMethod
 import io.github.twyora.douyinenhancer.utils.setField
 import java.io.File
@@ -334,16 +333,44 @@ object FeedMultiImageHooker : YukiBaseHooker() {
             return false
         }
 
-        val bitmap = packageInstance.heifDecoder.selfClass?.getStaticField<Any>(
-            packageInstance.heifDecoder.sBitmapFactory()
-        )?.invokeMethod<Bitmap>(
-            packageInstance.heifBitmapFactoryImpl.decodeByteArray(),
+        val bitmap = packageInstance.heif.selfClass?.invokeStaticMethod<Any>(
+            packageInstance.heif.toRgba(),
+            /* vvicBytes = */
             imageBytes,
-            0,
+            /* ttheifOpt = */
+            true,
+            /* length = */
             imageBytes.size,
-            BitmapFactory.Options().apply {
-                inPreferredConfig = Bitmap.Config.ARGB_8888
-            }
+            /* vvicDecOpt = */
+            true,
+            /* vvicOptMode = */
+            0,
+            /* heicUseWpp = */
+            true,
+            /* heicDecodeThreads = */
+            1,
+            /* vvicUseWpp = */
+            true,
+            /* vvicDecodeThreads = */
+            1,
+            /* sampleSize = */
+            1,
+            /* cropLeft = */
+            -1,
+            /* cropTop = */
+            -1,
+            /* cropHeight = */
+            -1,
+            /* cropWidth = */
+            -1,
+            /* fixVvicDecode = */
+            true
+        )?.invokeMethod<Any>(
+            packageInstance.heifData.newBitmap(),
+            null,
+            Bitmap.Config.ARGB_8888
+        )?.invokeMethod<Bitmap>(
+            packageInstance.closeableReference.get()
         )
         if (bitmap == null) {
             YLog.error("$TAG: failed to decode vvic image to bitmap: ${imageFile.absolutePath}")

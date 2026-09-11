@@ -96,8 +96,6 @@ class DouyinPackage(classLoader: ClassLoader, context: Context) {
     val downloadAction = DownloadActionModule(hookInfo.downloadAction, classLoader)
     val abTestServiceImpl = ABTestServiceImplModule(hookInfo.abTestServiceImpl, classLoader)
     val awemeStatistics = AwemeStatisticsModule(hookInfo.awemeStatistics, classLoader)
-    val heifDecoder = HeifDecoderModule(hookInfo.heifDecoder, classLoader)
-    val heifBitmapFactoryImpl = HeifBitmapFactoryImplModule(hookInfo.heifBitmapFactoryImpl, classLoader)
     val downLoadExecutor = DownLoadExecutorModule(hookInfo.downLoadExecutor, classLoader)
     val downLoadTask = DownLoadTaskModule(hookInfo.downLoadTask, classLoader)
     val downloadLivePhotoExecutor = DownloadLivePhotoExecutorModule(hookInfo.downloadLivePhotoExecutor, classLoader)
@@ -119,6 +117,9 @@ class DouyinPackage(classLoader: ClassLoader, context: Context) {
     val danmakuView = DanmakuViewModule(hookInfo.danmakuView, classLoader)
     val fluxComponentId = FluxComponentIdModule(hookInfo.fluxComponentId, classLoader)
     val fluxComponentDataAction = FluxComponentDataActionModule(hookInfo.fluxComponentDataAction, classLoader)
+    val heif = HeifModule(hookInfo.heif, classLoader)
+    val heifData = HeifDataModule(hookInfo.heifData, classLoader)
+    val closeableReference = CloseableReferenceModule(hookInfo.closeableReference, classLoader)
 
     class CommentImageStructModule internal constructor(
         private val configs: Configs.CommentImageStruct,
@@ -727,28 +728,6 @@ class DouyinPackage(classLoader: ClassLoader, context: Context) {
         fun shareCount() = Field(configs.shareCount.nameOrNull)
     }
 
-    class HeifDecoderModule internal constructor(private val configs: Configs.HeifDecoder, private val classLoader: ClassLoader) {
-        val selfClass by weak {
-            configs.class_.nameOrNull?.toClass(classLoader)
-        }
-
-        fun sBitmapFactory() = Field(configs.sBitmapFactory.nameOrNull)
-    }
-
-    class HeifBitmapFactoryImplModule internal constructor(
-        private val configs: Configs.HeifBitmapFactoryImpl,
-        private val classLoader: ClassLoader
-    ) {
-        val selfClass by weak {
-            configs.class_.nameOrNull?.toClass(classLoader)
-        }
-
-        fun decodeByteArray() = Method(
-            configs.decodeByteArray.nameOrNull,
-            configs.decodeByteArray.parameters.valuesListOrNull
-        )
-    }
-
     class DownLoadExecutorModule internal constructor(private val configs: Configs.DownLoadExecutor, private val classLoader: ClassLoader) {
         val selfClass by weak {
             configs.class_.nameOrNull?.toClass(classLoader)
@@ -1008,6 +987,42 @@ class DouyinPackage(classLoader: ClassLoader, context: Context) {
         fun onAttachedToWindow() = Method(
             configs.onAttachedToWindow.nameOrNull,
             configs.onAttachedToWindow.parameters.valuesListOrNull
+        )
+    }
+
+    class HeifModule internal constructor(private val configs: Configs.Heif, private val classLoader: ClassLoader) {
+        val selfClass by weak {
+            configs.class_.nameOrNull?.toClass(classLoader)
+        }
+
+        fun toRgba() = Method(
+            configs.toRgba.nameOrNull,
+            configs.toRgba.parameters.valuesListOrNull
+        )
+    }
+
+    class HeifDataModule internal constructor(private val configs: Configs.HeifData, private val classLoader: ClassLoader) {
+        val selfClass by weak {
+            configs.class_.nameOrNull?.toClass(classLoader)
+        }
+
+        fun newBitmap() = Method(
+            configs.newBitmap.nameOrNull,
+            configs.newBitmap.parameters.valuesListOrNull
+        )
+    }
+
+    class CloseableReferenceModule internal constructor(
+        private val configs: Configs.CloseableReference,
+        private val classLoader: ClassLoader
+    ) {
+        val selfClass by weak {
+            configs.class_.nameOrNull?.toClass(classLoader)
+        }
+
+        fun get() = Method(
+            configs.get.nameOrNull,
+            configs.get.parameters.valuesListOrNull
         )
     }
 
@@ -1932,35 +1947,6 @@ class DouyinPackage(classLoader: ClassLoader, context: Context) {
                     }
                     shareCount = field {
                         name = "shareCount"
-                    }
-                }
-
-                heifDecoder = heifDecoder {
-                    class_ = class_ {
-                        name = "com.bytedance.fresco.heif.HeifDecoder"
-                    }
-                    sBitmapFactory = field {
-                        name = "sBitmapFactory"
-                    }
-                }
-
-                heifBitmapFactoryImpl = heifBitmapFactoryImpl {
-                    class_ = class_ {
-                        name = "com.bytedance.fresco.heif.HeifBitmapFactoryImpl"
-                    }
-                    decodeByteArray = method {
-                        name = "decodeByteArray"
-                        parameters = MethodKt.parameters {
-                            values.clear()
-                            values.addAll(
-                                listOf(
-                                    "[B",
-                                    "int",
-                                    "int",
-                                    $$"android.graphics.BitmapFactory$Options"
-                                )
-                            )
-                        }
                     }
                 }
 
@@ -3308,6 +3294,118 @@ class DouyinPackage(classLoader: ClassLoader, context: Context) {
                             parameters = MethodKt.parameters {
                                 values.clear()
                                 values.addAll(getSetMethodData.paramTypeNames)
+                            }
+                        }
+                    }.onFailure {
+                        YLog.error(populateFailedMsg.format(TAG), it)
+                    }
+                }
+
+                heif = heif {
+                    runCatching {
+                        val heifClassData = bridge.getClassData("com.bytedance.fresco.nativeheif.Heif")
+                        val toRgbaMethodData = heifClassData?.let {
+                            bridge.findMethod {
+                                searchClasses = listOf(it)
+                                matcher {
+                                    name = "toRgba"
+                                    params {
+                                        add("byte[]") // vvicBytes
+                                        add("boolean") // ttheifOpt
+                                        add("int") // length
+                                        add("boolean") // vvicDecOpt
+                                        add("int") // vvicOptMode
+                                        add("boolean") // heicUseWpp
+                                        add("int") // heicDecodeThreads
+                                        add("boolean") // vvicUseWpp
+                                        add("int") // vvicDecodeThreads
+                                        add("int") // sampleSize
+                                        add("int") // cropLeft
+                                        add("int") // cropTop
+                                        add("int") // cropHeight
+                                        add("int") // cropWidth
+                                        add("boolean") // fixVvicDecode
+                                    }
+                                }
+                            }.singleOrNull()
+                        }
+                        if (heifClassData == null || toRgbaMethodData == null) {
+                            YLog.error(symbolNotFoundMsg.format(TAG, this::class.java.enclosingClass?.simpleName))
+                            return@heif
+                        }
+
+                        class_ = class_ {
+                            name = heifClassData.name
+                        }
+                        toRgba = method {
+                            name = toRgbaMethodData.name
+                            parameters = MethodKt.parameters {
+                                values.clear()
+                                values.addAll(toRgbaMethodData.paramTypeNames)
+                            }
+                        }
+                    }.onFailure {
+                        YLog.error(populateFailedMsg.format(TAG), it)
+                    }
+                }
+
+                heifData = heifData {
+                    runCatching {
+                        val heifDataClassData = bridge.getClassData("com.bytedance.fresco.nativeheif.HeifData")
+                        val newBitmapMethodData = heifDataClassData?.let {
+                            bridge.findMethod {
+                                searchClasses = listOf(it)
+                                matcher {
+                                    name = "newBitmap"
+                                    paramCount = 2
+                                }
+                            }.singleOrNull()
+                        }
+                        if (heifDataClassData == null || newBitmapMethodData == null) {
+                            YLog.error(symbolNotFoundMsg.format(TAG, this::class.java.enclosingClass?.simpleName))
+                            return@heifData
+                        }
+
+                        class_ = class_ {
+                            name = heifDataClassData.name
+                        }
+                        newBitmap = method {
+                            name = newBitmapMethodData.name
+                            parameters = MethodKt.parameters {
+                                values.clear()
+                                values.addAll(newBitmapMethodData.paramTypeNames)
+                            }
+                        }
+                    }.onFailure {
+                        YLog.error(populateFailedMsg.format(TAG), it)
+                    }
+                }
+
+                closeableReference = closeableReference {
+                    runCatching {
+                        val closeableReferenceClassData = bridge.getClassData("com.facebook.common.references.CloseableReference")
+                        val getMethodData = closeableReferenceClassData?.let {
+                            bridge.findMethod {
+                                searchClasses = listOf(it)
+                                matcher {
+                                    name = "get"
+                                    paramCount = 0
+                                }
+                            }.singleOrNull()
+                        }
+                        if (closeableReferenceClassData == null || getMethodData == null) {
+                            YLog.error(symbolNotFoundMsg.format(TAG, this::class.java.enclosingClass?.simpleName))
+                            return@closeableReference
+                        }
+
+                        class_ = class_ {
+                            name = closeableReferenceClassData.name
+                        }
+                        get = method {
+                            name = getMethodData.name
+                            parameters = MethodKt.parameters {
+                                values.clear()
+                                values.addAll(getMethodData.paramTypeNames)
                             }
                         }
                     }.onFailure {

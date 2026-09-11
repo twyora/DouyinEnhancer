@@ -203,16 +203,6 @@ message ABTestServiceImpl {
   optional Method enable_ve_add_live_video_water_mark = 3;
 }
 
-message HeifDecoder {
-  optional Class class = 1;
-  optional Field s_bitmap_factory = 2;
-}
-
-message HeifBitmapFactoryImpl {
-  optional Class class = 1;
-  optional Method decode_byte_array = 2;
-}
-
 message DownLoadExecutor {
   optional Class class = 1;
   optional Method execute = 2;
@@ -389,6 +379,21 @@ message DanmakuView {
   optional Method on_attached_to_window = 2;
 }
 
+message Heif{
+  optional Class class = 1;
+  optional Method to_rgba = 2;
+}
+
+message HeifData{
+  optional Class class = 1;
+  optional Method new_bitmap = 2;
+}
+
+message CloseableReference{
+  optional Class class = 1;
+  optional Method get = 2;
+}
+
 message HookInfo {
   uint64 last_update_time = 1;
   uint32 module_version_code = 2;
@@ -421,8 +426,6 @@ message HookInfo {
   optional ImageUrlStruct image_url_struct = 30;
   optional ABTestServiceImpl ab_test_service_impl = 31;
   optional AwemeStatistics aweme_statistics = 33;
-  optional HeifDecoder heif_decoder = 35;
-  optional HeifBitmapFactoryImpl heif_bitmap_factory_impl = 36;
   optional DownLoadExecutor down_load_executor = 37;
   optional DownLoadTask down_load_task = 38;
   optional SingleImageToMp4Composer single_image_to_mp4_composer = 39;
@@ -444,6 +447,9 @@ message HookInfo {
   optional VideoPlayerEvent video_player_event = 55;
   optional FluxComponentId flux_component_id = 56;
   optional FluxComponentDataAction flux_component_data_action = 57;
+  optional Heif heif = 58;
+  optional HeifData heif_data = 59;
+  optional CloseableReference closeable_reference = 60;
 
-  reserved 13, 18, 32;
+  reserved 13, 18, 32, 35, 36;
 }
