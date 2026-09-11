@@ -546,6 +546,11 @@ class DouyinPackage(classLoader: ClassLoader, context: Context) {
             configs.onVideoPlayerEvent.nameOrNull,
             configs.onVideoPlayerEvent.parameters.valuesListOrNull
         )
+
+        fun handleBigDiggViewClick() = Method(
+            configs.handleBigDiggViewClick.nameOrNull,
+            configs.handleBigDiggViewClick.parameters.valuesListOrNull
+        )
     }
 
     class VideoPlayerEventModule internal constructor(private val configs: Configs.VideoPlayerEvent, private val classLoader: ClassLoader) {
@@ -2727,13 +2732,32 @@ class DouyinPackage(classLoader: ClassLoader, context: Context) {
                                 }
                             }.singleOrNull()
                         }
+                        val handleBigDiggViewClickMethodData = baseListFragmentPanelClassData?.let {
+                            bridge.findMethod {
+                                searchClasses = listOf(it)
+                                matcher {
+                                    params {
+                                        add("android.view.MotionEvent")
+                                        add("com.ss.android.ugc.aweme.feed.adapter.IFeedViewHolder")
+                                        add("com.ss.android.ugc.aweme.feed.model.Aweme")
+                                    }
+                                    returnType = "void"
+                                    usingFields {
+                                        add {
+                                            descriptor = "Lcom/ss/android/ugc/aweme/feed/model/Aweme;->userDigg:I"
+                                        }
+                                    }
+                                }
+                            }.singleOrNull()
+                        }
 
                         if (baseListFragmentPanelClassData == null || handleDoubleClickMethodData == null ||
                             handleVideoEventMethodData == null ||
                             getCurrentAwemeMethodData == null ||
                             pauseCurrentPlayerWithListenerMethodData == null ||
                             showIvWhenPauseMethodData == null ||
-                            onVideoPlayerEventMethodData == null
+                            onVideoPlayerEventMethodData == null ||
+                            handleBigDiggViewClickMethodData == null
                         ) {
                             YLog.error(symbolNotFoundMsg.format(TAG, this::class.java.enclosingClass?.simpleName))
                             return@baseListFragmentPanel
@@ -2782,6 +2806,13 @@ class DouyinPackage(classLoader: ClassLoader, context: Context) {
                             parameters = MethodKt.parameters {
                                 values.clear()
                                 values.addAll(onVideoPlayerEventMethodData.paramTypeNames)
+                            }
+                        }
+                        handleBigDiggViewClick = method {
+                            name = handleBigDiggViewClickMethodData.name
+                            parameters = MethodKt.parameters {
+                                values.clear()
+                                values.addAll(handleBigDiggViewClickMethodData.paramTypeNames)
                             }
                         }
 
