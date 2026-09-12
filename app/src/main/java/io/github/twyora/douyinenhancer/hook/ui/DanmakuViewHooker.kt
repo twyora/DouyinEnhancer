@@ -76,9 +76,13 @@ object DanmakuViewHooker : YukiBaseHooker() {
             packageInstance.cleanModePresenter.enterCleanMode()
         )?.hook {
             before {
-                @Suppress("UNCHECKED_CAST")
-                val whiteList = args[4] as? MutableList<Int> ?: run {
-                    YLog.error("$TAG: ${args[4]?.javaClass?.name} is not a mutable list of int")
+                // The whiteList argument's position in the parameter list varies across host versions,
+                // resolve it at runtime
+                val whiteList = args.firstNotNullOfOrNull {
+                    @Suppress("UNCHECKED_CAST")
+                    it as? MutableList<Int>
+                } ?: run {
+                    YLog.error("$TAG: whiteList not found in the argument list")
                     return@before
                 }
 
