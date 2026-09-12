@@ -129,18 +129,12 @@ object CommentAudioHooker : YukiBaseHooker() {
     }
 
     private fun installInjectAudioUrlOnSaveClickHook(): YukiMemberHookCreator.MemberHookCreator.Result? {
-        return packageInstance.saveImageActionItem.onClickExecutor.selfClass?.resolveMethod(
-            packageInstance.saveImageActionItem.onClickExecutor.onClick()
+        return packageInstance.saveImageActionItem.selfClass?.resolveMethod(
+            packageInstance.saveImageActionItem.onClick()
         )?.hook {
-            var originImageIndex = -1
-            var originImageUrlList: List<*>? = null
             before {
-                val saveImageActionItem = args[0]?.getField<Any>(
-                    packageInstance.saveImageActionItem.onClickExecutor.hostItem()
-                ) ?: return@before
-
-                val comment = saveImageActionItem.getField<Any>(
-                    packageInstance.saveImageActionItem.commentActionParams()
+                val comment = instance.getField<Any>(
+                    packageInstance.commentLongPressItemModel.commentActionParams()
                 )?.getField<Any>(
                     packageInstance.commentActionParams.comment()
                 ) ?: return@before
@@ -161,7 +155,7 @@ object CommentAudioHooker : YukiBaseHooker() {
                 val firstCommentAudio = commentAudioList.optJSONObject(0) ?: return@before
                 val commentAudioMainUrl = firstCommentAudio.optString("main_url")
                 val commentAudioBackupUrl = firstCommentAudio.optString("backup_url")
-                val audioUrlsToInject = listOf(
+                val audioUrls = listOf(
                     commentAudioMainUrl,
                     commentAudioBackupUrl
                 ).filter {
@@ -173,45 +167,11 @@ object CommentAudioHooker : YukiBaseHooker() {
                     return@before
                 }
 
-                // store and override image index
-                originImageIndex = overrideImageIndex(saveImageActionItem, 0)
-
-                // store origin image url list
-                originImageUrlList = comment.getField<List<*>>(
-                    packageInstance.comment.imageList()
-                )
-                // inject audio url into image url list
-                if (!injectAudioUrl(comment, audioUrlsToInject)) {
-                    YLog.error("$TAG: failed to inject audio URLs into comment image list")
-                    return@before
-                }
+                injectAudioUrl(comment, audioUrls)
+                args[0] = 0
 
                 if (verbose) {
-                    YLog.debug("$TAG: injected ${audioUrlsToInject.size} audio URL(s) into comment")
-                }
-            }
-            after {
-                val saveImageActionItem = args[0]?.getField<Any>(
-                    packageInstance.saveImageActionItem.onClickExecutor.hostItem()
-                ) ?: return@after
-                originImageIndex.takeIf {
-                    it >= 0
-                }?.let {
-                    overrideImageIndex(saveImageActionItem, it)
-                    originImageIndex = -1
-                }
-
-                val comment = saveImageActionItem.getField<Any>(
-                    packageInstance.saveImageActionItem.commentActionParams()
-                )?.getField<Any>(
-                    packageInstance.commentActionParams.comment()
-                ) ?: return@after
-                originImageUrlList?.let {
-                    comment.setField(
-                        packageInstance.comment.imageList(),
-                        it
-                    )
-                    originImageUrlList = null
+                    YLog.debug("$TAG: injected ${audioUrls.size} audio URL(s) into comment")
                 }
             }
         }?.result {
@@ -320,25 +280,7 @@ object CommentAudioHooker : YukiBaseHooker() {
         }
     }
 
-    private fun overrideImageIndex(actionItem: Any, index: Int): Int {
-        val actionParams = actionItem.getField<Any>(
-            packageInstance.saveImageActionItem.saveImageActionParams()
-        ) ?: return -1
-
-        // store origin image index
-        val originImageIndex = actionParams.getField<Int>(
-            packageInstance.commentActionParams.imageIndex()
-        ) ?: -1
-        // set image index
-        actionParams.setField(
-            packageInstance.commentActionParams.imageIndex(),
-            index
-        )
-
-        return originImageIndex
-    }
-
-    private fun injectAudioUrl(comment: Any, url: List<String>): Boolean {
+    private fun injectAudioUrl(comment: Any, audioUrls: List<String>): Boolean {
         val existingImageUrlList = comment.getField<List<*>>(
             packageInstance.comment.imageList()
         )
@@ -369,18 +311,9 @@ object CommentAudioHooker : YukiBaseHooker() {
             existingImageUrlList
         } ?: return false
 
-        val existingUrlList = imageUrlModel.getField<List<String>>(
-            packageInstance.urlModel.urlList()
-        )
-        val finalUrlList = if (existingUrlList == null) {
-            url
-        } else {
-            existingUrlList + url
-        }
-
         imageUrlModel.setField(
             packageInstance.urlModel.urlList(),
-            finalUrlList
+            audioUrls
         )
 
         return true

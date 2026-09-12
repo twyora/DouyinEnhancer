@@ -41,22 +41,19 @@ object FeedReplayHooker : YukiBaseHooker() {
                     return@after
                 }
                 val code = status.getField<Int>(
-                    packageInstance.videoPlayerEvent.code()
+                    packageInstance.videoPlayerStatus.code()
                 ) ?: run {
                     YLog.error("$TAG: video player event code is null")
                     return@after
                 }
 
-                if (code != DouyinPackage.VideoPlayerEventModule.EVENT_PLAY_COMPLETED) {
+                if (code != DouyinPackage.VideoPlayerStatusModule.EVENT_PLAY_COMPLETED) {
                     return@after
                 } else if (verbose) {
                     YLog.debug("$TAG: pause when feed playback completes")
                 }
                 instance.invokeMethodOnly(
-                    packageInstance.baseListFragmentPanel.pauseCurrentPlayerWithListener()
-                )
-                instance.invokeMethodOnly(
-                    packageInstance.baseListFragmentPanel.showIvWhenPause()
+                    packageInstance.baseListFragmentPanel.handlePause()
                 )
             }
         }?.result {

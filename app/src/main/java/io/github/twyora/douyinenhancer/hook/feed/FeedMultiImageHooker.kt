@@ -1,8 +1,6 @@
 package io.github.twyora.douyinenhancer.hook.feed
 
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import com.highcapable.kavaref.KavaRef.Companion.asResolver
 import com.highcapable.yukihookapi.hook.core.YukiMemberHookCreator
 import com.highcapable.yukihookapi.hook.entity.YukiBaseHooker
 import com.highcapable.yukihookapi.hook.log.YLog
@@ -13,8 +11,8 @@ import io.github.twyora.douyinenhancer.hook.DouyinPackage
 import io.github.twyora.douyinenhancer.hook.HookOnMainProcess
 import io.github.twyora.douyinenhancer.utils.FileTypeDetector
 import io.github.twyora.douyinenhancer.utils.getField
-import io.github.twyora.douyinenhancer.utils.getStaticField
 import io.github.twyora.douyinenhancer.utils.invokeMethod
+import io.github.twyora.douyinenhancer.utils.invokeStaticMethod
 import io.github.twyora.douyinenhancer.utils.resolveMethod
 import io.github.twyora.douyinenhancer.utils.setField
 import java.io.File
@@ -169,7 +167,7 @@ object FeedMultiImageHooker : YukiBaseHooker() {
                 val downloadTask = args[0] ?: return@before
 
                 val vvicImagePathList = downloadTask.invokeMethod<List<String?>>(
-                    packageInstance.downLoadTask.getTargetFilePaths()
+                    packageInstance.absTask.getTargetFilePaths()
                 )?.filterNotNull()?.filter {
                     it.isNotBlank() && File(it).exists() && FileTypeDetector.detect(it).mimeType == "image/vvic"
                 }
@@ -221,7 +219,7 @@ object FeedMultiImageHooker : YukiBaseHooker() {
                 val downloadTask = args[0] ?: return@before
 
                 val imageFilePath = downloadTask.invokeMethod<List<String?>>(
-                    packageInstance.downLoadTask.getTargetFilePaths()
+                    packageInstance.absTask.getTargetFilePaths()
                 )?.filterNotNull()?.filter {
                     it.isNotBlank() && File(it).exists() && FileTypeDetector.detect(it).mimeType == "image/vvic"
                 } ?: run {
@@ -245,29 +243,26 @@ object FeedMultiImageHooker : YukiBaseHooker() {
         }
     }
 
-    private fun installConvertSingleVvicImageToMp4Hook(): YukiMemberHookCreator.MemberHookCreator.Result? =
-        packageInstance.singleImageToMp4Composer.selfClass?.resolveMethod(
-            packageInstance.singleImageToMp4Composer.onLoad()
+    private fun installConvertSingleVvicImageToMp4Hook(): YukiMemberHookCreator.MemberHookCreator.Result? {
+        return packageInstance.storyServiceImpl.selfClass?.resolveMethod(
+            packageInstance.storyServiceImpl.convertImgToMp4()
         )?.hook {
             before {
-                // The instance currently holds both image paths and music paths,
-                // and during the DexKit lookup phase I can't tell them apart, so we have to defer it to runtime
-                val vvicImagePathList = instance.asResolver().field {
-                    type = String::class
-                }.mapNotNull {
-                    it.getQuietly<String>()
-                }.filter {
+                val imagePath = args[2] as? String ?: run {
+                    YLog.error("$TAG: ${args[2]?.javaClass?.name} is not String")
+                    return@before
+                }
+                val vvicImagePath = imagePath.takeIf {
                     it.isNotBlank() && File(it).exists() && FileTypeDetector.detect(it).mimeType == "image/vvic"
                 }
-
-                if (verbose) {
-                    YLog.debug("$TAG: vvic image path list: $vvicImagePathList")
+                if (vvicImagePath == null) {
+                    return@before
+                } else if (verbose) {
+                    YLog.debug("$TAG: vvic image path: $vvicImagePath")
                 }
 
-                vvicImagePathList.forEach {
-                    if (!overwriteVvicWithPng(it)) {
-                        YLog.error("$TAG: failed to convert single vvic image to png in mp4 composer: $it")
-                    }
+                if (!overwriteVvicWithPng(vvicImagePath)) {
+                    YLog.error("$TAG: failed to convert single vvic image to png in mp4 composer: $vvicImagePath")
                 }
             }
         }?.result {
@@ -278,15 +273,19 @@ object FeedMultiImageHooker : YukiBaseHooker() {
                 YLog.error("$TAG: failed to hook single image to mp4 composer", throwable)
             }
         }
+    }
 
-    private fun installConvertMultiVvicImagesToMp4Hook(): YukiMemberHookCreator.MemberHookCreator.Result? =
-        packageInstance.multiImageToMp4Composer.selfClass?.resolveMethod(
-            packageInstance.multiImageToMp4Composer.onLoad()
+    private fun installConvertMultiVvicImagesToMp4Hook(): YukiMemberHookCreator.MemberHookCreator.Result? {
+        return packageInstance.storyServiceImpl.selfClass?.resolveMethod(
+            packageInstance.storyServiceImpl.convertSingleLivePhotoToMp4UseMusicUrl()
         )?.hook {
             before {
-                val vvicImagePathList = instance.getField<List<List<String?>>>(
-                    packageInstance.multiImageToMp4Composer.imagePathList()
-                )?.flatten()?.filterNotNull()?.filter {
+                @Suppress("UNCHECKED_CAST")
+                val imagePathList = args[2] as? List<List<String?>> ?: run {
+                    YLog.error("$TAG: image path list is null")
+                    return@before
+                }
+                val vvicImagePathList = imagePathList.flatten().filterNotNull().filter {
                     it.isNotBlank() && File(it).exists() && FileTypeDetector.detect(it).mimeType == "image/vvic"
                 }
 
@@ -294,7 +293,7 @@ object FeedMultiImageHooker : YukiBaseHooker() {
                     YLog.debug("$TAG: vvic image path list: $vvicImagePathList")
                 }
 
-                vvicImagePathList?.forEach {
+                vvicImagePathList.forEach {
                     if (!overwriteVvicWithPng(it)) {
                         YLog.error("$TAG: failed to convert multi vvic images to png in mp4 composer: $it")
                     }
@@ -308,6 +307,7 @@ object FeedMultiImageHooker : YukiBaseHooker() {
                 YLog.error("$TAG: failed to hook multi image to mp4 composer", throwable)
             }
         }
+    }
 
     private fun overwriteVvicWithPng(imageFilePath: String): Boolean {
         val imageFile = File(imageFilePath)
@@ -334,16 +334,44 @@ object FeedMultiImageHooker : YukiBaseHooker() {
             return false
         }
 
-        val bitmap = packageInstance.heifDecoder.selfClass?.getStaticField<Any>(
-            packageInstance.heifDecoder.sBitmapFactory()
-        )?.invokeMethod<Bitmap>(
-            packageInstance.heifBitmapFactoryImpl.decodeByteArray(),
+        val bitmap = packageInstance.heif.selfClass?.invokeStaticMethod<Any>(
+            packageInstance.heif.toRgba(),
+            /* vvicBytes = */
             imageBytes,
-            0,
+            /* ttheifOpt = */
+            true,
+            /* length = */
             imageBytes.size,
-            BitmapFactory.Options().apply {
-                inPreferredConfig = Bitmap.Config.ARGB_8888
-            }
+            /* vvicDecOpt = */
+            true,
+            /* vvicOptMode = */
+            0,
+            /* heicUseWpp = */
+            true,
+            /* heicDecodeThreads = */
+            1,
+            /* vvicUseWpp = */
+            true,
+            /* vvicDecodeThreads = */
+            1,
+            /* sampleSize = */
+            1,
+            /* cropLeft = */
+            -1,
+            /* cropTop = */
+            -1,
+            /* cropHeight = */
+            -1,
+            /* cropWidth = */
+            -1,
+            /* fixVvicDecode = */
+            true
+        )?.invokeMethod<Any>(
+            packageInstance.heifData.newBitmap(),
+            null,
+            Bitmap.Config.ARGB_8888
+        )?.invokeMethod<Bitmap>(
+            packageInstance.closeableReference.get()
         )
         if (bitmap == null) {
             YLog.error("$TAG: failed to decode vvic image to bitmap: ${imageFile.absolutePath}")

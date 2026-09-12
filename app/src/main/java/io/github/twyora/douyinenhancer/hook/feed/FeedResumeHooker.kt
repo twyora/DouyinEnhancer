@@ -39,7 +39,7 @@ object FeedResumeHooker : YukiBaseHooker() {
         )?.hook {
             before {
                 val videoType = args[0]?.getField<Int>(
-                    packageInstance.videoEvent.videoType()
+                    packageInstance.videoEvent.type()
                 ) ?: run {
                     YLog.error("$TAG: video type is null")
                     return@before
