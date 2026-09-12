@@ -2030,30 +2030,124 @@ class DouyinPackage(classLoader: ClassLoader, context: Context) {
 
                 video = video {
                     runCatching {
-                        val getPlayAddrMethodData = bridge.findMethod {
-                            matcher {
-                                declaredClass = "com.ss.android.ugc.aweme.feed.model.Video"
-                                returnType = "com.ss.android.ugc.aweme.feed.model.VideoUrlModel"
-                                usingFields {
-                                    add {
-                                        name = "_playAddr"
-                                    }
-                                    add {
-                                        name = "_playAddrH265"
+                        val videoClassData = bridge.getClassData("com.ss.android.ugc.aweme.feed.model.Video")
+                        val hasSuffixWaterMarkFieldData = videoClassData?.let {
+                            bridge.findField {
+                                searchClasses = listOf(it)
+                                matcher {
+                                    type = "boolean"
+                                    annotations {
+                                        add {
+                                            type = "com.google.gson.annotations.SerializedName"
+                                            addElement {
+                                                name = "value"
+                                                stringValue(
+                                                    value = "has_download_suffix_logo_addr",
+                                                    matchType = StringMatchType.Equals
+                                                )
+                                            }
+                                        }
                                     }
                                 }
+                            }.singleOrNull()
+                        }
+                        val hasWaterMarkFieldData = videoClassData?.let {
+                            bridge.findField {
+                                searchClasses = listOf(it)
+                                matcher {
+                                    type = "boolean"
+                                    annotations {
+                                        add {
+                                            type = "com.google.gson.annotations.SerializedName"
+                                            addElement {
+                                                name = "value"
+                                                stringValue(
+                                                    value = "has_watermark",
+                                                    matchType = StringMatchType.Equals
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }.singleOrNull()
+                        }
+                        val downloadAddrFieldData = videoClassData?.let {
+                            bridge.findField {
+                                searchClasses = listOf(it)
+                                matcher {
+                                    type = "com.ss.android.ugc.aweme.base.model.UrlModel"
+                                    annotations {
+                                        add {
+                                            type = "com.google.gson.annotations.SerializedName"
+                                            addElement {
+                                                name = "value"
+                                                stringValue(
+                                                    value = "download_addr",
+                                                    matchType = StringMatchType.Equals
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }.singleOrNull()
+                        }
+                        val getPlayAddrMethodData = videoClassData?.let {
+                            bridge.findMethod {
+                                searchClasses = listOf(it)
+                                matcher {
+                                    returnType = "com.ss.android.ugc.aweme.feed.model.VideoUrlModel"
+                                    usingFields {
+                                        add {
+                                            declaredClass = it.name
+                                            type = "com.ss.android.ugc.aweme.feed.model.VideoUrlModel"
+                                            annotations {
+                                                add {
+                                                    type = "com.google.gson.annotations.SerializedName"
+                                                    addElement {
+                                                        name = "value"
+                                                        stringValue("play_addr")
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        add {
+                                            declaredClass = it.name
+                                            type = "com.ss.android.ugc.aweme.feed.model.VideoUrlModel"
+                                            annotations {
+                                                add {
+                                                    type = "com.google.gson.annotations.SerializedName"
+                                                    addElement {
+                                                        name = "value"
+                                                        stringValue("play_addr_265")
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }.singleOrNull { methodData ->
+                                methodData.usingFields.flatMap { fieldUsage ->
+                                    fieldUsage.field.annotations
+                                }.filter { annotation ->
+                                    annotation.typeName == "com.google.gson.annotations.SerializedName"
+                                }.flatMap { annotation ->
+                                    annotation.elements
+                                }.none { element ->
+                                    element.value.stringValue() == "ratio"
+                                }
                             }
-                        }.singleOrNull { methodData ->
-                            methodData.usingFields.none {
-                                it.field.fieldName == "ratio"
-                            }
-                        } ?: run {
+                        }
+
+                        if (videoClassData == null || hasSuffixWaterMarkFieldData == null ||
+                            hasWaterMarkFieldData == null || downloadAddrFieldData == null ||
+                            getPlayAddrMethodData == null
+                        ) {
                             YLog.error(symbolNotFoundMsg.format(TAG, this::class.java.enclosingClass?.simpleName))
                             return@video
                         }
 
                         class_ = class_ {
-                            name = getPlayAddrMethodData.className
+                            name = videoClassData.name
                         }
                         getPlayAddr = method {
                             name = getPlayAddrMethodData.methodName
@@ -2063,13 +2157,13 @@ class DouyinPackage(classLoader: ClassLoader, context: Context) {
                             }
                         }
                         hasSuffixWaterMark = field {
-                            name = "hasSuffixWaterMark"
+                            name = hasSuffixWaterMarkFieldData.name
                         }
                         hasWaterMark = field {
-                            name = "hasWaterMark"
+                            name = hasWaterMarkFieldData.name
                         }
                         downloadAddr = field {
-                            name = "downloadAddr"
+                            name = downloadAddrFieldData.name
                         }
                     }.onFailure {
                         YLog.error(populateFailedMsg.format(TAG), it)
