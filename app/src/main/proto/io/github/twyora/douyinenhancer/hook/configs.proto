@@ -270,13 +270,14 @@ message BaseListFragmentPanel {
   optional Method handle_double_click = 2;
   optional Method handle_video_event = 3;
   optional Method get_current_aweme = 4;
-  optional Method pause_current_player_with_listener = 5;
-  optional Method show_iv_when_pause = 6;
   optional Method on_video_player_event = 7;
   optional Method handle_big_digg_view_click = 8;
+  optional Method handle_pause = 9;
+
+  reserved 5, 6;
 }
 
-message VideoPlayerEvent {
+message VideoPlayerStatus {
   optional Class class = 1;
   optional Field code = 2;
 }
@@ -349,7 +350,9 @@ message FluxComponentDataAction {
 
 message VideoEvent {
   optional Class class = 1;
-  optional Field video_type = 2;
+  optional Field type = 3;
+
+  reserved 2;
 }
 
 message CleanModePresenter {
@@ -363,22 +366,22 @@ message DanmakuView {
   optional Method on_attached_to_window = 2;
 }
 
-message Heif{
+message Heif {
   optional Class class = 1;
   optional Method to_rgba = 2;
 }
 
-message HeifData{
+message HeifData {
   optional Class class = 1;
   optional Method new_bitmap = 2;
 }
 
-message CloseableReference{
+message CloseableReference {
   optional Class class = 1;
   optional Method get = 2;
 }
 
-message StoryServiceImpl{
+message StoryServiceImpl {
   optional Class class = 1;
   optional Method convert_single_live_photo_to_mp4_use_music_url = 2;
   optional Method convert_img_to_mp4 = 3;
@@ -436,7 +439,6 @@ message HookInfo {
   optional VideoEvent video_event = 52;
   optional CleanModePresenter clean_mode_presenter = 53;
   optional DanmakuView danmaku_view = 54;
-  optional VideoPlayerEvent video_player_event = 55;
   optional FluxComponentId flux_component_id = 56;
   optional FluxComponentDataAction flux_component_data_action = 57;
   optional Heif heif = 58;
@@ -444,6 +446,7 @@ message HookInfo {
   optional CloseableReference closeable_reference = 60;
   optional StoryServiceImpl story_service_impl = 61;
   optional AbsTask abs_task = 62;
+  optional VideoPlayerStatus video_player_status = 63;
 
-  reserved 13, 18, 32, 35, 36, 38, 39, 40;
+  reserved 13, 18, 32, 35, 36, 38, 39, 40, 55;
 }

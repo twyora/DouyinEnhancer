@@ -107,7 +107,7 @@ class DouyinPackage(classLoader: ClassLoader, context: Context) {
     val rxObservable = RxObservableModule(hookInfo.rxObservable, classLoader)
     val listenAwemeFilter = ListenAwemeFilterModule(hookInfo.listenAwemeFilter, classLoader)
     val baseListFragmentPanel = BaseListFragmentPanelModule(hookInfo.baseListFragmentPanel, classLoader)
-    val videoPlayerEvent = VideoPlayerEventModule(hookInfo.videoPlayerEvent, classLoader)
+    val videoPlayerStatus = VideoPlayerStatusModule(hookInfo.videoPlayerStatus, classLoader)
     val videoEvent = VideoEventModule(hookInfo.videoEvent, classLoader)
     val cleanModePresenter = CleanModePresenterModule(hookInfo.cleanModePresenter, classLoader)
     val danmakuView = DanmakuViewModule(hookInfo.danmakuView, classLoader)
@@ -531,16 +531,6 @@ class DouyinPackage(classLoader: ClassLoader, context: Context) {
             configs.getCurrentAweme.parameters.valuesListOrNull
         )
 
-        fun pauseCurrentPlayerWithListener() = Method(
-            configs.pauseCurrentPlayerWithListener.nameOrNull,
-            configs.pauseCurrentPlayerWithListener.parameters.valuesListOrNull
-        )
-
-        fun showIvWhenPause() = Method(
-            configs.showIvWhenPause.nameOrNull,
-            configs.showIvWhenPause.parameters.valuesListOrNull
-        )
-
         fun onVideoPlayerEvent() = Method(
             configs.onVideoPlayerEvent.nameOrNull,
             configs.onVideoPlayerEvent.parameters.valuesListOrNull
@@ -550,9 +540,17 @@ class DouyinPackage(classLoader: ClassLoader, context: Context) {
             configs.handleBigDiggViewClick.nameOrNull,
             configs.handleBigDiggViewClick.parameters.valuesListOrNull
         )
+
+        fun handlePause() = Method(
+            configs.handlePause.nameOrNull,
+            configs.handlePause.parameters.valuesListOrNull
+        )
     }
 
-    class VideoPlayerEventModule internal constructor(private val configs: Configs.VideoPlayerEvent, private val classLoader: ClassLoader) {
+    class VideoPlayerStatusModule internal constructor(
+        private val configs: Configs.VideoPlayerStatus,
+        private val classLoader: ClassLoader
+    ) {
         val selfClass by weak {
             configs.class_.nameOrNull?.toClass(classLoader)
         }
@@ -569,7 +567,7 @@ class DouyinPackage(classLoader: ClassLoader, context: Context) {
             configs.class_.nameOrNull?.toClass(classLoader)
         }
 
-        fun videoType() = Field(configs.videoType.nameOrNull)
+        fun type() = Field(configs.type.nameOrNull)
 
         companion object {
             const val EVENT_TEXTURE_AVAILABLE = 0
@@ -2722,7 +2720,8 @@ class DouyinPackage(classLoader: ClassLoader, context: Context) {
                             bridge.findMethod {
                                 searchClasses = listOf(it)
                                 matcher {
-                                    name = "handleDoubleClick"
+                                    modifiers = Modifier.PUBLIC
+                                    returnType = "void"
                                     params {
                                         add("android.view.MotionEvent")
                                     }
@@ -2733,9 +2732,16 @@ class DouyinPackage(classLoader: ClassLoader, context: Context) {
                             bridge.findMethod {
                                 searchClasses = listOf(it)
                                 matcher {
-                                    name = "handleVideoEvent"
                                     paramCount = 1
                                     returnType = "void"
+                                    usingStrings {
+                                        add("handleVideoEvent")
+                                    }
+                                    invokeMethods {
+                                        add {
+                                            descriptor = "Lcom/ss/android/ugc/aweme/feed/model/Aweme;->getAid()Ljava/lang/String;"
+                                        }
+                                    }
                                 }
                             }.singleOrNull()
                         }
@@ -2745,26 +2751,6 @@ class DouyinPackage(classLoader: ClassLoader, context: Context) {
                                 matcher {
                                     name = "getCurrentAweme"
                                     paramCount = 0
-                                }
-                            }.singleOrNull()
-                        }
-                        val pauseCurrentPlayerWithListenerMethodData = baseListFragmentPanelClassData?.let {
-                            bridge.findMethod {
-                                searchClasses = listOf(it)
-                                matcher {
-                                    name = "pauseCurrentPlayerWithListener"
-                                    paramCount = 0
-                                    returnType = "void"
-                                }
-                            }.singleOrNull()
-                        }
-                        val showIvWhenPauseMethodData = baseListFragmentPanelClassData?.let {
-                            bridge.findMethod {
-                                searchClasses = listOf(it)
-                                matcher {
-                                    name = "showIvWhenPause"
-                                    paramCount = 0
-                                    returnType = "void"
                                 }
                             }.singleOrNull()
                         }
@@ -2796,16 +2782,36 @@ class DouyinPackage(classLoader: ClassLoader, context: Context) {
                                 }
                             }.singleOrNull()
                         }
+                        val handlePauseMethodData = baseListFragmentPanelClassData?.let {
+                            bridge.findMethod {
+                                searchClasses = listOf(it)
+                                matcher {
+                                    modifiers = Modifier.PUBLIC
+                                    returnType = "void"
+                                    params {
+                                        add("boolean")
+                                    }
+                                    usingStrings {
+                                        add("handlePause")
+                                    }
+                                }
+                            }.singleOrNull()
+                        }
 
                         if (baseListFragmentPanelClassData == null || handleDoubleClickMethodData == null ||
                             handleVideoEventMethodData == null ||
                             getCurrentAwemeMethodData == null ||
-                            pauseCurrentPlayerWithListenerMethodData == null ||
-                            showIvWhenPauseMethodData == null ||
                             onVideoPlayerEventMethodData == null ||
-                            handleBigDiggViewClickMethodData == null
+                            handleBigDiggViewClickMethodData == null ||
+                            handlePauseMethodData == null
                         ) {
-                            YLog.error(symbolNotFoundMsg.format(TAG, this::class.java.enclosingClass?.simpleName))
+                            if (baseListFragmentPanelClassData == null) YLog.error("$TAG: BaseListFragmentPanel class not found")
+                            if (handleDoubleClickMethodData == null) YLog.error("$TAG: handleDoubleClick not found")
+                            if (handleVideoEventMethodData == null) YLog.error("$TAG: handleVideoEvent not found")
+                            if (getCurrentAwemeMethodData == null) YLog.error("$TAG: getCurrentAweme not found")
+                            if (onVideoPlayerEventMethodData == null) YLog.error("$TAG: onVideoPlayerEvent not found")
+                            if (handleBigDiggViewClickMethodData == null) YLog.error("$TAG: handleBigDiggViewClick not found")
+                            if (handlePauseMethodData == null) YLog.error("$TAG: handlePause not found")
                             return@baseListFragmentPanel
                         }
 
@@ -2833,20 +2839,6 @@ class DouyinPackage(classLoader: ClassLoader, context: Context) {
                                 values.addAll(getCurrentAwemeMethodData.paramTypeNames)
                             }
                         }
-                        pauseCurrentPlayerWithListener = method {
-                            name = pauseCurrentPlayerWithListenerMethodData.methodName
-                            parameters = MethodKt.parameters {
-                                values.clear()
-                                values.addAll(pauseCurrentPlayerWithListenerMethodData.paramTypeNames)
-                            }
-                        }
-                        showIvWhenPause = method {
-                            name = showIvWhenPauseMethodData.methodName
-                            parameters = MethodKt.parameters {
-                                values.clear()
-                                values.addAll(showIvWhenPauseMethodData.paramTypeNames)
-                            }
-                        }
                         onVideoPlayerEvent = method {
                             name = onVideoPlayerEventMethodData.methodName
                             parameters = MethodKt.parameters {
@@ -2861,30 +2853,36 @@ class DouyinPackage(classLoader: ClassLoader, context: Context) {
                                 values.addAll(handleBigDiggViewClickMethodData.paramTypeNames)
                             }
                         }
+                        handlePause = method {
+                            name = handlePauseMethodData.name
+                            parameters = MethodKt.parameters {
+                                values.clear()
+                                values.addAll(handlePauseMethodData.paramTypeNames)
+                            }
+                        }
 
-                        this@hookInfo.videoPlayerEvent = videoPlayerEvent {
+                        this@hookInfo.videoPlayerStatus = videoPlayerStatus {
                             runCatching {
-                                val videoPlayerEventCodeFieldData = bridge.findField {
-                                    searchInClass(onVideoPlayerEventMethodData.paramTypes)
-                                    matcher {
-                                        modifiers = Modifier.PUBLIC or Modifier.FINAL
-                                        readMethods {
-                                            add {
-                                                descriptor = onVideoPlayerEventMethodData.descriptor
-                                            }
+                                val videoPlayerStatusClassData = onVideoPlayerEventMethodData.paramTypes.singleOrNull()
+                                val codeFieldData = videoPlayerStatusClassData?.let {
+                                    bridge.findField {
+                                        searchClasses = listOf(it)
+                                        matcher {
+                                            modifiers = Modifier.PUBLIC or Modifier.FINAL
+                                            type = "int"
                                         }
-                                    }
-                                }.singleOrNull()
-                                if (videoPlayerEventCodeFieldData == null) {
+                                    }.singleOrNull()
+                                }
+                                if (videoPlayerStatusClassData == null || codeFieldData == null) {
                                     YLog.error(symbolNotFoundMsg.format(TAG, this::class.java.enclosingClass?.simpleName))
-                                    return@videoPlayerEvent
+                                    return@videoPlayerStatus
                                 }
 
                                 class_ = class_ {
-                                    name = videoPlayerEventCodeFieldData.declaredClassName
+                                    name = videoPlayerStatusClassData.name
                                 }
                                 code = field {
-                                    name = videoPlayerEventCodeFieldData.name
+                                    name = codeFieldData.name
                                 }
                             }.onFailure {
                                 YLog.error(populateFailedMsg.format(TAG), it)
@@ -2948,7 +2946,7 @@ class DouyinPackage(classLoader: ClassLoader, context: Context) {
                         class_ = class_ {
                             name = videoEventClassData.name
                         }
-                        videoType = field {
+                        type = field {
                             name = videTypeFieldData.name
                         }
                     }.onFailure {
