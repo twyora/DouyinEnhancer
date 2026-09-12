@@ -7,8 +7,6 @@ package io.github.twyora.douyinenhancer.hook
 import android.app.AndroidAppHelper
 import android.content.Context
 import com.highcapable.kavaref.KavaRef.Companion.resolve
-import com.highcapable.kavaref.condition.matcher.extension.parameterizedBy
-import com.highcapable.kavaref.condition.matcher.extension.toTypeMatcher
 import com.highcapable.kavaref.condition.type.Modifiers
 import com.highcapable.kavaref.extension.asParameterizedTypeOrNull
 import com.highcapable.yukihookapi.hook.log.YLog
@@ -97,10 +95,8 @@ class DouyinPackage(classLoader: ClassLoader, context: Context) {
     val abTestServiceImpl = ABTestServiceImplModule(hookInfo.abTestServiceImpl, classLoader)
     val awemeStatistics = AwemeStatisticsModule(hookInfo.awemeStatistics, classLoader)
     val downLoadExecutor = DownLoadExecutorModule(hookInfo.downLoadExecutor, classLoader)
-    val downLoadTask = DownLoadTaskModule(hookInfo.downLoadTask, classLoader)
+    val absTask = AbsTaskModule(hookInfo.absTask, classLoader)
     val downloadLivePhotoExecutor = DownloadLivePhotoExecutorModule(hookInfo.downloadLivePhotoExecutor, classLoader)
-    val singleImageToMp4Composer = SingleImageToMp4ComposerModule(hookInfo.singleImageToMp4Composer, classLoader)
-    val multiImageToMp4Composer = MultiImageToMp4ComposerModule(hookInfo.multiImageToMp4Composer, classLoader)
     val mainActivity = MainActivityModule(hookInfo.mainActivity, classLoader)
     val absPermissionChecker = AbsPermissionCheckerModule(hookInfo.absPermissionChecker, classLoader)
     val actionCheckResult = ActionCheckResultModule(hookInfo.actionCheckResult, classLoader)
@@ -120,6 +116,7 @@ class DouyinPackage(classLoader: ClassLoader, context: Context) {
     val heif = HeifModule(hookInfo.heif, classLoader)
     val heifData = HeifDataModule(hookInfo.heifData, classLoader)
     val closeableReference = CloseableReferenceModule(hookInfo.closeableReference, classLoader)
+    val storyServiceImpl = StoryServiceImplModule(hookInfo.storyServiceImpl, classLoader)
 
     class CommentImageStructModule internal constructor(
         private val configs: Configs.CommentImageStruct,
@@ -739,7 +736,7 @@ class DouyinPackage(classLoader: ClassLoader, context: Context) {
         )
     }
 
-    class DownLoadTaskModule internal constructor(private val configs: Configs.DownLoadTask, private val classLoader: ClassLoader) {
+    class AbsTaskModule internal constructor(private val configs: Configs.AbsTask, private val classLoader: ClassLoader) {
         val selfClass by weak {
             configs.class_.nameOrNull?.toClass(classLoader)
         }
@@ -761,38 +758,6 @@ class DouyinPackage(classLoader: ClassLoader, context: Context) {
         fun encodeLivePhoto() = Method(
             configs.encodeLivePhoto.nameOrNull,
             configs.encodeLivePhoto.parameters.valuesListOrNull
-        )
-    }
-
-    class SingleImageToMp4ComposerModule internal constructor(
-        private val configs: Configs.SingleImageToMp4Composer,
-        private val classLoader: ClassLoader
-    ) {
-        val selfClass by weak {
-            configs.class_.nameOrNull?.toClass(classLoader)
-        }
-
-        fun onLoad() = Method(
-            configs.onLoad.nameOrNull,
-            configs.onLoad.parameters.valuesListOrNull
-        )
-    }
-
-    class MultiImageToMp4ComposerModule internal constructor(
-        private val configs: Configs.MultiImageToMp4Composer,
-        private val classLoader: ClassLoader
-    ) {
-        val selfClass by weak {
-            configs.class_.nameOrNull?.toClass(classLoader)
-        }
-
-        fun onLoad() = Method(
-            configs.onLoad.nameOrNull,
-            configs.onLoad.parameters.valuesListOrNull
-        )
-
-        fun imagePathList() = Field(
-            configs.imagePathList.nameOrNull
         )
     }
 
@@ -1023,6 +988,22 @@ class DouyinPackage(classLoader: ClassLoader, context: Context) {
         fun get() = Method(
             configs.get.nameOrNull,
             configs.get.parameters.valuesListOrNull
+        )
+    }
+
+    class StoryServiceImplModule internal constructor(private val configs: Configs.StoryServiceImpl, private val classLoader: ClassLoader) {
+        val selfClass by weak {
+            configs.class_.nameOrNull?.toClass(classLoader)
+        }
+
+        fun convertSingleLivePhotoToMp4UseMusicUrl() = Method(
+            configs.convertSingleLivePhotoToMp4UseMusicUrl.nameOrNull,
+            configs.convertSingleLivePhotoToMp4UseMusicUrl.parameters.valuesListOrNull
+        )
+
+        fun convertImgToMp4() = Method(
+            configs.convertImgToMp4.nameOrNull,
+            configs.convertImgToMp4.parameters.valuesListOrNull
         )
     }
 
@@ -1963,12 +1944,6 @@ class DouyinPackage(classLoader: ClassLoader, context: Context) {
                                     add(".png")
                                     add("DownLoadExecutor")
                                 }
-                                invokeMethods {
-                                    add {
-                                        descriptor =
-                                            "Lcom/bytedance/android/ug/UGFileUtilsKt;->getExternalStorageDirectory(Ljava/lang/String;Z)Ljava/lang/String;"
-                                    }
-                                }
                             }
                         }.singleOrNull() ?: run {
                             YLog.error(symbolNotFoundMsg.format(TAG, this::class.java.enclosingClass?.simpleName))
@@ -1990,27 +1965,27 @@ class DouyinPackage(classLoader: ClassLoader, context: Context) {
                     }
                 }
 
-                downLoadTask = downLoadTask {
+                absTask = absTask {
                     runCatching {
-                        val downloadTaskClassName = this@hookInfo.downLoadExecutor.execute.parameters.valuesListOrNull?.firstOrNull()
-                            ?: run {
-                                YLog.error(symbolNotFoundMsg.format(TAG, this::class.java.enclosingClass?.simpleName))
-                                return@downLoadTask
-                            }
-                        val getTargetFilePathsMethodData = bridge.findMethod {
-                            matcher {
-                                declaredClass = downloadTaskClassName
-                                returnType = "java.util.List"
-                            }
-                        }.singleOrNull()
+                        val absTaskClassData = this@hookInfo.downLoadExecutor.execute.parameters.valuesListOrNull?.firstOrNull()?.let {
+                            bridge.getClassData(it)
+                        }
+                        val getTargetFilePathsMethodData = absTaskClassData?.let {
+                            bridge.findMethod {
+                                searchClasses = listOf(it)
+                                matcher {
+                                    returnType = "java.util.List"
+                                }
+                            }.singleOrNull()
+                        }
 
-                        if (getTargetFilePathsMethodData == null) {
+                        if (absTaskClassData == null || getTargetFilePathsMethodData == null) {
                             YLog.error(symbolNotFoundMsg.format(TAG, this::class.java.enclosingClass?.simpleName))
-                            return@downLoadTask
+                            return@absTask
                         }
 
                         class_ = class_ {
-                            name = downloadTaskClassName
+                            name = absTaskClassData.name
                         }
                         getTargetFilePaths = method {
                             name = getTargetFilePathsMethodData.methodName
@@ -2049,96 +2024,6 @@ class DouyinPackage(classLoader: ClassLoader, context: Context) {
                                 values.clear()
                                 values.addAll(encodeLivePhotoMethodData.paramTypeNames)
                             }
-                        }
-                    }.onFailure {
-                        YLog.error(populateFailedMsg.format(TAG), it)
-                    }
-                }
-
-                singleImageToMp4Composer = singleImageToMp4Composer {
-                    runCatching {
-                        val onLoadMethodData = bridge.findMethod {
-                            matcher {
-                                name = "onLoad"
-                                usingStrings {
-                                    add("[onLoad] failed, cause path not exist")
-                                }
-                                invokeMethods {
-                                    add {
-                                        descriptor =
-                                            $$"Lcom/ss/android/ugc/aweme/services/external/ui/IStoryService;->convertImgToMp4(Landroid/content/Context;Landroidx/lifecycle/LifecycleOwner;Ljava/lang/String;Ljava/lang/String;ZJLjava/lang/String;Lcom/ss/android/ugc/aweme/services/external/ui/IStoryService$OnMuxImgToMp4Callback;)V"
-                                    }
-                                }
-                            }
-                        }.singleOrNull() ?: run {
-                            YLog.error(symbolNotFoundMsg.format(TAG, this::class.java.enclosingClass?.simpleName))
-                            return@singleImageToMp4Composer
-                        }
-
-                        class_ = class_ {
-                            name = onLoadMethodData.className
-                        }
-                        onLoad = method {
-                            name = onLoadMethodData.methodName
-                            parameters = MethodKt.parameters {
-                                values.clear()
-                                values.addAll(onLoadMethodData.paramTypeNames)
-                            }
-                        }
-                    }.onFailure {
-                        YLog.error(populateFailedMsg.format(TAG), it)
-                    }
-                }
-
-                multiImageToMp4Composer = multiImageToMp4Composer {
-                    runCatching {
-                        val onLoadMethodData = bridge.findMethod {
-                            matcher {
-                                name = "onLoad"
-                                usingStrings {
-                                    add("images file not exist!")
-                                }
-                                invokeMethods {
-                                    add {
-                                        descriptor =
-                                            "Lcom/ss/android/ugc/aweme/services/external/ui/IStoryService;->convertImgListToMp4UseMusicUrl(Landroid/app/Activity;Landroidx/lifecycle/LifecycleOwner;Ljava/util/List;Lcom/ss/android/ugc/aweme/music/model/Music;ZZLjava/lang/String;ZLkotlin/jvm/functions/Function1;)V"
-                                    }
-                                    add {
-                                        descriptor =
-                                            "Lcom/ss/android/ugc/aweme/services/external/ui/IStoryService;->convertSlidesListToMp4UseMusicUrl(Landroid/app/Activity;Landroidx/lifecycle/LifecycleOwner;Ljava/util/List;Lcom/ss/android/ugc/aweme/music/model/Music;ZZLjava/lang/String;ZLkotlin/jvm/functions/Function1;)V"
-                                    }
-                                }
-                            }
-                        }.singleOrNull()
-
-                        val imagePathListFieldName = onLoadMethodData?.className
-                            ?.toClass(hostAppClassLoader)
-                            ?.resolve()
-                            ?.firstFieldOrNull {
-                                genericType = List::class.parameterizedBy(
-                                    List::class.parameterizedBy(
-                                        String::class.toTypeMatcher()
-                                    )
-                                )
-                            }?.self?.name
-
-                        if (onLoadMethodData == null || imagePathListFieldName == null) {
-                            YLog.error(symbolNotFoundMsg.format(TAG, this::class.java.enclosingClass?.simpleName))
-                            return@multiImageToMp4Composer
-                        }
-
-                        class_ = class_ {
-                            name = onLoadMethodData.className
-                        }
-                        onLoad = method {
-                            name = onLoadMethodData.methodName
-                            parameters = MethodKt.parameters {
-                                values.clear()
-                                values.addAll(onLoadMethodData.paramTypeNames)
-                            }
-                        }
-                        imagePathList = field {
-                            name = imagePathListFieldName
                         }
                     }.onFailure {
                         YLog.error(populateFailedMsg.format(TAG), it)
@@ -2354,23 +2239,25 @@ class DouyinPackage(classLoader: ClassLoader, context: Context) {
 
                 downloadAction = downloadAction {
                     runCatching {
-                        val downloadActionClassData = bridge.findClass {
+                        val startDownloadMethodData = bridge.findMethod {
                             matcher {
-                                className("DownloadAction", StringMatchType.EndsWith)
-                            }
-                        }.singleOrNull { classData ->
-                            classData.simpleName == "DownloadAction"
-                        }
-                        val startDownloadMethodData = downloadActionClassData?.let {
-                            bridge.findMethod {
-                                searchClasses = listOf(it)
-                                matcher {
-                                    modifiers = Modifier.PUBLIC or Modifier.FINAL
-                                    paramTypes("com.ss.android.ugc.aweme.sharer.ui.SharePackage")
-                                    addUsingString("downloadImage")
+                                modifiers = Modifier.PUBLIC or Modifier.FINAL
+                                returnType = "void"
+                                params {
+                                    add("com.ss.android.ugc.aweme.sharer.ui.SharePackage")
                                 }
-                            }.singleOrNull()
-                        }
+                                usingStrings {
+                                    add("downloadImage")
+                                }
+                                invokeMethods {
+                                    add {
+                                        descriptor =
+                                            "Lcom/ss/android/ugc/aweme/feed/model/Aweme;->getVideoMuteStatus()Lcom/ss/android/ugc/aweme/feed/model/VideoMuteStruct;"
+                                    }
+                                }
+                            }
+                        }.singleOrNull()
+                        val downloadActionClassData = startDownloadMethodData?.declaredClass
                         val awemeFieldData = downloadActionClassData?.let {
                             bridge.findField {
                                 searchClasses = listOf(it)
@@ -2380,7 +2267,7 @@ class DouyinPackage(classLoader: ClassLoader, context: Context) {
                             }.singleOrNull()
                         }
 
-                        if (downloadActionClassData == null || startDownloadMethodData == null || awemeFieldData == null) {
+                        if (startDownloadMethodData == null || downloadActionClassData == null || awemeFieldData == null) {
                             YLog.error(symbolNotFoundMsg.format(TAG, this::class.java.enclosingClass?.simpleName))
                             return@downloadAction
                         }
@@ -2422,14 +2309,70 @@ class DouyinPackage(classLoader: ClassLoader, context: Context) {
                 }
 
                 abTestServiceImpl = aBTestServiceImpl {
+                    val abTestServiceImplClassData = bridge.findClass {
+                        matcher {
+                            modifiers = Modifier.PUBLIC or Modifier.FINAL
+                            interfaces {
+                                add {
+                                    className = "com.ss.android.ugc.aweme.services.external.IABTestService"
+                                }
+                            }
+                        }
+                    }.singleOrNull {
+                        it.simpleName != "StubAllServices"
+                    }
+                    val enableSaveImageToVideoLocalWaterMaskMethodData = abTestServiceImplClassData?.let {
+                        bridge.findMethod {
+                            searchClasses = listOf(it)
+                            matcher {
+                                modifiers = Modifier.PUBLIC or Modifier.FINAL
+                                returnType = "boolean"
+                                usingStrings {
+                                    add("save_image_to_video_local_water_mask_enable")
+                                }
+                            }
+                        }.singleOrNull()
+                    }
+                    val enableVeAddLiveVideoWaterMarkMethodData = abTestServiceImplClassData?.let {
+                        bridge.findMethod {
+                            searchClasses = listOfNotNull(it, *it.interfaces.toTypedArray())
+                            matcher {
+                                paramCount = 0
+                                returnType = "boolean"
+                                callerMethods {
+                                    add {
+                                        usingStrings {
+                                            add("_with_watermark.mp4")
+                                            add("composeWaterMark")
+                                        }
+                                    }
+                                }
+                            }
+                        }.singleOrNull()
+                    }
+                    if (abTestServiceImplClassData == null || enableSaveImageToVideoLocalWaterMaskMethodData == null ||
+                        enableVeAddLiveVideoWaterMarkMethodData == null
+                    ) {
+                        YLog.error(symbolNotFoundMsg.format(TAG, this::class.java.enclosingClass?.simpleName))
+                        return@aBTestServiceImpl
+                    }
+
                     class_ = class_ {
-                        name = "com.ss.android.ugc.aweme.servicimpl.ABTestServiceImpl"
+                        name = abTestServiceImplClassData.name
                     }
                     enableSaveImageToVideoLocalWaterMask = method {
-                        name = "enableSaveImageToVideoLocalWaterMask"
+                        name = enableSaveImageToVideoLocalWaterMaskMethodData.name
+                        parameters = MethodKt.parameters {
+                            values.clear()
+                            values.addAll(enableSaveImageToVideoLocalWaterMaskMethodData.paramTypeNames)
+                        }
                     }
                     enableVeAddLiveVideoWaterMark = method {
-                        name = "enableVEAddLiveVideoWaterMark"
+                        name = enableVeAddLiveVideoWaterMarkMethodData.name
+                        parameters = MethodKt.parameters {
+                            values.clear()
+                            values.addAll(enableVeAddLiveVideoWaterMarkMethodData.paramTypeNames)
+                        }
                     }
                 }
 
@@ -3406,6 +3349,84 @@ class DouyinPackage(classLoader: ClassLoader, context: Context) {
                             parameters = MethodKt.parameters {
                                 values.clear()
                                 values.addAll(getMethodData.paramTypeNames)
+                            }
+                        }
+                    }.onFailure {
+                        YLog.error(populateFailedMsg.format(TAG), it)
+                    }
+                }
+
+                storyServiceImpl = storyServiceImpl {
+                    runCatching {
+                        val storyServiceImplClassData = bridge.findClass {
+                            matcher {
+                                modifiers = Modifier.PUBLIC or Modifier.FINAL
+                                interfaces {
+                                    add {
+                                        className = "com.ss.android.ugc.aweme.services.external.ui.IStoryService"
+                                        modifiers = Modifier.PUBLIC or Modifier.INTERFACE or Modifier.ABSTRACT
+                                    }
+                                }
+                            }
+                        }.singleOrNull {
+                            it.simpleName != "StubAllServices"
+                        }
+                        val singleLivePhotoToMp4MethodData = storyServiceImplClassData?.let {
+                            bridge.findMethod {
+                                searchClasses = listOf(it)
+                                matcher {
+                                    modifiers = Modifier.PUBLIC or Modifier.FINAL
+                                    returnType = "void"
+                                    params {
+                                        add("android.app.Activity")
+                                        add("androidx.lifecycle.LifecycleOwner")
+                                        add("java.util.List")
+                                        add("com.ss.android.ugc.aweme.music.model.Music")
+                                        add("boolean")
+                                        add("boolean")
+                                        add("java.lang.String")
+                                        add("java.lang.Integer")
+                                        add("kotlin.jvm.functions.Function1")
+                                    }
+                                }
+                            }.singleOrNull()
+                        }
+                        val convertImgToMp4MethodData = storyServiceImplClassData?.let {
+                            bridge.findMethod {
+                                searchClasses = listOf(it)
+                                matcher {
+                                    modifiers = Modifier.PUBLIC or Modifier.FINAL
+                                    returnType = "void"
+                                    paramCount = 8
+                                    usingStrings {
+                                        add("asve")
+                                    }
+                                }
+                            }.singleOrNull()
+                        }
+                        if (storyServiceImplClassData == null || singleLivePhotoToMp4MethodData == null ||
+                            convertImgToMp4MethodData == null
+                        ) {
+                            YLog.error(symbolNotFoundMsg.format(TAG, this::class.java.enclosingClass?.simpleName))
+                            return@storyServiceImpl
+                        }
+
+                        class_ = class_ {
+                            name = storyServiceImplClassData.name
+                        }
+                        convertSingleLivePhotoToMp4UseMusicUrl = method {
+                            name = singleLivePhotoToMp4MethodData.name
+                            parameters = MethodKt.parameters {
+                                values.clear()
+                                values.addAll(singleLivePhotoToMp4MethodData.paramTypeNames)
+                            }
+                        }
+
+                        convertImgToMp4 = method {
+                            name = convertImgToMp4MethodData.name
+                            parameters = MethodKt.parameters {
+                                values.clear()
+                                values.addAll(convertImgToMp4MethodData.paramTypeNames)
                             }
                         }
                     }.onFailure {

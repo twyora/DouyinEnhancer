@@ -208,25 +208,9 @@ message DownLoadExecutor {
   optional Method execute = 2;
 }
 
-message DownLoadTask {
-  optional Class class = 1;
-  optional Method get_target_file_paths = 2;
-}
-
 message DownloadLivePhotoExecutor {
   optional Class class = 1;
   optional Method encode_live_photo = 2;
-}
-
-message SingleImageToMp4Composer {
-  optional Class class = 1;
-  optional Method on_load = 2;
-}
-
-message MultiImageToMp4Composer {
-  optional Class class = 1;
-  optional Method on_load = 2;
-  optional Field image_path_list = 3;
 }
 
 message AbsPermissionChecker {
@@ -394,6 +378,17 @@ message CloseableReference{
   optional Method get = 2;
 }
 
+message StoryServiceImpl{
+  optional Class class = 1;
+  optional Method convert_single_live_photo_to_mp4_use_music_url = 2;
+  optional Method convert_img_to_mp4 = 3;
+}
+
+message AbsTask {
+  optional Class class = 1;
+  optional Method get_target_file_paths = 2;
+}
+
 message HookInfo {
   uint64 last_update_time = 1;
   uint32 module_version_code = 2;
@@ -427,9 +422,6 @@ message HookInfo {
   optional ABTestServiceImpl ab_test_service_impl = 31;
   optional AwemeStatistics aweme_statistics = 33;
   optional DownLoadExecutor down_load_executor = 37;
-  optional DownLoadTask down_load_task = 38;
-  optional SingleImageToMp4Composer single_image_to_mp4_composer = 39;
-  optional MultiImageToMp4Composer multi_image_to_mp4_composer = 40;
   optional DownloadLivePhotoExecutor download_live_photo_executor = 41;
   optional MainActivity main_activity = 42;
   optional AbsPermissionChecker abs_permission_checker = 43;
@@ -450,6 +442,8 @@ message HookInfo {
   optional Heif heif = 58;
   optional HeifData heif_data = 59;
   optional CloseableReference closeable_reference = 60;
+  optional StoryServiceImpl story_service_impl = 61;
+  optional AbsTask abs_task = 62;
 
-  reserved 13, 18, 32, 35, 36;
+  reserved 13, 18, 32, 35, 36, 38, 39, 40;
 }
