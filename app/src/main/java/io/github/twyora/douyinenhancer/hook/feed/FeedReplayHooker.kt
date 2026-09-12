@@ -53,7 +53,8 @@ object FeedReplayHooker : YukiBaseHooker() {
                     YLog.debug("$TAG: pause when feed playback completes")
                 }
                 instance.invokeMethodOnly(
-                    packageInstance.baseListFragmentPanel.handlePause()
+                    packageInstance.baseListFragmentPanel.handlePause(),
+                    true
                 )
             }
         }?.result {
