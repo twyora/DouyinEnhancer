@@ -9,12 +9,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.core.content.edit
 import androidx.core.view.children
 import io.github.twyora.douyinenhancer.R
-import io.github.twyora.douyinenhancer.config.FastKVConfigManager
-import io.github.twyora.douyinenhancer.config.key.MiscKey
-import io.github.twyora.douyinenhancer.config.key.RecommendedFeedFilterKey
+import io.github.twyora.douyinenhancer.config.ConfigManager
 import io.github.twyora.douyinenhancer.databinding.ItemInputWithDeleteBinding
 import io.github.twyora.douyinenhancer.databinding.RecommendedFeedFilterDialogBinding
 
@@ -23,10 +20,10 @@ class RecommendedFeedFilterDialog(context: Context) : AlertDialog.Builder(Contex
         val recommendedFeedFilterDialogBinding = RecommendedFeedFilterDialogBinding.inflate(
             LayoutInflater.from(ContextThemeWrapper(context, R.style.MainTheme))
         )
-        val prefs = FastKVConfigManager.settings
+        val cfg = ConfigManager.recommendedFeedFilterConfig
 
         // Show hidden block options when feature is enabled
-        val showBlockGroups = prefs.getBoolean(MiscKey.ENABLE_HIDDEN_FEATURES, false)
+        val showBlockGroups = ConfigManager.miscConfig.hiddenFeatureEnabled
         if (showBlockGroups) {
             recommendedFeedFilterDialogBinding.groupBlockAd.visibility = View.VISIBLE
             recommendedFeedFilterDialogBinding.groupBlockEcomAweme.visibility = View.VISIBLE
@@ -36,67 +33,62 @@ class RecommendedFeedFilterDialog(context: Context) : AlertDialog.Builder(Contex
         }
 
         // restore state
-        recommendedFeedFilterDialogBinding.switchMainSwitch.isChecked = prefs.getBoolean(RecommendedFeedFilterKey.MAIN_SWITCH, false)
-        recommendedFeedFilterDialogBinding.switchBlockAd.isChecked = prefs.getBoolean(RecommendedFeedFilterKey.BLOCK_AD, false)
-        recommendedFeedFilterDialogBinding.switchBlockEcomAweme.isChecked =
-            prefs.getBoolean(RecommendedFeedFilterKey.BLOCK_ECOM, false)
-        recommendedFeedFilterDialogBinding.switchBlockGrouponLargeCard.isChecked =
-            prefs.getBoolean(RecommendedFeedFilterKey.BLOCK_GROUPON, false)
-        recommendedFeedFilterDialogBinding.switchBlockLive.isChecked =
-            prefs.getBoolean(RecommendedFeedFilterKey.BLOCK_LIVE, false)
-        recommendedFeedFilterDialogBinding.switchBlockMultiImage.isChecked =
-            prefs.getBoolean(RecommendedFeedFilterKey.BLOCK_MULTI_IMAGE, false)
-        prefs.getInt(RecommendedFeedFilterKey.SHORT_DURATION_LIMIT, 0).let {
+        recommendedFeedFilterDialogBinding.switchMainSwitch.isChecked = cfg.mainSwitch
+        recommendedFeedFilterDialogBinding.switchBlockAd.isChecked = cfg.blockAd
+        recommendedFeedFilterDialogBinding.switchBlockEcomAweme.isChecked = cfg.blockEcom
+        recommendedFeedFilterDialogBinding.switchBlockGrouponLargeCard.isChecked = cfg.blockGrouponLargeCard
+        recommendedFeedFilterDialogBinding.switchBlockLive.isChecked = cfg.blockLive
+        recommendedFeedFilterDialogBinding.switchBlockMultiImage.isChecked = cfg.blockMultiImage
+        cfg.shortDurationLimit.let {
             recommendedFeedFilterDialogBinding.editShortDuration.setText(it.toString())
         }
-        prefs.getInt(RecommendedFeedFilterKey.LONG_DURATION_LIMIT, Int.MAX_VALUE).let {
+        cfg.longDurationLimit.let {
             recommendedFeedFilterDialogBinding.editLongDuration.setText(it.toString())
         }
-        prefs.getInt(RecommendedFeedFilterKey.COLLECT_COUNT_MIN, 0).let {
+        cfg.collectCountMin.let {
             recommendedFeedFilterDialogBinding.editCollectCountMin.setText(it.toString())
         }
-        prefs.getInt(RecommendedFeedFilterKey.COLLECT_COUNT_MAX, Int.MAX_VALUE).let {
+        cfg.collectCountMax.let {
             recommendedFeedFilterDialogBinding.editCollectCountMax.setText(it.toString())
         }
-        prefs.getInt(RecommendedFeedFilterKey.COMMENT_COUNT_MIN, 0).let {
+        cfg.commentCountMin.let {
             recommendedFeedFilterDialogBinding.editCommentCountMin.setText(it.toString())
         }
-        prefs.getInt(RecommendedFeedFilterKey.COMMENT_COUNT_MAX, Int.MAX_VALUE).let {
+        cfg.commentCountMax.let {
             recommendedFeedFilterDialogBinding.editCommentCountMax.setText(it.toString())
         }
-        prefs.getInt(RecommendedFeedFilterKey.DIGG_COUNT_MIN, 0).let {
+        cfg.diggCountMin.let {
             recommendedFeedFilterDialogBinding.editDiggCountMin.setText(it.toString())
         }
-        prefs.getInt(RecommendedFeedFilterKey.DIGG_COUNT_MAX, Int.MAX_VALUE).let {
+        cfg.diggCountMax.let {
             recommendedFeedFilterDialogBinding.editDiggCountMax.setText(it.toString())
         }
-        prefs.getInt(RecommendedFeedFilterKey.SHARE_COUNT_MIN, 0).let {
+        cfg.shareCountMin.let {
             recommendedFeedFilterDialogBinding.editShareCountMin.setText(it.toString())
         }
-        prefs.getInt(RecommendedFeedFilterKey.SHARE_COUNT_MAX, Int.MAX_VALUE).let {
+        cfg.shareCountMax.let {
             recommendedFeedFilterDialogBinding.editShareCountMax.setText(it.toString())
         }
-        recommendedFeedFilterDialogBinding.switchTitleRegex.isChecked = prefs.getBoolean(RecommendedFeedFilterKey.TITLE_REGEX_MODE, false)
-        prefs.getStringSet(RecommendedFeedFilterKey.TITLE_KEYWORDS, null)?.forEach {
+        recommendedFeedFilterDialogBinding.switchTitleRegex.isChecked = cfg.titleRegexMode
+        cfg.titleKeywords.forEach {
             pushKeywordItem(context, recommendedFeedFilterDialogBinding.groupAwemeTitle).apply {
                 editInput.setText(it)
             }
         }
-        prefs.getStringSet(RecommendedFeedFilterKey.AUTHOR_UID_KEYWORDS, null)?.forEach {
+        cfg.authorUidKeywords.forEach {
             pushKeywordItem(context, recommendedFeedFilterDialogBinding.groupAuthorUid).apply {
                 editInput.inputType = InputType.TYPE_CLASS_NUMBER
                 editInput.setText(it)
             }
         }
-        prefs.getStringSet(RecommendedFeedFilterKey.AUTHOR_NICKNAME_KEYWORDS, null)?.forEach {
+        cfg.authorNicknameKeywords.forEach {
             pushKeywordItem(context, recommendedFeedFilterDialogBinding.groupAuthorNickname).apply {
                 editInput.setText(it)
             }
         }
-        recommendedFeedFilterDialogBinding.switchAuthorNicknameRegex.isChecked =
-            prefs.getBoolean(RecommendedFeedFilterKey.AUTHOR_NICKNAME_REGEX_MODE, false)
-        recommendedFeedFilterDialogBinding.switchDescRegex.isChecked = prefs.getBoolean(RecommendedFeedFilterKey.DESC_REGEX_MODE, false)
-        prefs.getStringSet(RecommendedFeedFilterKey.DESC_KEYWORDS, null)?.forEach {
+        recommendedFeedFilterDialogBinding.switchAuthorNicknameRegex.isChecked = cfg.authorNicknameRegexMode
+        recommendedFeedFilterDialogBinding.switchDescRegex.isChecked = cfg.descRegexMode
+        cfg.descKeywords.forEach {
             pushKeywordItem(context, recommendedFeedFilterDialogBinding.groupAwemeDesc).apply {
                 editInput.setText(it)
             }
@@ -235,31 +227,29 @@ class RecommendedFeedFilterDialog(context: Context) : AlertDialog.Builder(Contex
                 return@setPositiveButton
             }
 
-            prefs.edit(commit = true) {
-                putBoolean(RecommendedFeedFilterKey.MAIN_SWITCH, mainSwitch)
-                putBoolean(RecommendedFeedFilterKey.BLOCK_AD, blockAd)
-                putBoolean(RecommendedFeedFilterKey.BLOCK_ECOM, blockEcomAweme)
-                putBoolean(RecommendedFeedFilterKey.BLOCK_GROUPON, blockGrouponLargeCard)
-                putBoolean(RecommendedFeedFilterKey.BLOCK_LIVE, blockLive)
-                putBoolean(RecommendedFeedFilterKey.BLOCK_MULTI_IMAGE, blockMultiImage)
-                putInt(RecommendedFeedFilterKey.SHORT_DURATION_LIMIT, hideShortDurationLimit)
-                putInt(RecommendedFeedFilterKey.LONG_DURATION_LIMIT, hideLongDurationLimit)
-                putInt(RecommendedFeedFilterKey.COLLECT_COUNT_MIN, hideCollectCountMin)
-                putInt(RecommendedFeedFilterKey.COLLECT_COUNT_MAX, hideCollectCountMax)
-                putInt(RecommendedFeedFilterKey.COMMENT_COUNT_MIN, hideCommentCountMin)
-                putInt(RecommendedFeedFilterKey.COMMENT_COUNT_MAX, hideCommentCountMax)
-                putInt(RecommendedFeedFilterKey.DIGG_COUNT_MIN, hideDiggCountMin)
-                putInt(RecommendedFeedFilterKey.DIGG_COUNT_MAX, hideDiggCountMax)
-                putInt(RecommendedFeedFilterKey.SHARE_COUNT_MIN, hideShareCountMin)
-                putInt(RecommendedFeedFilterKey.SHARE_COUNT_MAX, hideShareCountMax)
-                putBoolean(RecommendedFeedFilterKey.TITLE_REGEX_MODE, titleRegexMode)
-                putStringSet(RecommendedFeedFilterKey.TITLE_KEYWORDS, titleKeywords)
-                putStringSet(RecommendedFeedFilterKey.AUTHOR_UID_KEYWORDS, uidKeywords)
-                putBoolean(RecommendedFeedFilterKey.AUTHOR_NICKNAME_REGEX_MODE, authorNicknameRegexMode)
-                putStringSet(RecommendedFeedFilterKey.AUTHOR_NICKNAME_KEYWORDS, upKeywords)
-                putBoolean(RecommendedFeedFilterKey.DESC_REGEX_MODE, descRegexMode)
-                putStringSet(RecommendedFeedFilterKey.DESC_KEYWORDS, descKeywords)
-            }
+            cfg.mainSwitch = mainSwitch
+            cfg.blockAd = blockAd
+            cfg.blockEcom = blockEcomAweme
+            cfg.blockGrouponLargeCard = blockGrouponLargeCard
+            cfg.blockLive = blockLive
+            cfg.blockMultiImage = blockMultiImage
+            cfg.shortDurationLimit = hideShortDurationLimit
+            cfg.longDurationLimit = hideLongDurationLimit
+            cfg.collectCountMin = hideCollectCountMin
+            cfg.collectCountMax = hideCollectCountMax
+            cfg.commentCountMin = hideCommentCountMin
+            cfg.commentCountMax = hideCommentCountMax
+            cfg.diggCountMin = hideDiggCountMin
+            cfg.diggCountMax = hideDiggCountMax
+            cfg.shareCountMin = hideShareCountMin
+            cfg.shareCountMax = hideShareCountMax
+            cfg.titleRegexMode = titleRegexMode
+            cfg.titleKeywords = titleKeywords
+            cfg.authorUidKeywords = uidKeywords
+            cfg.authorNicknameRegexMode = authorNicknameRegexMode
+            cfg.authorNicknameKeywords = upKeywords
+            cfg.descRegexMode = descRegexMode
+            cfg.descKeywords = descKeywords
 
             (context as? Activity)?.runOnUiThread {
                 Toast.makeText(context, context.getString(R.string.save_success_restart_required), Toast.LENGTH_SHORT).show()

@@ -5,8 +5,7 @@ import com.highcapable.yukihookapi.annotation.xposed.InjectYukiHookWithXposed
 import com.highcapable.yukihookapi.hook.factory.encase
 import com.highcapable.yukihookapi.hook.log.YLog
 import com.highcapable.yukihookapi.hook.xposed.proxy.IYukiHookXposedInit
-import io.github.twyora.douyinenhancer.config.FastKVConfigManager
-import io.github.twyora.douyinenhancer.config.key.ModuleKey
+import io.github.twyora.douyinenhancer.config.ConfigManager
 
 @InjectYukiHookWithXposed
 object HookEntry : IYukiHookXposedInit {
@@ -29,14 +28,11 @@ object HookEntry : IYukiHookXposedInit {
                             return@onCreate
                         }
 
-                        FastKVConfigManager.init(this)
+                        ConfigManager.init(this)
                         // load cached HookInfo and run hooks when app context is available
                         DouyinPackage.init(this.classLoader, this)
 
-                        val verboseDisabled = FastKVConfigManager.module.getBoolean(
-                            ModuleKey.DISABLE_VERBOSE_LOGS,
-                            false
-                        )
+                        val verboseDisabled = ConfigManager.moduleConfig.verboseDisabled
                         YLog.info("$TAG: verbose log disabling is $verboseDisabled")
 
                         HookerRegistry.mainProcessHookers.forEach {

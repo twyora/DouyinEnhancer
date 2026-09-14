@@ -6,13 +6,11 @@ import android.content.Context
 import android.view.ContextThemeWrapper
 import android.view.LayoutInflater
 import android.widget.Toast
-import androidx.core.content.edit
 import com.highcapable.yukihookapi.hook.factory.injectModuleAppResources
 import com.highcapable.yukihookapi.hook.log.YLog
 import io.github.twyora.douyinenhancer.BuildConfig
 import io.github.twyora.douyinenhancer.R
-import io.github.twyora.douyinenhancer.config.FastKVConfigManager
-import io.github.twyora.douyinenhancer.config.key.ModuleKey
+import io.github.twyora.douyinenhancer.config.ConfigManager
 import io.github.twyora.douyinenhancer.databinding.VerifyDialogBinding
 
 class VerifyDialog(private val hostContext: Context) : AlertDialog.Builder(ContextThemeWrapper(hostContext, R.style.MainTheme)) {
@@ -38,9 +36,7 @@ class VerifyDialog(private val hostContext: Context) : AlertDialog.Builder(Conte
                 inputUrl.contains(it, ignoreCase = true)
             }
             if (valid) {
-                moduleConfig.edit(true) {
-                    putInt(ModuleKey.LAST_VERIFIED_VERSION, BuildConfig.VERSION_CODE)
-                }
+                ConfigManager.moduleConfig.lastVerifiedVersion = BuildConfig.VERSION_CODE
                 dialog.dismiss()
 
                 (hostContext as? Activity)?.runOnUiThread {
@@ -58,9 +54,6 @@ class VerifyDialog(private val hostContext: Context) : AlertDialog.Builder(Conte
     companion object {
         private val TAG = this::class.simpleName
 
-        private val moduleConfig
-            get() = FastKVConfigManager.module
-
         fun show(context: Context) {
             if (!shouldVerify()) {
                 return
@@ -75,10 +68,7 @@ class VerifyDialog(private val hostContext: Context) : AlertDialog.Builder(Conte
         }
 
         fun shouldVerify(): Boolean {
-            val lastVerifiedVersion = moduleConfig.getInt(
-                ModuleKey.LAST_VERIFIED_VERSION,
-                0
-            )
+            val lastVerifiedVersion = ConfigManager.moduleConfig.lastVerifiedVersion
             return !(BuildConfig.DEBUG || BuildConfig.VERSION_CODE == lastVerifiedVersion)
         }
     }

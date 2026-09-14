@@ -11,8 +11,7 @@ import com.highcapable.kavaref.condition.type.Modifiers
 import com.highcapable.kavaref.extension.asParameterizedTypeOrNull
 import com.highcapable.yukihookapi.hook.log.YLog
 import io.github.twyora.douyinenhancer.BuildConfig
-import io.github.twyora.douyinenhancer.config.FastKVConfigManager
-import io.github.twyora.douyinenhancer.config.key.ModuleKey
+import io.github.twyora.douyinenhancer.config.ConfigManager
 import io.github.twyora.douyinenhancer.generated.AppProperties
 import io.github.twyora.douyinenhancer.utils.Field
 import io.github.twyora.douyinenhancer.utils.Method
@@ -1009,7 +1008,7 @@ class DouyinPackage(classLoader: ClassLoader, context: Context) {
         private val TAG = DouyinPackage::class.simpleName
 
         private val verbose
-            get() = !FastKVConfigManager.module.getBoolean(ModuleKey.DISABLE_VERBOSE_LOGS, false)
+            get() = !ConfigManager.moduleConfig.verboseDisabled
 
         @Volatile
         lateinit var instance: DouyinPackage

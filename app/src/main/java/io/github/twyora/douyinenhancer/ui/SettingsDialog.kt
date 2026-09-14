@@ -7,6 +7,7 @@ import android.app.Activity.RESULT_CANCELED
 import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.content.res.Configuration
 import android.os.Bundle
 import android.preference.Preference
@@ -17,15 +18,14 @@ import android.view.ContextThemeWrapper
 import android.view.View
 import android.widget.TextView
 import android.widget.Toast
-import androidx.core.content.edit
 import com.highcapable.yukihookapi.hook.factory.injectModuleAppResources
 import com.highcapable.yukihookapi.hook.log.YLog
-import io.fastkv.FastKV
 import io.github.twyora.douyinenhancer.BuildConfig
 import io.github.twyora.douyinenhancer.R
-import io.github.twyora.douyinenhancer.config.FastKVConfigManager
-import io.github.twyora.douyinenhancer.config.key.MiscKey
-import io.github.twyora.douyinenhancer.config.key.ModuleKey
+import io.github.twyora.douyinenhancer.config.ConfigManager
+import io.github.twyora.douyinenhancer.config.FastKVStorage
+import io.github.twyora.douyinenhancer.config.MiscConfigManager
+import io.github.twyora.douyinenhancer.config.ModuleConfigManager
 import io.github.twyora.douyinenhancer.hook.comment.CommentAudioHooker.hook
 import io.github.twyora.douyinenhancer.utils.Field
 import io.github.twyora.douyinenhancer.utils.Method
@@ -68,16 +68,17 @@ class SettingsDialog(context: Context) : AlertDialog.Builder(ContextThemeWrapper
         override fun onCreate(savedInstanceState: Bundle?) {
             super.onCreate(savedInstanceState)
 
-            val prefs = FastKVConfigManager.settings
-
-            preferenceManager.setField(Field("mSharedPreferences"), prefs)
+            preferenceManager.setField(
+                Field("mSharedPreferences"),
+                ((ConfigManager.settings as FastKVStorage).fastKV) as SharedPreferences
+            )
             preferenceManager.setField(Field("mEditor"), null)
             addPreferencesFromResource(R.xml.prefs_setting)
 
-            if (!prefs.getBoolean(MiscKey.ENABLE_HIDDEN_FEATURES, false)) {
+            if (!ConfigManager.miscConfig.hiddenFeatureEnabled) {
                 val miscCategory = findPreference("pref_category_misc") as? PreferenceCategory
                 miscCategory?.let { category ->
-                    findPreference(MiscKey.ENABLE_HIDDEN_FEATURES)?.let {
+                    findPreference(MiscConfigManager.ENABLE_HIDDEN_FEATURES)?.let {
                         category.removePreference(it)
                     }
                     if (category.preferenceCount == 0) {
@@ -91,7 +92,7 @@ class SettingsDialog(context: Context) : AlertDialog.Builder(ContextThemeWrapper
             findPreference("export_config")?.onPreferenceClickListener = this
             findPreference("import_config")?.onPreferenceClickListener = this
             (findPreference("disable_verbose_logs") as? SwitchPreference)?.apply {
-                isChecked = FastKVConfigManager.module.getBoolean(ModuleKey.DISABLE_VERBOSE_LOGS, false)
+                isChecked = ConfigManager.moduleConfig.verboseDisabled
                 onPreferenceChangeListener = this@PrefsFragment
             }
             findPreference("version")?.summary = BuildConfig.VERSION_NAME
@@ -121,12 +122,9 @@ class SettingsDialog(context: Context) : AlertDialog.Builder(ContextThemeWrapper
             }
 
             "version" -> {
-                val prefs = FastKVConfigManager.settings
-                if (!prefs.getBoolean(MiscKey.ENABLE_HIDDEN_FEATURES, false)) {
+                if (!ConfigManager.miscConfig.hiddenFeatureEnabled) {
                     if (++hiddenFeatureClickCount == HIDDEN_FEATURE_TRIGGER_CLICK_COUNT) {
-                        prefs.edit(commit = true) {
-                            putBoolean(MiscKey.ENABLE_HIDDEN_FEATURES, true)
-                        }
+                        ConfigManager.miscConfig.hiddenFeatureEnabled = true
                         activity.runOnUiThread {
                             Toast.makeText(
                                 context,
@@ -169,9 +167,7 @@ class SettingsDialog(context: Context) : AlertDialog.Builder(ContextThemeWrapper
         override fun onPreferenceChange(preference: Preference, newValue: Any): Boolean = when (preference.key) {
             "disable_verbose_logs" -> {
                 val verboseLogsDisabled = newValue as Boolean
-                FastKVConfigManager.module.edit(commit = true) {
-                    putBoolean(ModuleKey.DISABLE_VERBOSE_LOGS, verboseLogsDisabled)
-                }
+                ConfigManager.moduleConfig.verboseDisabled = verboseLogsDisabled
                 YLog.info("!!verbose logging disabled is $verboseLogsDisabled!!")
                 true
             }
@@ -278,14 +274,12 @@ class SettingsDialog(context: Context) : AlertDialog.Builder(ContextThemeWrapper
                                     throw IOException(context.getString(R.string.config_import_corrupted))
                                 }
 
-                                val settingsPref = FastKVConfigManager.settings
-                                val hiddenFeatureEnabled = settingsPref.getBoolean(MiscKey.ENABLE_HIDDEN_FEATURES, false)
-                                val importedSettings = FastKV.Builder(context.cacheDir.absolutePath, tempBaseName).build()
+                                val settings = ConfigManager.settings
+                                val hiddenFeatureEnabled = ConfigManager.miscConfig.hiddenFeatureEnabled
+                                val importedSettings = FastKVStorage.open(context.cacheDir.absolutePath, tempBaseName)
                                 try {
-                                    (settingsPref as FastKV).putAll(
-                                        importedSettings.all
-                                    )
-                                    settingsPref.putBoolean(MiscKey.ENABLE_HIDDEN_FEATURES, hiddenFeatureEnabled)
+                                    settings.putAll(importedSettings.getAll())
+                                    ConfigManager.miscConfig.hiddenFeatureEnabled = hiddenFeatureEnabled
                                 } finally {
                                     importedSettings.close()
                                 }
@@ -385,12 +379,10 @@ class SettingsDialog(context: Context) : AlertDialog.Builder(ContextThemeWrapper
                         }
                     } ?: context.getString(R.string.pref_about_update_available_summary)
                 }
-                val counter = FastKVConfigManager.module.getInt(ModuleKey.NOTIFY_UPDATE_COOLDOWN, NOTIFY_UPDATE_COOLDOWN_PERIOD)
+                val counter = ConfigManager.moduleConfig.notifyUpdateCooldown
                 val newCounter =
-                    (counter - 1 + NOTIFY_UPDATE_COOLDOWN_PERIOD) % NOTIFY_UPDATE_COOLDOWN_PERIOD
-                FastKVConfigManager.module.edit(true) {
-                    putInt(ModuleKey.NOTIFY_UPDATE_COOLDOWN, newCounter)
-                }
+                    (counter - 1 + ModuleConfigManager.NOTIFY_UPDATE_COOLDOWN_PERIOD) % ModuleConfigManager.NOTIFY_UPDATE_COOLDOWN_PERIOD
+                ConfigManager.moduleConfig.notifyUpdateCooldown = newCounter
                 if (newCounter == 0) {
                     activity.runOnUiThread {
                         Toast.makeText(
@@ -472,9 +464,7 @@ class SettingsDialog(context: Context) : AlertDialog.Builder(ContextThemeWrapper
         private val TAG = this::class.simpleName
 
         private val verbose
-            get() = !FastKVConfigManager.module.getBoolean(ModuleKey.DISABLE_VERBOSE_LOGS, false)
-
-        private const val NOTIFY_UPDATE_COOLDOWN_PERIOD = 3
+            get() = !ConfigManager.moduleConfig.verboseDisabled
 
         private const val EXPORT_CONFIG = 0
         private const val IMPORT_CONFIG = 1
