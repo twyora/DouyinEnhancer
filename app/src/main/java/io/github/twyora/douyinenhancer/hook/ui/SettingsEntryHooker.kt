@@ -14,7 +14,7 @@ import io.github.twyora.douyinenhancer.R
 import io.github.twyora.douyinenhancer.config.ConfigManager
 import io.github.twyora.douyinenhancer.hook.DouyinPackage
 import io.github.twyora.douyinenhancer.hook.HookOnMainProcess
-import io.github.twyora.douyinenhancer.ui.SettingsDialog
+import io.github.twyora.douyinenhancer.ui.SettingsScreen
 import io.github.twyora.douyinenhancer.utils.getField
 import io.github.twyora.douyinenhancer.utils.invokeMethod
 import io.github.twyora.douyinenhancer.utils.invokeMethodOnly
@@ -91,7 +91,7 @@ object SettingsEntryHooker : YukiBaseHooker() {
                 )
 
                 moduleSettingsCommonItemView.setOnClickListener {
-                    SettingsDialog.show(activity)
+                    activity.startActivity(Intent(activity, SettingsScreen::class.java))
                 }
 
                 // prefer inserting above the logout button; fallback to direct insert
@@ -148,7 +148,7 @@ object SettingsEntryHooker : YukiBaseHooker() {
                     YLog.debug("$TAG: attaching long click listener on about_ame view to open settings dialog")
                 }
                 aboutAwemeView.setOnLongClickListener {
-                    SettingsDialog.show(activity)
+                    activity.startActivity(Intent(activity, SettingsScreen::class.java))
                     true
                 }
             }
@@ -178,7 +178,7 @@ object SettingsEntryHooker : YukiBaseHooker() {
                         YLog.debug("$TAG: start-settings flag detected in onResume intent, showing settings dialog")
                     }
                     activity.intent?.removeExtra("douyinenhancer_start_settings")
-                    SettingsDialog.show(activity)
+                    activity.startActivity(Intent(activity, SettingsScreen::class.java))
                     removeSelf {
                         if (verbose) {
                             YLog.debug("$TAG: settings dialog shown, unregistering onResume hook to prevent re-show")
@@ -213,7 +213,7 @@ object SettingsEntryHooker : YukiBaseHooker() {
                         YLog.debug("$TAG: start-settings flag detected in onNewIntent, showing settings dialog")
                     }
                     intent.removeExtra("douyinenhancer_start_settings")
-                    SettingsDialog.show(activity)
+                    activity.startActivity(Intent(activity, SettingsScreen::class.java))
                 }
             }
         }?.result {

@@ -3,6 +3,7 @@ package io.github.twyora.douyinenhancer.hook
 import com.highcapable.yukihookapi.YukiHookAPI
 import com.highcapable.yukihookapi.annotation.xposed.InjectYukiHookWithXposed
 import com.highcapable.yukihookapi.hook.factory.encase
+import com.highcapable.yukihookapi.hook.factory.registerModuleAppActivities
 import com.highcapable.yukihookapi.hook.log.YLog
 import com.highcapable.yukihookapi.hook.xposed.proxy.IYukiHookXposedInit
 import io.github.twyora.douyinenhancer.config.ConfigManager
@@ -28,6 +29,9 @@ object HookEntry : IYukiHookXposedInit {
                             return@onCreate
                         }
 
+                        registerModuleAppActivities(
+                            proxy = "com.ss.android.ugc.aweme.compliance.business.guestmode.activity.BasicFuncMainActivity"
+                        )
                         ConfigManager.init(this)
                         // load cached HookInfo and run hooks when app context is available
                         DouyinPackage.init(this.classLoader, this)
