@@ -6,9 +6,7 @@ import com.highcapable.kavaref.extension.createInstance
 import com.highcapable.yukihookapi.hook.core.YukiMemberHookCreator
 import com.highcapable.yukihookapi.hook.entity.YukiBaseHooker
 import com.highcapable.yukihookapi.hook.log.YLog
-import io.github.twyora.douyinenhancer.config.FastKVConfigManager
-import io.github.twyora.douyinenhancer.config.key.ModuleKey
-import io.github.twyora.douyinenhancer.config.key.SaveKey
+import io.github.twyora.douyinenhancer.config.ConfigManager
 import io.github.twyora.douyinenhancer.hook.DouyinPackage
 import io.github.twyora.douyinenhancer.hook.HookOnMainProcess
 import io.github.twyora.douyinenhancer.utils.FileTypeDetector
@@ -30,10 +28,10 @@ object CommentAudioHooker : YukiBaseHooker() {
         get() = DouyinPackage.instance
 
     private val verbose
-        get() = !FastKVConfigManager.module.getBoolean(ModuleKey.DISABLE_VERBOSE_LOGS, false)
+        get() = !ConfigManager.moduleConfig.verboseDisabled
 
     override fun onHook() {
-        if (!FastKVConfigManager.settings.getBoolean(SaveKey.DOWNLOAD_COMMENT_AUDIO, false)) {
+        if (!ConfigManager.saveConfig.downloadCommentAudio) {
             if (verbose) {
                 YLog.debug("$TAG: download comment audio is disabled, skipping hook")
             }

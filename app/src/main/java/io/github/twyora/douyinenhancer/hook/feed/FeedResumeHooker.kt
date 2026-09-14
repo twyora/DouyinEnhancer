@@ -2,9 +2,7 @@ package io.github.twyora.douyinenhancer.hook.feed
 
 import com.highcapable.yukihookapi.hook.entity.YukiBaseHooker
 import com.highcapable.yukihookapi.hook.log.YLog
-import io.github.twyora.douyinenhancer.config.FastKVConfigManager
-import io.github.twyora.douyinenhancer.config.key.FeedKey
-import io.github.twyora.douyinenhancer.config.key.ModuleKey
+import io.github.twyora.douyinenhancer.config.ConfigManager
 import io.github.twyora.douyinenhancer.hook.DouyinPackage
 import io.github.twyora.douyinenhancer.hook.HookOnMainProcess
 import io.github.twyora.douyinenhancer.utils.getField
@@ -18,10 +16,10 @@ object FeedResumeHooker : YukiBaseHooker() {
         get() = DouyinPackage.instance
 
     private val verbose
-        get() = !FastKVConfigManager.module.getBoolean(ModuleKey.DISABLE_VERBOSE_LOGS, false)
+        get() = !ConfigManager.moduleConfig.verboseDisabled
 
     override fun onHook() {
-        if (!FastKVConfigManager.settings.getBoolean(FeedKey.FEED_BLOCK_RESUME_PLAYBACK, false)) {
+        if (!ConfigManager.feedConfig.blockResumePlayback) {
             if (verbose) {
                 YLog.debug("$TAG: block resume playback is disabled, skipping hook")
             }

@@ -13,9 +13,7 @@ import com.highcapable.yukihookapi.hook.core.YukiMemberHookCreator
 import com.highcapable.yukihookapi.hook.entity.YukiBaseHooker
 import com.highcapable.yukihookapi.hook.log.YLog
 import com.shakster.gifkt.GifEncoder
-import io.github.twyora.douyinenhancer.config.FastKVConfigManager
-import io.github.twyora.douyinenhancer.config.key.ModuleKey
-import io.github.twyora.douyinenhancer.config.key.SaveKey
+import io.github.twyora.douyinenhancer.config.ConfigManager
 import io.github.twyora.douyinenhancer.hook.DouyinPackage
 import io.github.twyora.douyinenhancer.hook.HookOnMainProcess
 import io.github.twyora.douyinenhancer.utils.FileTypeDetector
@@ -39,13 +37,13 @@ object CommentEmojiHooker : YukiBaseHooker() {
     private val TAG = this::class.simpleName
 
     private val verbose
-        get() = !FastKVConfigManager.module.getBoolean(ModuleKey.DISABLE_VERBOSE_LOGS, false)
+        get() = !ConfigManager.moduleConfig.verboseDisabled
 
     private val packageInstance
         get() = DouyinPackage.instance
 
     override fun onHook() {
-        if (!FastKVConfigManager.settings.getBoolean(SaveKey.UNLOCK_COMMENT_EMOJI, false)) {
+        if (!ConfigManager.saveConfig.unlockCommentEmoji) {
             if (verbose) {
                 YLog.debug("$TAG: unlock comment emoji is disabled, skipping hook")
             }
