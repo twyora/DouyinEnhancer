@@ -1,7 +1,6 @@
 package io.github.twyora.douyinenhancer.config
 
 import android.content.Context
-import io.fastkv.FastKV
 
 // TODO: Consider renaming
 object ConfigManager {
@@ -52,11 +51,13 @@ object ConfigManager {
     }
 
     fun init(context: Context) {
-        settings = FastKVStorage(
-            FastKV.Builder(context, "douyinenhancer_prefs").build()
+        settings = FastKVStorage.open(
+            context.filesDir.absolutePath + "/fastkv/",
+            "douyinenhancer_prefs"
         )
-        module = FastKVStorage(
-            FastKV.Builder(context, "douyinenhancer_module").build()
+        module = FastKVStorage.open(
+            context.filesDir.absolutePath + "/fastkv/",
+            "douyinenhancer_module"
         )
     }
 }
