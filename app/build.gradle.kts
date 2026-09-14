@@ -8,6 +8,7 @@ plugins {
     // 作为 Xposed 模块使用务必添加，其它情况可选
     alias(libs.plugins.ksp)
     alias(libs.plugins.protobuf)
+    alias(libs.plugins.compose.compiler)
 }
 
 android {
@@ -35,9 +36,9 @@ android {
      */
     val isKeyStoreAvailable = try {
         gropify.keystore.path.isNotBlank() &&
-            gropify.keystore.password.isNotBlank() &&
-            gropify.key.alias.isNotBlank() &&
-            gropify.key.password.isNotBlank()
+                gropify.keystore.password.isNotBlank() &&
+                gropify.key.alias.isNotBlank() &&
+                gropify.key.password.isNotBlank()
     } catch (_: Exception) {
         false
     }
@@ -72,6 +73,7 @@ android {
     buildFeatures {
         buildConfig = true
         viewBinding = true
+        compose = true
     }
 
     buildTypes {
@@ -154,6 +156,8 @@ protobuf {
 }
 
 dependencies {
+    // TODO: Reorganize this
+
     implementation(project(":annotation"))
     ksp(project(":processor"))
 
@@ -182,6 +186,15 @@ dependencies {
     compileOnly(libs.xposed.api)
     // 作为 Xposed 模块使用务必添加，其它情况可选
     ksp(libs.yukihookapi.ksp.xposed)
+
+    // compose
+    implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.compose.ui)
+    implementation(libs.androidx.compose.foundation)
+    implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.ui.tooling.preview)
+    debugImplementation(libs.androidx.compose.ui.tooling)
 }
 
 /**
