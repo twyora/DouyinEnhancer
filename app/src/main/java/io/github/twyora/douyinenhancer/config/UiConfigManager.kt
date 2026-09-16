@@ -1,6 +1,6 @@
 package io.github.twyora.douyinenhancer.config
 
-class UiConfigManager(kvConfig: KVStorage) : ConfigProvider(kvConfig) {
+class UiConfigManager(kvConfig: IKVStorage) : ConfigProvider(kvConfig) {
     var keepDanmakuVisible by property(KEEP_DANMAKU_VISIBLE, false)
 
     companion object {

@@ -6,7 +6,7 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 
-class FastKVStorage(val fastKV: FastKV) : KVStorage {
+class FastKVStorage(val fastKV: FastKV) : IKVStorage {
     override fun <T : Any> get(key: String, defValue: T): T {
         @Suppress("UNCHECKED_CAST")
         return when (defValue) {
@@ -68,7 +68,7 @@ class FastKVStorage(val fastKV: FastKV) : KVStorage {
         fastKV.close()
     }
 
-    companion object : KVStorage.KVFactory {
+    companion object : IKVStorage.KVFactory {
         override fun open(path: String, name: String) = FastKVStorage(
             FastKV.Builder(path, name).build()
         )

@@ -4,10 +4,10 @@ import android.content.Context
 
 // TODO: Consider renaming
 object ConfigManager {
-    lateinit var settings: KVStorage
+    lateinit var settings: IKVStorage
         private set
 
-    lateinit var module: KVStorage
+    lateinit var module: IKVStorage
         private set
 
     val recommendedFeedFilterConfig by lazy {
