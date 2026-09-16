@@ -1,4 +1,4 @@
-package io.github.twyora.douyinenhancer.ui
+package io.github.twyora.douyinenhancer.ui.legacy
 
 import android.app.Activity
 import android.app.AlertDialog
