@@ -20,7 +20,7 @@
         android:theme="@style/Theme.DouyinEnhancer">
 
         <activity
-            android:name=".ui.MainActivity"
+            android:name=".ui.legacy.MainActivity"
             android:exported="true"
             android:showForAllUsers="true"
             android:launchMode="singleInstance"
@@ -34,7 +34,7 @@
         <activity-alias
             android:name=".ui.MainActivityAlias"
             android:exported="true"
-            android:targetActivity=".ui.MainActivity">
+            android:targetActivity=".ui.legacy.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

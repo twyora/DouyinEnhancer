@@ -1,9 +1,8 @@
 @file:Suppress("DEPRECATION")
 
-package io.github.twyora.douyinenhancer.ui
+package io.github.twyora.douyinenhancer.ui.legacy
 
 import android.app.Activity
-import android.app.Activity.RESULT_CANCELED
 import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
@@ -31,6 +30,12 @@ import io.github.twyora.douyinenhancer.utils.Field
 import io.github.twyora.douyinenhancer.utils.Method
 import io.github.twyora.douyinenhancer.utils.resolveMethod
 import io.github.twyora.douyinenhancer.utils.setField
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import org.json.JSONObject
 import java.io.File
 import java.net.URL
 import java.security.DigestInputStream
@@ -43,20 +48,18 @@ import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 import java.util.zip.ZipOutputStream
 import kotlin.system.exitProcess
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import kotlinx.io.IOException
-import org.json.JSONObject
 
 /**
  * Settings dialog for DouyinEnhancer.
  *
  * Referenced from [BiliRoaming](https://github.com/yujincheng08/BiliRoaming/blob/master/app/src/main/java/me/iacn/biliroaming/SettingDialog.kt)
  */
-class SettingsDialog(context: Context) : AlertDialog.Builder(ContextThemeWrapper(context, R.style.MainTheme)) {
+class SettingsDialog(context: Context) : AlertDialog.Builder(
+    ContextThemeWrapper(
+        context,
+        R.style.MainTheme
+    )
+) {
     class PrefsFragment :
         PreferenceFragment(),
         Preference.OnPreferenceClickListener,
@@ -184,7 +187,7 @@ class SettingsDialog(context: Context) : AlertDialog.Builder(ContextThemeWrapper
                     val digest = MessageDigest.getInstance("SHA-256")
 
                     val uri = data?.data
-                    if (resultCode == RESULT_CANCELED || uri == null) {
+                    if (resultCode == Activity.RESULT_CANCELED || uri == null) {
                         return
                     }
 
@@ -200,7 +203,10 @@ class SettingsDialog(context: Context) : AlertDialog.Builder(ContextThemeWrapper
                                             it.exists()
                                         }.forEach { file ->
                                             zipOut.putNextEntry(ZipEntry(file.name))
-                                            DigestInputStream(file.inputStream(), digest).use { input ->
+                                            DigestInputStream(
+                                                file.inputStream(),
+                                                digest
+                                            ).use { input ->
                                                 input.copyTo(zipOut)
                                             }
                                             zipOut.closeEntry()
@@ -271,7 +277,7 @@ class SettingsDialog(context: Context) : AlertDialog.Builder(ContextThemeWrapper
                                     "%02x".format(it)
                                 }
                                 if (checksum != expectedChecksum) {
-                                    throw IOException(context.getString(R.string.config_import_corrupted))
+                                    throw kotlinx.io.IOException(context.getString(R.string.config_import_corrupted))
                                 }
 
                                 val settings = ConfigManager.settings
@@ -437,8 +443,10 @@ class SettingsDialog(context: Context) : AlertDialog.Builder(ContextThemeWrapper
                         YLog.error("$TAG: bound target ${instance::class.qualifiedName} has no view, skip recolor")
                         return@after
                     }
-                    view.findViewById<TextView>(android.R.id.title)?.setTextColor(activity.resources.getColor(R.color.white))
-                    view.findViewById<TextView>(android.R.id.summary)?.setTextColor(activity.resources.getColor(R.color.white_50))
+                    view.findViewById<TextView>(android.R.id.title)
+                        ?.setTextColor(activity.resources.getColor(R.color.white))
+                    view.findViewById<TextView>(android.R.id.summary)
+                        ?.setTextColor(activity.resources.getColor(R.color.white_50))
                 }
             }
         } else {
