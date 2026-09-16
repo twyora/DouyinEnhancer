@@ -1463,7 +1463,7 @@ class DouyinPackage(classLoader: ClassLoader, context: Context) {
                             .findMethod {
                                 matcher {
                                     name = "onSuccessed"
-                                    modifiers = Modifier.FINAL + Modifier.PUBLIC
+                                    modifiers = Modifier.FINAL or Modifier.PUBLIC
                                     returnType = "void"
                                     params {
                                         add("com.ss.android.socialbase.downloader.model.DownloadInfo")
@@ -1471,12 +1471,6 @@ class DouyinPackage(classLoader: ClassLoader, context: Context) {
                                     usingStrings {
                                         add("/douyin/comment")
                                         add("comment_")
-                                    }
-                                    invokeMethods {
-                                        add {
-                                            descriptor =
-                                                "Lcom/bytedance/android/ug/UGFileUtilsKt;->copyFile(Ljava/lang/String;Ljava/lang/String;Lcom/bytedance/bpea/cert/token/TokenCert;)Z"
-                                        }
                                     }
                                 }
                             }.singleOrNull()
@@ -3020,7 +3014,7 @@ class DouyinPackage(classLoader: ClassLoader, context: Context) {
                             bridge.findField {
                                 searchInClass(listOf(it))
                                 matcher {
-                                    modifiers = Modifier.PUBLIC or Modifier.FINAL
+                                    modifiers = Modifier.PUBLIC
                                     type = "int"
                                     writeMethods {
                                         add {
@@ -3126,8 +3120,29 @@ class DouyinPackage(classLoader: ClassLoader, context: Context) {
                 }
 
                 fluxComponentId = fluxComponentId {
+                    val fluxComponentClassData = bridge.findClass {
+                        matcher {
+                            superClass = "java.lang.Enum"
+                            fields {
+                                add {
+                                    name = "MUSIC_COVER"
+                                }
+                                add {
+                                    name = "REPORT_WARN"
+                                }
+                                add {
+                                    name = "DANMAKU_VERTICAL"
+                                }
+                            }
+                        }
+                    }.singleOrNull()
+                    if (fluxComponentClassData == null) {
+                        YLog.error(symbolNotFoundMsg.format(TAG, this::class.java.enclosingClass?.simpleName))
+                        return@fluxComponentId
+                    }
+
                     class_ = class_ {
-                        name = "com.ss.android.ugc.aweme.flux.register.FluxComponentId"
+                        name = fluxComponentClassData.name
                     }
                     musicCoverBlock = field {
                         name = "MUSIC_COVER_BLOCK"
