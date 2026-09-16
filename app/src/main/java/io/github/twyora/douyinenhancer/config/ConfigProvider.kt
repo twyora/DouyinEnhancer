@@ -9,9 +9,9 @@ enum class FeatureGate {
 
 // TODO: Rename it
 abstract class ConfigProvider(
-    val kvConfig: KVStorage,
+    val kvConfig: IKVStorage,
     protected open val gates: Map<FeatureGate, () -> Boolean> = emptyMap()
-) : KVStorage by kvConfig {
+) : IKVStorage by kvConfig {
     // TODO: refactoring is required
     open val gatedKeys: Map<FeatureGate, Set<String>> = emptyMap()
 

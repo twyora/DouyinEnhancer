@@ -4,7 +4,7 @@ import kotlin.collections.setOf
 import kotlin.to
 
 class RecommendedFeedFilterConfigManager(
-    kvConfig: KVStorage,
+    kvConfig: IKVStorage,
     gates: Map<FeatureGate, () -> Boolean> = emptyMap()
 ) : ConfigProvider(kvConfig, gates) {
     override val gatedKeys = mapOf(

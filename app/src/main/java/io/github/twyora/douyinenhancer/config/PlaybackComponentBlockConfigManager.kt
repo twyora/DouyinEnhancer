@@ -1,11 +1,9 @@
 package io.github.twyora.douyinenhancer.config
 
 class PlaybackComponentBlockConfigManager(
-    kvConfig: KVStorage,
+    kvConfig: IKVStorage,
     gates: Map<FeatureGate, () -> Boolean> = emptyMap()
 ) : ConfigProvider(kvConfig, gates) {
-
-    // 隐藏功能子集：仅隐藏模式开启时显示/生效（与 Dialog 显隐一致）
     override val gatedKeys = mapOf(
         FeatureGate.HIDDEN to setOf(
             BUTTON_UNFOLLOW_FAMILIAR_REC,
