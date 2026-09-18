@@ -1,6 +1,8 @@
 package io.github.twyora.douyinenhancer.config
 
-class SaveConfigManager(kvConfig: IKVStorage) : ConfigProvider(kvConfig) {
+import io.github.twyora.douyinenhancer.config.kvstorage.IKVStorage
+
+class SaveConfigProvider(kvConfig: IKVStorage) : AbsConfigProvider(kvConfig) {
     var purifyCommentImage by property(PURIFY_COMMENT_IMAGE, false)
     var unlockCommentEmoji by property(UNLOCK_COMMENT_EMOJI, false)
     var downloadCommentAudio by property(DOWNLOAD_COMMENT_AUDIO, false)

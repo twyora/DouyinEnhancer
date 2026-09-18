@@ -1,5 +1,6 @@
 package io.github.twyora.douyinenhancer.config
 
+import io.github.twyora.douyinenhancer.config.kvstorage.IKVStorage
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
@@ -8,7 +9,7 @@ enum class FeatureGate {
 }
 
 // TODO: Rename it
-abstract class ConfigProvider(
+abstract class AbsConfigProvider(
     val kvConfig: IKVStorage,
     protected open val gates: Map<FeatureGate, () -> Boolean> = emptyMap()
 ) : IKVStorage by kvConfig {

@@ -1,12 +1,13 @@
 package io.github.twyora.douyinenhancer.config
 
+import io.github.twyora.douyinenhancer.config.kvstorage.IKVStorage
 import kotlin.collections.setOf
 import kotlin.to
 
-class RecommendedFeedFilterConfigManager(
+class RecommendedFeedFilterConfigProvider(
     kvConfig: IKVStorage,
     gates: Map<FeatureGate, () -> Boolean> = emptyMap()
-) : ConfigProvider(kvConfig, gates) {
+) : AbsConfigProvider(kvConfig, gates) {
     override val gatedKeys = mapOf(
         FeatureGate.HIDDEN to setOf(
             BLOCK_AD, BLOCK_ECOM, BLOCK_GROUPON, BLOCK_LIVE, BLOCK_MULTI_IMAGE

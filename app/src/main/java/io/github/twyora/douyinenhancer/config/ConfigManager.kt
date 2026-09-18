@@ -1,6 +1,8 @@
 package io.github.twyora.douyinenhancer.config
 
 import android.content.Context
+import io.github.twyora.douyinenhancer.config.kvstorage.FastKVStorage
+import io.github.twyora.douyinenhancer.config.kvstorage.IKVStorage
 
 // TODO: Consider renaming
 object ConfigManager {
@@ -11,7 +13,7 @@ object ConfigManager {
         private set
 
     val recommendedFeedFilterConfig by lazy {
-        RecommendedFeedFilterConfigManager(
+        RecommendedFeedFilterConfigProvider(
             settings,
             gates = mapOf(
                 FeatureGate.HIDDEN to {
@@ -21,27 +23,27 @@ object ConfigManager {
     }
 
     val moduleConfig by lazy {
-        ModuleConfigManager(module)
+        ModuleConfigProvider(module)
     }
 
     val miscConfig by lazy {
-        MiscConfigManager(settings)
+        MiscConfigProvider(settings)
     }
 
     val feedConfig by lazy {
-        FeedConfigManager(settings)
+        FeedConfigProvider(settings)
     }
 
     val saveConfig by lazy {
-        SaveConfigManager(settings)
+        SaveConfigProvider(settings)
     }
 
     val uiConfig by lazy {
-        UiConfigManager(settings)
+        UiConfigProvider(settings)
     }
 
     val playbackComponentBlockConfig by lazy {
-        PlaybackComponentBlockConfigManager(
+        PlaybackComponentBlockConfigProvider(
             settings,
             gates = mapOf(
                 FeatureGate.HIDDEN to {

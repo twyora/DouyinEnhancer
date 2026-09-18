@@ -22,9 +22,9 @@ import com.highcapable.yukihookapi.hook.log.YLog
 import io.github.twyora.douyinenhancer.BuildConfig
 import io.github.twyora.douyinenhancer.R
 import io.github.twyora.douyinenhancer.config.ConfigManager
-import io.github.twyora.douyinenhancer.config.FastKVStorage
-import io.github.twyora.douyinenhancer.config.MiscConfigManager
-import io.github.twyora.douyinenhancer.config.ModuleConfigManager
+import io.github.twyora.douyinenhancer.config.kvstorage.FastKVStorage
+import io.github.twyora.douyinenhancer.config.MiscConfigProvider
+import io.github.twyora.douyinenhancer.config.ModuleConfigProvider
 import io.github.twyora.douyinenhancer.hook.comment.CommentAudioHooker.hook
 import io.github.twyora.douyinenhancer.utils.Field
 import io.github.twyora.douyinenhancer.utils.Method
@@ -81,7 +81,7 @@ class SettingsDialog(context: Context) : AlertDialog.Builder(
             if (!ConfigManager.miscConfig.hiddenFeatureEnabled) {
                 val miscCategory = findPreference("pref_category_misc") as? PreferenceCategory
                 miscCategory?.let { category ->
-                    findPreference(MiscConfigManager.ENABLE_HIDDEN_FEATURES)?.let {
+                    findPreference(MiscConfigProvider.ENABLE_HIDDEN_FEATURES)?.let {
                         category.removePreference(it)
                     }
                     if (category.preferenceCount == 0) {
@@ -387,7 +387,7 @@ class SettingsDialog(context: Context) : AlertDialog.Builder(
                 }
                 val counter = ConfigManager.moduleConfig.notifyUpdateCooldown
                 val newCounter =
-                    (counter - 1 + ModuleConfigManager.NOTIFY_UPDATE_COOLDOWN_PERIOD) % ModuleConfigManager.NOTIFY_UPDATE_COOLDOWN_PERIOD
+                    (counter - 1 + ModuleConfigProvider.NOTIFY_UPDATE_COOLDOWN_PERIOD) % ModuleConfigProvider.NOTIFY_UPDATE_COOLDOWN_PERIOD
                 ConfigManager.moduleConfig.notifyUpdateCooldown = newCounter
                 if (newCounter == 0) {
                     activity.runOnUiThread {
