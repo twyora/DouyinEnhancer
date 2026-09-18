@@ -1906,20 +1906,106 @@ class DouyinPackage(classLoader: ClassLoader, context: Context) {
                 }
 
                 awemeStatistics = awemeStatistics {
+                    val awemeStatisticsClassData = bridge.getClassData("com.ss.android.ugc.aweme.feed.model.AwemeStatistics")
+                    val collectCountFieldData = awemeStatisticsClassData?.let {
+                        bridge.findField {
+                            searchClasses = listOf(it)
+                            matcher {
+                                annotations {
+                                    add {
+                                        type = "com.google.gson.annotations.SerializedName"
+                                        addElement {
+                                            name = "value"
+                                            stringValue(
+                                                value = "collect_count",
+                                                matchType = StringMatchType.Equals
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }.singleOrNull()
+                    }
+                    val commentCountFieldData = awemeStatisticsClassData?.let {
+                        bridge.findField {
+                            searchClasses = listOf(it)
+                            matcher {
+                                annotations {
+                                    add {
+                                        type = "com.google.gson.annotations.SerializedName"
+                                        addElement {
+                                            name = "value"
+                                            stringValue(
+                                                value = "comment_count",
+                                                matchType = StringMatchType.Equals
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }.singleOrNull()
+                    }
+                    val diggCountFieldData = awemeStatisticsClassData?.let {
+                        bridge.findField {
+                            searchClasses = listOf(it)
+                            matcher {
+                                annotations {
+                                    add {
+                                        type = "com.google.gson.annotations.SerializedName"
+                                        addElement {
+                                            name = "value"
+                                            stringValue(
+                                                value = "digg_count",
+                                                matchType = StringMatchType.Equals
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }.singleOrNull()
+                    }
+                    val shareCountFieldData = awemeStatisticsClassData?.let {
+                        bridge.findField {
+                            searchClasses = listOf(it)
+                            matcher {
+                                annotations {
+                                    add {
+                                        type = "com.google.gson.annotations.SerializedName"
+                                        addElement {
+                                            name = "value"
+                                            stringValue(
+                                                value = "share_count",
+                                                matchType = StringMatchType.Equals
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }.singleOrNull()
+                    }
+
+                    if (awemeStatisticsClassData == null || collectCountFieldData == null ||
+                        commentCountFieldData == null || diggCountFieldData == null ||
+                        shareCountFieldData == null
+                    ) {
+                        YLog.error(symbolNotFoundMsg.format(TAG, this::class.java.enclosingClass?.simpleName))
+                        return@awemeStatistics
+                    }
+
                     class_ = class_ {
-                        name = "com.ss.android.ugc.aweme.feed.model.AwemeStatistics"
+                        name = awemeStatisticsClassData.name
                     }
                     collectCount = field {
-                        name = "collectCount"
+                        name = collectCountFieldData.name
                     }
                     commentCount = field {
-                        name = "commentCount"
+                        name = commentCountFieldData.name
                     }
                     diggCount = field {
-                        name = "diggCount"
+                        name = diggCountFieldData.name
                     }
                     shareCount = field {
-                        name = "shareCount"
+                        name = shareCountFieldData.name
                     }
                 }
 
