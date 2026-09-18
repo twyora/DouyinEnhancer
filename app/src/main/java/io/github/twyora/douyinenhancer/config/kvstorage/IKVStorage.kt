@@ -1,4 +1,4 @@
-package io.github.twyora.douyinenhancer.config
+package io.github.twyora.douyinenhancer.config.kvstorage
 
 import kotlinx.coroutines.flow.Flow
 import java.io.File
@@ -18,7 +18,7 @@ interface IKVStorage {
 
     fun close()
 
-    interface KVFactory {
+    interface IKVFactory {
         fun open(path: String, name: String): IKVStorage
 
         fun open(path: String): IKVStorage {

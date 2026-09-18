@@ -1,9 +1,11 @@
 package io.github.twyora.douyinenhancer.config
 
-class PlaybackComponentBlockConfigManager(
+import io.github.twyora.douyinenhancer.config.kvstorage.IKVStorage
+
+class PlaybackComponentBlockConfigProvider(
     kvConfig: IKVStorage,
     gates: Map<FeatureGate, () -> Boolean> = emptyMap()
-) : ConfigProvider(kvConfig, gates) {
+) : AbsConfigProvider(kvConfig, gates) {
     override val gatedKeys = mapOf(
         FeatureGate.HIDDEN to setOf(
             BUTTON_UNFOLLOW_FAMILIAR_REC,

@@ -1,6 +1,8 @@
 package io.github.twyora.douyinenhancer.config
 
-class ModuleConfigManager(kvConfig: IKVStorage) : ConfigProvider(kvConfig) {
+import io.github.twyora.douyinenhancer.config.kvstorage.IKVStorage
+
+class ModuleConfigProvider(kvConfig: IKVStorage) : AbsConfigProvider(kvConfig) {
     var verboseDisabled by property(DISABLE_VERBOSE_LOGS, false)
     var notifyUpdateCooldown by property(NOTIFY_UPDATE_COOLDOWN, NOTIFY_UPDATE_COOLDOWN_PERIOD)
     var lastVerifiedVersion by property(LAST_VERIFIED_VERSION, 0)

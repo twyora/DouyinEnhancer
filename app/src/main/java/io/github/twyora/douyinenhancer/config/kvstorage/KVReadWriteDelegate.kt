@@ -1,9 +1,9 @@
-package io.github.twyora.douyinenhancer.config
+package io.github.twyora.douyinenhancer.config.kvstorage
 
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
-internal class KVProperty<T : Any>(
+internal class KVReadWriteDelegate<T : Any>(
     private val storage: IKVStorage,
     private val key: String,
     private val defValue: T
@@ -12,5 +12,5 @@ internal class KVProperty<T : Any>(
     override fun setValue(thisRef: Any, property: KProperty<*>, value: T) = storage.put(key, value)
 }
 
-internal fun <T : Any> IKVStorage.property(key: String, defValue: T) = KVProperty(this, key, defValue)
+internal fun <T : Any> IKVStorage.readWriteConfig(key: String, defValue: T) = KVReadWriteDelegate(this, key, defValue)
 

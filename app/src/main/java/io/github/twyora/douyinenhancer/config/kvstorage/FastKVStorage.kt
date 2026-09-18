@@ -1,4 +1,4 @@
-package io.github.twyora.douyinenhancer.config
+package io.github.twyora.douyinenhancer.config.kvstorage
 
 import android.content.SharedPreferences
 import io.fastkv.FastKV
@@ -68,7 +68,7 @@ class FastKVStorage(val fastKV: FastKV) : IKVStorage {
         fastKV.close()
     }
 
-    companion object : IKVStorage.KVFactory {
+    companion object : IKVStorage.IKVFactory {
         override fun open(path: String, name: String) = FastKVStorage(
             FastKV.Builder(path, name).build()
         )

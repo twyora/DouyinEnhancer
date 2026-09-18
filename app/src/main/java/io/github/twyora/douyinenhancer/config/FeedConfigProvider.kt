@@ -1,6 +1,8 @@
 package io.github.twyora.douyinenhancer.config
 
-class FeedConfigManager(kvConfig: IKVStorage) : ConfigProvider(kvConfig) {
+import io.github.twyora.douyinenhancer.config.kvstorage.IKVStorage
+
+class FeedConfigProvider(kvConfig: IKVStorage) : AbsConfigProvider(kvConfig) {
     var bypassListenAwemeRestriction by property(BYPASS_LISTEN_AWEME_RESTRICTION, false)
     var interceptDoubleTapDigg by property(FEED_DOUBLE_TAP_DIGG, false)
     var doubleTapOpenComment by property(FEED_DOUBLE_TAP_OPEN_COMMENT, false)
