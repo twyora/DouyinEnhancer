@@ -18,14 +18,14 @@ object DanmakuViewHooker : YukiBaseHooker() {
         get() = DouyinPackage.instance
 
     private val verbose
-        get() = !ConfigManager.moduleConfig.verboseDisabled
+        get() = !ConfigManager.module.verboseDisabled.value
 
     private val danmakuViewIds = ArraySet<Int>().apply {
         add(View.generateViewId())
     }
 
     override fun onHook() {
-        if (!ConfigManager.uiConfig.keepDanmakuVisible) {
+        if (!ConfigManager.ui.keepDanmakuVisible.value) {
             if (verbose) {
                 YLog.debug("$TAG: keep danmaku visible disabled, skip danmaku hooks")
             }

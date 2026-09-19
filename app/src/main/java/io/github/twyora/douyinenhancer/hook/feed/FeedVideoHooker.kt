@@ -16,10 +16,10 @@ object FeedVideoHooker : YukiBaseHooker() {
         get() = DouyinPackage.instance
 
     private val verbose
-        get() = !ConfigManager.moduleConfig.verboseDisabled
+        get() = !ConfigManager.module.verboseDisabled.value
 
     override fun onHook() {
-        if (!ConfigManager.saveConfig.feedVideoRemoveWatermark) {
+        if (!ConfigManager.save.feedVideoRemoveWatermark.value) {
             if (verbose) {
                 YLog.debug("$TAG: remove watermark is disabled, skipping hook")
             }

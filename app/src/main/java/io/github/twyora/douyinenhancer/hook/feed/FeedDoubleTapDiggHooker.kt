@@ -15,10 +15,10 @@ object FeedDoubleTapDiggHooker : YukiBaseHooker() {
         get() = DouyinPackage.instance
 
     private val verbose
-        get() = !ConfigManager.moduleConfig.verboseDisabled
+        get() = !ConfigManager.module.verboseDisabled.value
 
     override fun onHook() {
-        if (!ConfigManager.feedConfig.interceptDoubleTapDigg) {
+        if (!ConfigManager.feed.interceptDoubleTapDigg.value) {
             if (verbose) {
                 YLog.debug("$TAG: double-tap digg interception is disabled, skipping hook")
             }

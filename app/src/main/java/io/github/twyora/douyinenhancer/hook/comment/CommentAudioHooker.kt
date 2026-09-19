@@ -28,10 +28,10 @@ object CommentAudioHooker : YukiBaseHooker() {
         get() = DouyinPackage.instance
 
     private val verbose
-        get() = !ConfigManager.moduleConfig.verboseDisabled
+        get() = !ConfigManager.module.verboseDisabled.value
 
     override fun onHook() {
-        if (!ConfigManager.saveConfig.downloadCommentAudio) {
+        if (!ConfigManager.save.downloadCommentAudio.value) {
             if (verbose) {
                 YLog.debug("$TAG: download comment audio is disabled, skipping hook")
             }

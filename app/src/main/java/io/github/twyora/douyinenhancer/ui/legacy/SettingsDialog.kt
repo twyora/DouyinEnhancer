@@ -23,8 +23,6 @@ import io.github.twyora.douyinenhancer.BuildConfig
 import io.github.twyora.douyinenhancer.R
 import io.github.twyora.douyinenhancer.config.ConfigManager
 import io.github.twyora.douyinenhancer.config.kvstorage.FastKVStorage
-import io.github.twyora.douyinenhancer.config.MiscConfigProvider
-import io.github.twyora.douyinenhancer.config.ModuleConfigProvider
 import io.github.twyora.douyinenhancer.hook.comment.CommentAudioHooker.hook
 import io.github.twyora.douyinenhancer.utils.Field
 import io.github.twyora.douyinenhancer.utils.Method
@@ -48,6 +46,8 @@ import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 import java.util.zip.ZipOutputStream
 import kotlin.system.exitProcess
+import io.github.twyora.douyinenhancer.config.provider.ModuleConfigProvider
+import io.github.twyora.douyinenhancer.config.provider.MiscConfigProvider
 
 /**
  * Settings dialog for DouyinEnhancer.
@@ -73,12 +73,12 @@ class SettingsDialog(context: Context) : AlertDialog.Builder(
 
             preferenceManager.setField(
                 Field("mSharedPreferences"),
-                ((ConfigManager.settings as FastKVStorage).fastKV) as SharedPreferences
+                ((ConfigManager.settingsStorage as FastKVStorage).fastKV) as SharedPreferences
             )
             preferenceManager.setField(Field("mEditor"), null)
             addPreferencesFromResource(R.xml.prefs_setting)
 
-            if (!ConfigManager.miscConfig.hiddenFeatureEnabled) {
+            if (!ConfigManager.misc.hiddenFeatureEnabled.value) {
                 val miscCategory = findPreference("pref_category_misc") as? PreferenceCategory
                 miscCategory?.let { category ->
                     findPreference(MiscConfigProvider.ENABLE_HIDDEN_FEATURES)?.let {
@@ -95,7 +95,7 @@ class SettingsDialog(context: Context) : AlertDialog.Builder(
             findPreference("export_config")?.onPreferenceClickListener = this
             findPreference("import_config")?.onPreferenceClickListener = this
             (findPreference("disable_verbose_logs") as? SwitchPreference)?.apply {
-                isChecked = ConfigManager.moduleConfig.verboseDisabled
+                isChecked = ConfigManager.module.verboseDisabled.value
                 onPreferenceChangeListener = this@PrefsFragment
             }
             findPreference("version")?.summary = BuildConfig.VERSION_NAME
@@ -125,9 +125,9 @@ class SettingsDialog(context: Context) : AlertDialog.Builder(
             }
 
             "version" -> {
-                if (!ConfigManager.miscConfig.hiddenFeatureEnabled) {
+                if (!ConfigManager.misc.hiddenFeatureEnabled.value) {
                     if (++hiddenFeatureClickCount == HIDDEN_FEATURE_TRIGGER_CLICK_COUNT) {
-                        ConfigManager.miscConfig.hiddenFeatureEnabled = true
+                        ConfigManager.misc.hiddenFeatureEnabled.value = true
                         activity.runOnUiThread {
                             Toast.makeText(
                                 context,
@@ -170,7 +170,7 @@ class SettingsDialog(context: Context) : AlertDialog.Builder(
         override fun onPreferenceChange(preference: Preference, newValue: Any): Boolean = when (preference.key) {
             "disable_verbose_logs" -> {
                 val verboseLogsDisabled = newValue as Boolean
-                ConfigManager.moduleConfig.verboseDisabled = verboseLogsDisabled
+                ConfigManager.module.verboseDisabled.value = verboseLogsDisabled
                 YLog.info("!!verbose logging disabled is $verboseLogsDisabled!!")
                 true
             }
@@ -280,12 +280,12 @@ class SettingsDialog(context: Context) : AlertDialog.Builder(
                                     throw kotlinx.io.IOException(context.getString(R.string.config_import_corrupted))
                                 }
 
-                                val settings = ConfigManager.settings
-                                val hiddenFeatureEnabled = ConfigManager.miscConfig.hiddenFeatureEnabled
+                                val settings = ConfigManager.settingsStorage
+                                val hiddenFeatureEnabled = ConfigManager.misc.hiddenFeatureEnabled
                                 val importedSettings = FastKVStorage.open(context.cacheDir.absolutePath, tempBaseName)
                                 try {
                                     settings.putAll(importedSettings.getAll())
-                                    ConfigManager.miscConfig.hiddenFeatureEnabled = hiddenFeatureEnabled
+                                    ConfigManager.misc.hiddenFeatureEnabled = hiddenFeatureEnabled
                                 } finally {
                                     importedSettings.close()
                                 }
@@ -385,10 +385,10 @@ class SettingsDialog(context: Context) : AlertDialog.Builder(
                         }
                     } ?: context.getString(R.string.pref_about_update_available_summary)
                 }
-                val counter = ConfigManager.moduleConfig.notifyUpdateCooldown
+                val counter = ConfigManager.module.notifyUpdateCooldown.value
                 val newCounter =
                     (counter - 1 + ModuleConfigProvider.NOTIFY_UPDATE_COOLDOWN_PERIOD) % ModuleConfigProvider.NOTIFY_UPDATE_COOLDOWN_PERIOD
-                ConfigManager.moduleConfig.notifyUpdateCooldown = newCounter
+                ConfigManager.module.notifyUpdateCooldown.value = newCounter
                 if (newCounter == 0) {
                     activity.runOnUiThread {
                         Toast.makeText(
@@ -472,7 +472,7 @@ class SettingsDialog(context: Context) : AlertDialog.Builder(
         private val TAG = this::class.simpleName
 
         private val verbose
-            get() = !ConfigManager.moduleConfig.verboseDisabled
+            get() = !ConfigManager.module.verboseDisabled.value
 
         private const val EXPORT_CONFIG = 0
         private const val IMPORT_CONFIG = 1

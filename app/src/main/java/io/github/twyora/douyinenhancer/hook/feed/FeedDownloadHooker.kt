@@ -23,10 +23,10 @@ object FeedDownloadHooker : YukiBaseHooker() {
         get() = DouyinPackage.instance
 
     private val verbose
-        get() = !ConfigManager.moduleConfig.verboseDisabled
+        get() = !ConfigManager.module.verboseDisabled.value
 
     override fun onHook() {
-        if (!ConfigManager.saveConfig.feedDownloadBypass) {
+        if (!ConfigManager.save.feedDownloadBypass.value) {
             if (verbose) {
                 YLog.debug("$TAG: bypass feed download is disabled, skipping hook")
             }

@@ -17,11 +17,11 @@ object RecommendedFeedHooker : YukiBaseHooker() {
         get() = DouyinPackage.instance
 
     private val verbose
-        get() = !ConfigManager.moduleConfig.verboseDisabled
+        get() = !ConfigManager.module.verboseDisabled.value
 
     private val kwdFilterTitleRegexes by lazy {
-        val titleList = ConfigManager.recommendedFeedFilterConfig.titleKeywords
-        val regexMode = ConfigManager.recommendedFeedFilterConfig.titleRegexMode
+        val titleList = ConfigManager.recommendedFeedFilter.titleKeywords.value
+        val regexMode = ConfigManager.recommendedFeedFilter.titleRegexMode.value
         if (regexMode) {
             titleList.map {
                 it.toRegex()
@@ -34,8 +34,8 @@ object RecommendedFeedHooker : YukiBaseHooker() {
     }
 
     private val kwdFilterAuthorNicknameRegexes by lazy {
-        val nicknameList = ConfigManager.recommendedFeedFilterConfig.authorNicknameKeywords
-        val regexMode = ConfigManager.recommendedFeedFilterConfig.authorNicknameRegexMode
+        val nicknameList = ConfigManager.recommendedFeedFilter.authorNicknameKeywords.value
+        val regexMode = ConfigManager.recommendedFeedFilter.authorNicknameRegexMode.value
         if (regexMode) {
             nicknameList.map {
                 it.toRegex()
@@ -48,8 +48,8 @@ object RecommendedFeedHooker : YukiBaseHooker() {
     }
 
     private val kwdFilterDescRegexes by lazy {
-        val descList = ConfigManager.recommendedFeedFilterConfig.descKeywords
-        val regexMode = ConfigManager.recommendedFeedFilterConfig.descRegexMode
+        val descList = ConfigManager.recommendedFeedFilter.descKeywords.value
+        val regexMode = ConfigManager.recommendedFeedFilter.descRegexMode.value
         if (regexMode) {
             descList.map {
                 it.toRegex()
@@ -62,7 +62,7 @@ object RecommendedFeedHooker : YukiBaseHooker() {
     }
 
     override fun onHook() {
-        if (!ConfigManager.recommendedFeedFilterConfig.mainSwitch) {
+        if (!ConfigManager.recommendedFeedFilter.mainSwitch.value) {
             if (verbose) {
                 YLog.debug("$TAG: recommended feed filter master switch disabled, skip feed filter hook")
             }
@@ -79,20 +79,20 @@ object RecommendedFeedHooker : YukiBaseHooker() {
                 while (iter.hasNext()) {
                     val awemeObj = iter.next() ?: continue
 
-                    if (ConfigManager.recommendedFeedFilterConfig.blockAd && awemeObj.invokeMethod<Boolean?>(packageInstance.aweme.getAd()) == true) {
+                    if (ConfigManager.recommendedFeedFilter.blockAd.value && awemeObj.invokeMethod<Boolean?>(packageInstance.aweme.getAd()) == true) {
                         if (verbose) {
                             YLog.debug("$TAG: filtered by ad")
                         }
                         iter.remove()
                         continue
-                    } else if (ConfigManager.recommendedFeedFilterConfig.blockEcom && awemeObj.invokeMethod<Boolean?>(packageInstance.aweme.isEcomAweme()) == true) {
+                    } else if (ConfigManager.recommendedFeedFilter.blockEcom.value && awemeObj.invokeMethod<Boolean?>(packageInstance.aweme.isEcomAweme()) == true) {
                         // NOTE: this filter logic has not been rigorously verified
                         if (verbose) {
                             YLog.debug("$TAG: filtered by ecom aweme")
                         }
                         iter.remove()
                         continue
-                    } else if (ConfigManager.recommendedFeedFilterConfig.blockGrouponLargeCard && awemeObj.getField<Any?>(
+                    } else if (ConfigManager.recommendedFeedFilter.blockGrouponLargeCard.value && awemeObj.getField<Any?>(
                             packageInstance.aweme.grouponLargeCard()
                         ) != null
                     ) {
@@ -102,14 +102,14 @@ object RecommendedFeedHooker : YukiBaseHooker() {
                         }
                         iter.remove()
                         continue
-                    } else if (ConfigManager.recommendedFeedFilterConfig.blockLive && awemeObj.invokeMethod<Boolean?>(packageInstance.aweme.isLive()) == true) {
+                    } else if (ConfigManager.recommendedFeedFilter.blockLive.value && awemeObj.invokeMethod<Boolean?>(packageInstance.aweme.isLive()) == true) {
                         // NOTE: this filter logic has not been rigorously verified
                         if (verbose) {
                             YLog.debug("$TAG: filtered by live")
                         }
                         iter.remove()
                         continue
-                    } else if (ConfigManager.recommendedFeedFilterConfig.blockMultiImage &&
+                    } else if (ConfigManager.recommendedFeedFilter.blockMultiImage.value &&
                         awemeObj.invokeMethod<Boolean?>(packageInstance.aweme.isMultiImage()) == true
                     ) {
                         // NOTE: this filter logic has not been rigorously verified
@@ -119,7 +119,7 @@ object RecommendedFeedHooker : YukiBaseHooker() {
                         iter.remove()
                         continue
                     } else if (run {
-                            if (ConfigManager.recommendedFeedFilterConfig.shortDurationLimit > ConfigManager.recommendedFeedFilterConfig.longDurationLimit) {
+                            if (ConfigManager.recommendedFeedFilter.shortDurationLimit.value > ConfigManager.recommendedFeedFilter.longDurationLimit.value) {
                                 return@run false
                             }
 
@@ -134,7 +134,7 @@ object RecommendedFeedHooker : YukiBaseHooker() {
                                 packageInstance.aweme.duration()
                             ) ?: return@run false
 
-                            return@run duration != 0 && (duration !in ConfigManager.recommendedFeedFilterConfig.shortDurationLimit..ConfigManager.recommendedFeedFilterConfig.longDurationLimit)
+                            return@run duration != 0 && (duration !in ConfigManager.recommendedFeedFilter.shortDurationLimit.value..ConfigManager.recommendedFeedFilter.longDurationLimit.value)
                         }
                     ) {
                         if (verbose) {
@@ -163,10 +163,10 @@ object RecommendedFeedHooker : YukiBaseHooker() {
 
     private fun shouldFilterByInteractionStats(aweme: Any): Boolean {
         val statsMinLEMax =
-            ConfigManager.recommendedFeedFilterConfig.collectCountMin <= ConfigManager.recommendedFeedFilterConfig.collectCountMax ||
-                    ConfigManager.recommendedFeedFilterConfig.commentCountMin <= ConfigManager.recommendedFeedFilterConfig.commentCountMax ||
-                    ConfigManager.recommendedFeedFilterConfig.diggCountMin <= ConfigManager.recommendedFeedFilterConfig.diggCountMax ||
-                    ConfigManager.recommendedFeedFilterConfig.shareCountMin <= ConfigManager.recommendedFeedFilterConfig.shareCountMax
+            ConfigManager.recommendedFeedFilter.collectCountMin.value <= ConfigManager.recommendedFeedFilter.collectCountMax.value ||
+                    ConfigManager.recommendedFeedFilter.commentCountMin.value <= ConfigManager.recommendedFeedFilter.commentCountMax.value ||
+                    ConfigManager.recommendedFeedFilter.diggCountMin.value <= ConfigManager.recommendedFeedFilter.diggCountMax.value ||
+                    ConfigManager.recommendedFeedFilter.shareCountMin.value <= ConfigManager.recommendedFeedFilter.shareCountMax.value
         if (!statsMinLEMax) {
             return false
         }
@@ -174,9 +174,9 @@ object RecommendedFeedHooker : YukiBaseHooker() {
         val statsObj = aweme.getField<Any?>(packageInstance.aweme.statistics())
             ?: return false
 
-        if (ConfigManager.recommendedFeedFilterConfig.collectCountMin <= ConfigManager.recommendedFeedFilterConfig.collectCountMax) {
+        if (ConfigManager.recommendedFeedFilter.collectCountMin.value <= ConfigManager.recommendedFeedFilter.collectCountMax.value) {
             val collectCount = statsObj.getField<Long?>(packageInstance.awemeStatistics.collectCount())
-            if (collectCount != null && (collectCount !in ConfigManager.recommendedFeedFilterConfig.collectCountMin..ConfigManager.recommendedFeedFilterConfig.collectCountMax)) {
+            if (collectCount != null && (collectCount !in ConfigManager.recommendedFeedFilter.collectCountMin.value..ConfigManager.recommendedFeedFilter.collectCountMax.value)) {
                 if (verbose) {
                     YLog.debug("$TAG: filtered by collect count: $collectCount")
                 }
@@ -184,9 +184,9 @@ object RecommendedFeedHooker : YukiBaseHooker() {
             }
         }
 
-        if (ConfigManager.recommendedFeedFilterConfig.commentCountMin <= ConfigManager.recommendedFeedFilterConfig.commentCountMax) {
+        if (ConfigManager.recommendedFeedFilter.commentCountMin.value <= ConfigManager.recommendedFeedFilter.commentCountMax.value) {
             val commentCount = statsObj.getField<Long?>(packageInstance.awemeStatistics.commentCount())
-            if (commentCount != null && (commentCount !in ConfigManager.recommendedFeedFilterConfig.commentCountMin..ConfigManager.recommendedFeedFilterConfig.commentCountMax)) {
+            if (commentCount != null && (commentCount !in ConfigManager.recommendedFeedFilter.commentCountMin.value..ConfigManager.recommendedFeedFilter.commentCountMax.value)) {
                 if (verbose) {
                     YLog.debug("$TAG: filtered by comment count: $commentCount")
                 }
@@ -194,9 +194,9 @@ object RecommendedFeedHooker : YukiBaseHooker() {
             }
         }
 
-        if (ConfigManager.recommendedFeedFilterConfig.diggCountMin <= ConfigManager.recommendedFeedFilterConfig.diggCountMax) {
+        if (ConfigManager.recommendedFeedFilter.diggCountMin.value <= ConfigManager.recommendedFeedFilter.diggCountMax.value) {
             val diggCount = statsObj.getField<Long?>(packageInstance.awemeStatistics.diggCount())
-            if (diggCount != null && (diggCount !in ConfigManager.recommendedFeedFilterConfig.diggCountMin..ConfigManager.recommendedFeedFilterConfig.diggCountMax)) {
+            if (diggCount != null && (diggCount !in ConfigManager.recommendedFeedFilter.diggCountMin.value..ConfigManager.recommendedFeedFilter.diggCountMax.value)) {
                 if (verbose) {
                     YLog.debug("$TAG: filtered by digg count: $diggCount")
                 }
@@ -204,9 +204,9 @@ object RecommendedFeedHooker : YukiBaseHooker() {
             }
         }
 
-        if (ConfigManager.recommendedFeedFilterConfig.shareCountMin <= ConfigManager.recommendedFeedFilterConfig.shareCountMax) {
+        if (ConfigManager.recommendedFeedFilter.shareCountMin.value <= ConfigManager.recommendedFeedFilter.shareCountMax.value) {
             val shareCount = statsObj.getField<Long?>(packageInstance.awemeStatistics.shareCount())
-            if (shareCount != null && (shareCount !in ConfigManager.recommendedFeedFilterConfig.shareCountMin..ConfigManager.recommendedFeedFilterConfig.shareCountMax)) {
+            if (shareCount != null && (shareCount !in ConfigManager.recommendedFeedFilter.shareCountMin.value..ConfigManager.recommendedFeedFilter.shareCountMax.value)) {
                 if (verbose) {
                     YLog.debug("$TAG: filtered by share count: $shareCount")
                 }
@@ -234,7 +234,7 @@ object RecommendedFeedHooker : YukiBaseHooker() {
             }
         }
 
-        val uidFilters = ConfigManager.recommendedFeedFilterConfig.authorUidKeywords
+        val uidFilters = ConfigManager.recommendedFeedFilter.authorUidKeywords.value
         if (uidFilters.isNotEmpty()) {
             val authorObj = aweme.getField<Any?>(packageInstance.aweme.author())
             if (authorObj != null) {

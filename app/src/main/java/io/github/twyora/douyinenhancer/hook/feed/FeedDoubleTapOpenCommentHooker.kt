@@ -19,10 +19,10 @@ object FeedDoubleTapOpenCommentHooker : YukiBaseHooker() {
         get() = DouyinPackage.instance
 
     private val verbose
-        get() = !ConfigManager.moduleConfig.verboseDisabled
+        get() = !ConfigManager.module.verboseDisabled.value
 
     override fun onHook() {
-        if (!ConfigManager.feedConfig.doubleTapOpenComment) {
+        if (!ConfigManager.feed.doubleTapOpenComment.value) {
             if (verbose) {
                 YLog.debug("$TAG: double-tap to open comment panel is disabled, skipping hook")
             }

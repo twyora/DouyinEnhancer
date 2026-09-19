@@ -16,10 +16,10 @@ object FeedResumeHooker : YukiBaseHooker() {
         get() = DouyinPackage.instance
 
     private val verbose
-        get() = !ConfigManager.moduleConfig.verboseDisabled
+        get() = !ConfigManager.module.verboseDisabled.value
 
     override fun onHook() {
-        if (!ConfigManager.feedConfig.blockResumePlayback) {
+        if (!ConfigManager.feed.blockResumePlayback.value) {
             if (verbose) {
                 YLog.debug("$TAG: block resume playback is disabled, skipping hook")
             }

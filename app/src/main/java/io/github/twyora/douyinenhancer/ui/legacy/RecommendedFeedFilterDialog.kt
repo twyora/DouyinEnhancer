@@ -20,10 +20,10 @@ class RecommendedFeedFilterDialog(context: Context) : AlertDialog.Builder(Contex
         val recommendedFeedFilterDialogBinding = RecommendedFeedFilterDialogBinding.inflate(
             LayoutInflater.from(ContextThemeWrapper(context, R.style.MainTheme))
         )
-        val cfg = ConfigManager.recommendedFeedFilterConfig
+        val cfg = ConfigManager.recommendedFeedFilter
 
         // Show hidden block options when feature is enabled
-        val showBlockGroups = ConfigManager.miscConfig.hiddenFeatureEnabled
+        val showBlockGroups = ConfigManager.misc.hiddenFeatureEnabled.value
         if (showBlockGroups) {
             recommendedFeedFilterDialogBinding.groupBlockAd.visibility = View.VISIBLE
             recommendedFeedFilterDialogBinding.groupBlockEcomAweme.visibility = View.VISIBLE
@@ -33,62 +33,62 @@ class RecommendedFeedFilterDialog(context: Context) : AlertDialog.Builder(Contex
         }
 
         // restore state
-        recommendedFeedFilterDialogBinding.switchMainSwitch.isChecked = cfg.mainSwitch
-        recommendedFeedFilterDialogBinding.switchBlockAd.isChecked = cfg.blockAd
-        recommendedFeedFilterDialogBinding.switchBlockEcomAweme.isChecked = cfg.blockEcom
-        recommendedFeedFilterDialogBinding.switchBlockGrouponLargeCard.isChecked = cfg.blockGrouponLargeCard
-        recommendedFeedFilterDialogBinding.switchBlockLive.isChecked = cfg.blockLive
-        recommendedFeedFilterDialogBinding.switchBlockMultiImage.isChecked = cfg.blockMultiImage
-        cfg.shortDurationLimit.let {
+        recommendedFeedFilterDialogBinding.switchMainSwitch.isChecked = cfg.mainSwitch.value
+        recommendedFeedFilterDialogBinding.switchBlockAd.isChecked = cfg.blockAd.value
+        recommendedFeedFilterDialogBinding.switchBlockEcomAweme.isChecked = cfg.blockEcom.value
+        recommendedFeedFilterDialogBinding.switchBlockGrouponLargeCard.isChecked = cfg.blockGrouponLargeCard.value
+        recommendedFeedFilterDialogBinding.switchBlockLive.isChecked = cfg.blockLive.value
+        recommendedFeedFilterDialogBinding.switchBlockMultiImage.isChecked = cfg.blockMultiImage.value
+        cfg.shortDurationLimit.value.let {
             recommendedFeedFilterDialogBinding.editShortDuration.setText(it.toString())
         }
-        cfg.longDurationLimit.let {
+        cfg.longDurationLimit.value.let {
             recommendedFeedFilterDialogBinding.editLongDuration.setText(it.toString())
         }
-        cfg.collectCountMin.let {
+        cfg.collectCountMin.value.let {
             recommendedFeedFilterDialogBinding.editCollectCountMin.setText(it.toString())
         }
-        cfg.collectCountMax.let {
+        cfg.collectCountMax.value.let {
             recommendedFeedFilterDialogBinding.editCollectCountMax.setText(it.toString())
         }
-        cfg.commentCountMin.let {
+        cfg.commentCountMin.value.let {
             recommendedFeedFilterDialogBinding.editCommentCountMin.setText(it.toString())
         }
-        cfg.commentCountMax.let {
+        cfg.commentCountMax.value.let {
             recommendedFeedFilterDialogBinding.editCommentCountMax.setText(it.toString())
         }
-        cfg.diggCountMin.let {
+        cfg.diggCountMin.value.let {
             recommendedFeedFilterDialogBinding.editDiggCountMin.setText(it.toString())
         }
-        cfg.diggCountMax.let {
+        cfg.diggCountMax.value.let {
             recommendedFeedFilterDialogBinding.editDiggCountMax.setText(it.toString())
         }
-        cfg.shareCountMin.let {
+        cfg.shareCountMin.value.let {
             recommendedFeedFilterDialogBinding.editShareCountMin.setText(it.toString())
         }
-        cfg.shareCountMax.let {
+        cfg.shareCountMax.value.let {
             recommendedFeedFilterDialogBinding.editShareCountMax.setText(it.toString())
         }
-        recommendedFeedFilterDialogBinding.switchTitleRegex.isChecked = cfg.titleRegexMode
-        cfg.titleKeywords.forEach {
+        recommendedFeedFilterDialogBinding.switchTitleRegex.isChecked = cfg.titleRegexMode.value
+        cfg.titleKeywords.value.forEach {
             pushKeywordItem(context, recommendedFeedFilterDialogBinding.groupAwemeTitle).apply {
                 editInput.setText(it)
             }
         }
-        cfg.authorUidKeywords.forEach {
+        cfg.authorUidKeywords.value.forEach {
             pushKeywordItem(context, recommendedFeedFilterDialogBinding.groupAuthorUid).apply {
                 editInput.inputType = InputType.TYPE_CLASS_NUMBER
                 editInput.setText(it)
             }
         }
-        cfg.authorNicknameKeywords.forEach {
+        cfg.authorNicknameKeywords.value.forEach {
             pushKeywordItem(context, recommendedFeedFilterDialogBinding.groupAuthorNickname).apply {
                 editInput.setText(it)
             }
         }
-        recommendedFeedFilterDialogBinding.switchAuthorNicknameRegex.isChecked = cfg.authorNicknameRegexMode
-        recommendedFeedFilterDialogBinding.switchDescRegex.isChecked = cfg.descRegexMode
-        cfg.descKeywords.forEach {
+        recommendedFeedFilterDialogBinding.switchAuthorNicknameRegex.isChecked = cfg.authorNicknameRegexMode.value
+        recommendedFeedFilterDialogBinding.switchDescRegex.isChecked = cfg.descRegexMode.value
+        cfg.descKeywords.value.forEach {
             pushKeywordItem(context, recommendedFeedFilterDialogBinding.groupAwemeDesc).apply {
                 editInput.setText(it)
             }
@@ -227,29 +227,29 @@ class RecommendedFeedFilterDialog(context: Context) : AlertDialog.Builder(Contex
                 return@setPositiveButton
             }
 
-            cfg.mainSwitch = mainSwitch
-            cfg.blockAd = blockAd
-            cfg.blockEcom = blockEcomAweme
-            cfg.blockGrouponLargeCard = blockGrouponLargeCard
-            cfg.blockLive = blockLive
-            cfg.blockMultiImage = blockMultiImage
-            cfg.shortDurationLimit = hideShortDurationLimit
-            cfg.longDurationLimit = hideLongDurationLimit
-            cfg.collectCountMin = hideCollectCountMin
-            cfg.collectCountMax = hideCollectCountMax
-            cfg.commentCountMin = hideCommentCountMin
-            cfg.commentCountMax = hideCommentCountMax
-            cfg.diggCountMin = hideDiggCountMin
-            cfg.diggCountMax = hideDiggCountMax
-            cfg.shareCountMin = hideShareCountMin
-            cfg.shareCountMax = hideShareCountMax
-            cfg.titleRegexMode = titleRegexMode
-            cfg.titleKeywords = titleKeywords
-            cfg.authorUidKeywords = uidKeywords
-            cfg.authorNicknameRegexMode = authorNicknameRegexMode
-            cfg.authorNicknameKeywords = upKeywords
-            cfg.descRegexMode = descRegexMode
-            cfg.descKeywords = descKeywords
+            cfg.mainSwitch.value = mainSwitch
+            cfg.blockAd.value = blockAd
+            cfg.blockEcom.value = blockEcomAweme
+            cfg.blockGrouponLargeCard.value = blockGrouponLargeCard
+            cfg.blockLive.value = blockLive
+            cfg.blockMultiImage.value = blockMultiImage
+            cfg.shortDurationLimit.value = hideShortDurationLimit
+            cfg.longDurationLimit.value = hideLongDurationLimit
+            cfg.collectCountMin.value = hideCollectCountMin
+            cfg.collectCountMax.value = hideCollectCountMax
+            cfg.commentCountMin.value = hideCommentCountMin
+            cfg.commentCountMax.value = hideCommentCountMax
+            cfg.diggCountMin.value = hideDiggCountMin
+            cfg.diggCountMax.value = hideDiggCountMax
+            cfg.shareCountMin.value = hideShareCountMin
+            cfg.shareCountMax.value = hideShareCountMax
+            cfg.titleRegexMode.value = titleRegexMode
+            cfg.titleKeywords.value = titleKeywords
+            cfg.authorUidKeywords.value = uidKeywords
+            cfg.authorNicknameRegexMode.value = authorNicknameRegexMode
+            cfg.authorNicknameKeywords.value = upKeywords
+            cfg.descRegexMode.value = descRegexMode
+            cfg.descKeywords.value = descKeywords
 
             (context as? Activity)?.runOnUiThread {
                 Toast.makeText(context, context.getString(R.string.save_success_restart_required), Toast.LENGTH_SHORT).show()

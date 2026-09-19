@@ -36,7 +36,7 @@ class VerifyDialog(private val hostContext: Context) : AlertDialog.Builder(Conte
                 inputUrl.contains(it, ignoreCase = true)
             }
             if (valid) {
-                ConfigManager.moduleConfig.lastVerifiedVersion = BuildConfig.VERSION_CODE
+                ConfigManager.module.lastVerifiedVersion.value = BuildConfig.VERSION_CODE
                 dialog.dismiss()
 
                 (hostContext as? Activity)?.runOnUiThread {
@@ -68,7 +68,7 @@ class VerifyDialog(private val hostContext: Context) : AlertDialog.Builder(Conte
         }
 
         fun shouldVerify(): Boolean {
-            val lastVerifiedVersion = ConfigManager.moduleConfig.lastVerifiedVersion
+            val lastVerifiedVersion = ConfigManager.module.lastVerifiedVersion.value
             return !(BuildConfig.DEBUG || BuildConfig.VERSION_CODE == lastVerifiedVersion)
         }
     }

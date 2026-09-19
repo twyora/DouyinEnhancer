@@ -17,7 +17,7 @@ object VerifyDialogHooker : YukiBaseHooker() {
         get() = DouyinPackage.instance
 
     private val verbose
-        get() = !ConfigManager.moduleConfig.verboseDisabled
+        get() = !ConfigManager.module.verboseDisabled.value
 
     override fun onHook() {
         if (!VerifyDialog.shouldVerify()) {
