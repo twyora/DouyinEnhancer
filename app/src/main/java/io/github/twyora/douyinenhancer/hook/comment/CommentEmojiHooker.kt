@@ -37,13 +37,13 @@ object CommentEmojiHooker : YukiBaseHooker() {
     private val TAG = this::class.simpleName
 
     private val verbose
-        get() = !ConfigManager.moduleConfig.verboseDisabled
+        get() = !ConfigManager.module.verboseDisabled.value
 
     private val packageInstance
         get() = DouyinPackage.instance
 
     override fun onHook() {
-        if (!ConfigManager.saveConfig.unlockCommentEmoji) {
+        if (!ConfigManager.save.unlockCommentEmoji.value) {
             if (verbose) {
                 YLog.debug("$TAG: unlock comment emoji is disabled, skipping hook")
             }

@@ -17,10 +17,10 @@ object ListenAwemeFilterHooker : YukiBaseHooker() {
         get() = DouyinPackage.instance
 
     private val verbose
-        get() = !ConfigManager.moduleConfig.verboseDisabled
+        get() = !ConfigManager.module.verboseDisabled.value
 
     override fun onHook() {
-        if (!ConfigManager.feedConfig.bypassListenAwemeRestriction) {
+        if (!ConfigManager.feed.bypassListenAwemeRestriction.value) {
             if (verbose) {
                 YLog.debug("$TAG: bypass listen aweme restriction is disabled, skipping hook")
             }

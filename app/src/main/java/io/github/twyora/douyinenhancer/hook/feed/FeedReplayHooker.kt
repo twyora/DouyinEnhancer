@@ -17,10 +17,10 @@ object FeedReplayHooker : YukiBaseHooker() {
         get() = DouyinPackage.instance
 
     private val verbose
-        get() = !ConfigManager.moduleConfig.verboseDisabled
+        get() = !ConfigManager.module.verboseDisabled.value
 
     override fun onHook() {
-        if (!ConfigManager.feedConfig.blockAutoReplay) {
+        if (!ConfigManager.feed.blockAutoReplay.value) {
             if (verbose) {
                 YLog.debug("$TAG: block auto replay is disabled, skipping hook")
             }

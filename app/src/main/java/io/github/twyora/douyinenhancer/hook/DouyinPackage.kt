@@ -1008,7 +1008,7 @@ class DouyinPackage(classLoader: ClassLoader, context: Context) {
         private val TAG = DouyinPackage::class.simpleName
 
         private val verbose
-            get() = !ConfigManager.moduleConfig.verboseDisabled
+            get() = !ConfigManager.module.verboseDisabled.value
 
         @Volatile
         lateinit var instance: DouyinPackage

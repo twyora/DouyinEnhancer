@@ -14,7 +14,7 @@ import com.highcapable.yukihookapi.hook.log.YLog
 import io.github.twyora.douyinenhancer.R
 import io.github.twyora.douyinenhancer.config.ConfigManager
 import io.github.twyora.douyinenhancer.config.kvstorage.FastKVStorage
-import io.github.twyora.douyinenhancer.config.FeatureGate
+import io.github.twyora.douyinenhancer.config.gate.ConfigStateMode
 import io.github.twyora.douyinenhancer.utils.Field
 import io.github.twyora.douyinenhancer.utils.setField
 
@@ -26,12 +26,12 @@ class PlaybackComponentBlockDialog(context: Context) : AlertDialog.Builder(Conte
 
             preferenceManager.setField(
                 Field("mSharedPreferences"),
-                ((ConfigManager.settings as FastKVStorage).fastKV) as SharedPreferences
+                ((ConfigManager.settingsStorage as FastKVStorage).fastKV) as SharedPreferences
             )
             preferenceManager.setField(Field("mEditor"), null)
             addPreferencesFromResource(R.xml.pref_playback_component_block)
 
-            if (!ConfigManager.miscConfig.hiddenFeatureEnabled) {
+            if (!ConfigManager.misc.hiddenFeatureEnabled.value) {
                 HIDDEN_KEYS.forEach { key ->
                     findPreference(key)?.let {
                         preferenceScreen?.removePreference(it)
@@ -52,9 +52,9 @@ class PlaybackComponentBlockDialog(context: Context) : AlertDialog.Builder(Conte
         setTitle(R.string.playback_component_block_dialog_title)
         setNegativeButton(android.R.string.cancel, null)
         setPositiveButton(android.R.string.ok) { _, _ ->
-            if (!ConfigManager.miscConfig.hiddenFeatureEnabled) {
+            if (!ConfigManager.misc.hiddenFeatureEnabled.value) {
                 HIDDEN_KEYS.forEach { key ->
-                    ConfigManager.settings.put(key, false)
+                    ConfigManager.settingsStorage.put(key, false)
                 }
             }
         }
@@ -67,8 +67,11 @@ class PlaybackComponentBlockDialog(context: Context) : AlertDialog.Builder(Conte
         private val TAG = this::class.simpleName
 
         private val HIDDEN_KEYS
-            get() = ConfigManager.playbackComponentBlockConfig
-                .gatedKeys[FeatureGate.HIDDEN].orEmpty()
+            get() = ConfigManager.playbackComponentBlock.allConfigItems.filter {
+                it.status == ConfigStateMode.HIDDEN
+            }.map {
+                it.key
+            }.toSet()
 
         fun show(context: Context) {
             runCatching {

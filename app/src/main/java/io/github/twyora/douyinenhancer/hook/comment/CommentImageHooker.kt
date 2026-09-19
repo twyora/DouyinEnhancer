@@ -16,10 +16,10 @@ object CommentImageHooker : YukiBaseHooker() {
         get() = DouyinPackage.instance
 
     private val verbose
-        get() = !ConfigManager.moduleConfig.verboseDisabled
+        get() = !ConfigManager.module.verboseDisabled.value
 
     override fun onHook() {
-        if (!ConfigManager.saveConfig.purifyCommentImage) {
+        if (!ConfigManager.save.purifyCommentImage.value) {
             if (verbose) {
                 YLog.debug("$TAG: purify comment image disabled, skipping hook")
             }
