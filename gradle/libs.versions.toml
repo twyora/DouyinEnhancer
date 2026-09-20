@@ -24,6 +24,9 @@ ksp-symbol-processing-api = "2.3.6"
 commonsCollections4 = "4.5.0"
 compose-bom = "2026.08.00"
 activity-compose = "1.13.0"
+navigation3 = "1.1.7"
+lifecycle-viewmodel-navigation3 = "2.11.0"
+lifecycle-runtime-compose = "2.11.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -60,6 +63,10 @@ androidx-compose-material3 = { module = "androidx.compose.material3:material3" }
 androidx-compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
 androidx-compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activity-compose" }
+androidx-navigation3-runtime = { module = "androidx.navigation3:navigation3-runtime", version.ref = "navigation3" }
+androidx-navigation3-ui = { module = "androidx.navigation3:navigation3-ui", version.ref = "navigation3" }
+androidx-lifecycle-viewmodel-navigation3 = { module = "androidx.lifecycle:lifecycle-viewmodel-navigation3", version.ref = "lifecycle-viewmodel-navigation3" }
+androidx-lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycle-runtime-compose" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
