@@ -16,7 +16,7 @@ A small Xposed module that adds quality-of-life features to Douyin
 >
 > Douyin v38.8.0
 >
-> Douyin v40.2.0 (Not tested by maintainer)
+> Douyin v40.3.0 (Not tested by maintainer)
 ---
 > Other versions are untested with no guaranteed functionality. Please report issues or submit PRs
 > for any
