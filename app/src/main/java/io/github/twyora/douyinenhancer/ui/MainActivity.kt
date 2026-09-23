@@ -2,7 +2,7 @@
 
 @file:Suppress("DEPRECATION")
 
-package io.github.twyora.douyinenhancer.ui.legacy
+package io.github.twyora.douyinenhancer.ui
 
 import android.app.Activity
 import android.content.ComponentName
@@ -16,7 +16,6 @@ import android.widget.Toast
 import com.highcapable.yukihookapi.YukiHookAPI
 import com.highcapable.yukihookapi.hook.log.YLog
 import io.github.twyora.douyinenhancer.BuildConfig
-import io.github.twyora.douyinenhancer.R
 import java.net.URL
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -45,7 +44,7 @@ class MainActivity : Activity() {
         @Deprecated("Deprecated in Java")
         override fun onCreate(savedInstanceState: Bundle?) {
             super.onCreate(savedInstanceState)
-            addPreferencesFromResource(R.xml.main_activity)
+            addPreferencesFromResource(io.github.twyora.douyinenhancer.R.xml.main_activity)
 
             findPreference("open_module_settings")?.onPreferenceClickListener = this
             (findPreference("hide_launcher_icon") as? SwitchPreference)?.let {
@@ -61,8 +60,10 @@ class MainActivity : Activity() {
                 SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(BuildConfig.BUILD_TIMESTAMP)
             if (YukiHookAPI.Status.isModuleActive) {
                 val activationStatus = findPreference("activation_status")
-                activationStatus?.title = context.getString(R.string.pref_about_activation_status_activated_title)
-                activationStatus?.summary = context.getString(R.string.pref_about_activation_status_activated_summary)
+                activationStatus?.title =
+                    context.getString(io.github.twyora.douyinenhancer.R.string.pref_about_activation_status_activated_title)
+                activationStatus?.summary =
+                    context.getString(io.github.twyora.douyinenhancer.R.string.pref_about_activation_status_activated_summary)
             }
 
             checkUpdate()
@@ -108,7 +109,7 @@ class MainActivity : Activity() {
                         Toast.makeText(
                             activity,
                             activity.getString(
-                                R.string.pref_about_activation_status_deactivated_summary
+                                io.github.twyora.douyinenhancer.R.string.pref_about_activation_status_deactivated_summary
                             ),
                             Toast.LENGTH_SHORT
                         ).show()
@@ -135,7 +136,7 @@ class MainActivity : Activity() {
                     JSONObject(
                         URL(
                             context.getString(
-                                R.string.latest_release_api_url
+                                io.github.twyora.douyinenhancer.R.string.latest_release_api_url
                             )
                         ).readText()
                     )
@@ -154,7 +155,7 @@ class MainActivity : Activity() {
                     summary = "${BuildConfig.VERSION_NAME} ($latestReleaseVer)"
                 }
                 findPreference("update")?.apply {
-                    title = context.getString(R.string.pref_about_update_available_title)
+                    title = context.getString(io.github.twyora.douyinenhancer.R.string.pref_about_update_available_title)
                     summary = latestReleaseJson.optString("body").takeIf {
                         it.isNotBlank()
                     }?.let {
@@ -163,20 +164,20 @@ class MainActivity : Activity() {
                         } else {
                             it
                         }
-                    } ?: context.getString(R.string.pref_about_update_available_summary)
+                    } ?: context.getString(io.github.twyora.douyinenhancer.R.string.pref_about_update_available_summary)
                 }
                 activity.runOnUiThread {
                     Toast.makeText(
                         context,
-                        context.getString(R.string.notify_update_available),
+                        context.getString(io.github.twyora.douyinenhancer.R.string.notify_update_available),
                         Toast.LENGTH_SHORT
                     ).show()
                 }
             } else {
                 findPreference("update")?.apply {
-                    title = context.getString(R.string.pref_about_up_to_date_title)
+                    title = context.getString(io.github.twyora.douyinenhancer.R.string.pref_about_up_to_date_title)
                     summary = latestReleaseJson.optString("body").ifEmpty {
-                        context.getString(R.string.pref_about_up_to_date_summary)
+                        context.getString(io.github.twyora.douyinenhancer.R.string.pref_about_up_to_date_summary)
                     }
                 }
             }
