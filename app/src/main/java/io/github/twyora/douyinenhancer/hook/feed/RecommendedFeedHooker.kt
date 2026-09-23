@@ -174,9 +174,9 @@ object RecommendedFeedHooker : YukiBaseHooker() {
     private fun shouldFilterByInteractionStats(aweme: Any): Boolean {
         val statsMinLEMax =
             ConfigManager.recommendedFeedFilter.collectCountMin.value <= ConfigManager.recommendedFeedFilter.collectCountMax.value ||
-                    ConfigManager.recommendedFeedFilter.commentCountMin.value <= ConfigManager.recommendedFeedFilter.commentCountMax.value ||
-                    ConfigManager.recommendedFeedFilter.diggCountMin.value <= ConfigManager.recommendedFeedFilter.diggCountMax.value ||
-                    ConfigManager.recommendedFeedFilter.shareCountMin.value <= ConfigManager.recommendedFeedFilter.shareCountMax.value
+                ConfigManager.recommendedFeedFilter.commentCountMin.value <= ConfigManager.recommendedFeedFilter.commentCountMax.value ||
+                ConfigManager.recommendedFeedFilter.diggCountMin.value <= ConfigManager.recommendedFeedFilter.diggCountMax.value ||
+                ConfigManager.recommendedFeedFilter.shareCountMin.value <= ConfigManager.recommendedFeedFilter.shareCountMax.value
         if (!statsMinLEMax) {
             return false
         }
@@ -188,9 +188,9 @@ object RecommendedFeedHooker : YukiBaseHooker() {
             val collectCount = statsObj.getField<Long?>(packageInstance.awemeStatistics.collectCount())
             if (collectCount != null &&
                 (
-                        collectCount !in
-                                ConfigManager.recommendedFeedFilter.collectCountMin.value..ConfigManager.recommendedFeedFilter.collectCountMax.value
-                        )
+                    collectCount !in
+                        ConfigManager.recommendedFeedFilter.collectCountMin.value..ConfigManager.recommendedFeedFilter.collectCountMax.value
+                    )
             ) {
                 if (verbose) {
                     YLog.debug("$TAG: filtered by collect count: $collectCount")
@@ -203,9 +203,9 @@ object RecommendedFeedHooker : YukiBaseHooker() {
             val commentCount = statsObj.getField<Long?>(packageInstance.awemeStatistics.commentCount())
             if (commentCount != null &&
                 (
-                        commentCount !in
-                                ConfigManager.recommendedFeedFilter.commentCountMin.value..ConfigManager.recommendedFeedFilter.commentCountMax.value
-                        )
+                    commentCount !in
+                        ConfigManager.recommendedFeedFilter.commentCountMin.value..ConfigManager.recommendedFeedFilter.commentCountMax.value
+                    )
             ) {
                 if (verbose) {
                     YLog.debug("$TAG: filtered by comment count: $commentCount")
@@ -218,9 +218,9 @@ object RecommendedFeedHooker : YukiBaseHooker() {
             val diggCount = statsObj.getField<Long?>(packageInstance.awemeStatistics.diggCount())
             if (diggCount != null &&
                 (
-                        diggCount !in
-                                ConfigManager.recommendedFeedFilter.diggCountMin.value..ConfigManager.recommendedFeedFilter.diggCountMax.value
-                        )
+                    diggCount !in
+                        ConfigManager.recommendedFeedFilter.diggCountMin.value..ConfigManager.recommendedFeedFilter.diggCountMax.value
+                    )
             ) {
                 if (verbose) {
                     YLog.debug("$TAG: filtered by digg count: $diggCount")
@@ -233,9 +233,9 @@ object RecommendedFeedHooker : YukiBaseHooker() {
             val shareCount = statsObj.getField<Long?>(packageInstance.awemeStatistics.shareCount())
             if (shareCount != null &&
                 (
-                        shareCount !in
-                                ConfigManager.recommendedFeedFilter.shareCountMin.value..ConfigManager.recommendedFeedFilter.shareCountMax.value
-                        )
+                    shareCount !in
+                        ConfigManager.recommendedFeedFilter.shareCountMin.value..ConfigManager.recommendedFeedFilter.shareCountMax.value
+                    )
             ) {
                 if (verbose) {
                     YLog.debug("$TAG: filtered by share count: $shareCount")
