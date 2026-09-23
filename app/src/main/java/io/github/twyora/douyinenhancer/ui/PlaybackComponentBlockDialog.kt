@@ -26,7 +26,7 @@ class PlaybackComponentBlockDialog(context: Context) : AlertDialog.Builder(Conte
 
             preferenceManager.setField(
                 Field("mSharedPreferences"),
-                ((ConfigManager.settingsStorage as FastKVStorage).fastKV) as SharedPreferences
+                ((ConfigManager.playbackComponentBlock.kvConfig as FastKVStorage).fastKV) as SharedPreferences
             )
             preferenceManager.setField(Field("mEditor"), null)
             addPreferencesFromResource(R.xml.pref_playback_component_block)
@@ -54,7 +54,7 @@ class PlaybackComponentBlockDialog(context: Context) : AlertDialog.Builder(Conte
         setPositiveButton(android.R.string.ok) { _, _ ->
             if (!ConfigManager.misc.hiddenFeatureEnabled.value) {
                 HIDDEN_KEYS.forEach { key ->
-                    ConfigManager.settingsStorage.put(key, false)
+                    ConfigManager.playbackComponentBlock.kvConfig.put(key, false)
                 }
             }
         }
