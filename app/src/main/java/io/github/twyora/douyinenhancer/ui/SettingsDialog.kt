@@ -3,6 +3,7 @@
 package io.github.twyora.douyinenhancer.ui
 
 import android.app.Activity
+import android.app.Activity.RESULT_CANCELED
 import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
@@ -47,6 +48,7 @@ import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.io.IOException
 import org.json.JSONObject
 
 /**
@@ -189,7 +191,7 @@ class SettingsDialog(context: Context) :
                     val digest = MessageDigest.getInstance("SHA-256")
 
                     val uri = data?.data
-                    if (resultCode == Activity.RESULT_CANCELED || uri == null) {
+                    if (resultCode == RESULT_CANCELED || uri == null) {
                         return
                     }
 
@@ -279,7 +281,7 @@ class SettingsDialog(context: Context) :
                                     "%02x".format(it)
                                 }
                                 if (checksum != expectedChecksum) {
-                                    throw kotlinx.io.IOException(context.getString(R.string.config_import_corrupted))
+                                    throw IOException(context.getString(R.string.config_import_corrupted))
                                 }
 
                                 val settings = ConfigManager.settingsStorage
