@@ -9,9 +9,9 @@ class ModuleConfigProvider(
         IRule.Context(hiddenFeatureEnabled = true)
     }
 ) : AbsConfigProvider(kvConfig, ruleContextProvider) {
-    var verboseDisabled = configItem(DISABLE_VERBOSE_LOGS, false)
-    var notifyUpdateCooldown = configItem(NOTIFY_UPDATE_COOLDOWN, NOTIFY_UPDATE_COOLDOWN_PERIOD)
-    var lastVerifiedVersion = configItem(LAST_VERIFIED_VERSION, 0)
+    val verboseDisabled = configItem(DISABLE_VERBOSE_LOGS, false)
+    val notifyUpdateCooldown = configItem(NOTIFY_UPDATE_COOLDOWN, NOTIFY_UPDATE_COOLDOWN_PERIOD)
+    val lastVerifiedVersion = configItem(LAST_VERIFIED_VERSION, 0)
 
     companion object {
         const val DISABLE_VERBOSE_LOGS = "disable_verbose_logs"

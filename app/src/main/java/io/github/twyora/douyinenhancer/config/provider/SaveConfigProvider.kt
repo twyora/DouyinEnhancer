@@ -9,12 +9,12 @@ class SaveConfigProvider(
         IRule.Context(hiddenFeatureEnabled = true)
     }
 ) : AbsConfigProvider(kvConfig, ruleContextProvider) {
-    var purifyCommentImage = configItem(PURIFY_COMMENT_IMAGE, false)
-    var unlockCommentEmoji = configItem(UNLOCK_COMMENT_EMOJI, false)
-    var downloadCommentAudio = configItem(DOWNLOAD_COMMENT_AUDIO, false)
-    var feedVideoRemoveWatermark = configItem(FEED_VIDEO_REMOVE_WATERMARK, false)
-    var feedMultiImageRemoveWatermark = configItem(FEED_MULTI_IMAGE_REMOVE_WATERMARK, false)
-    var feedDownloadBypass = configItem(FEED_DOWNLOAD_BYPASS, false)
+    val purifyCommentImage = configItem(PURIFY_COMMENT_IMAGE, false)
+    val unlockCommentEmoji = configItem(UNLOCK_COMMENT_EMOJI, false)
+    val downloadCommentAudio = configItem(DOWNLOAD_COMMENT_AUDIO, false)
+    val feedVideoRemoveWatermark = configItem(FEED_VIDEO_REMOVE_WATERMARK, false)
+    val feedMultiImageRemoveWatermark = configItem(FEED_MULTI_IMAGE_REMOVE_WATERMARK, false)
+    val feedDownloadBypass = configItem(FEED_DOWNLOAD_BYPASS, false)
 
     companion object {
         const val PURIFY_COMMENT_IMAGE = "purify_comment_image"

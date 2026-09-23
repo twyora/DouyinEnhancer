@@ -9,7 +9,7 @@ class UiConfigProvider(
         IRule.Context(hiddenFeatureEnabled = true)
     }
 ) : AbsConfigProvider(kvConfig, ruleContextProvider) {
-    var keepDanmakuVisible = configItem(KEEP_DANMAKU_VISIBLE, false)
+    val keepDanmakuVisible = configItem(KEEP_DANMAKU_VISIBLE, false)
 
     companion object {
         const val KEEP_DANMAKU_VISIBLE = "keep_danmaku_visible"
