@@ -282,11 +282,11 @@ class SettingsDialog(context: Context) :
                                 }
 
                                 val settings = ConfigManager.settingsStorage
-                                val hiddenFeatureEnabled = ConfigManager.misc.hiddenFeatureEnabled
+                                val hiddenFeatureValue = ConfigManager.misc.hiddenFeatureEnabled.value
                                 val importedSettings = FastKVStorage.open(context.cacheDir.absolutePath, tempBaseName)
                                 try {
                                     settings.putAll(importedSettings.getAll())
-                                    ConfigManager.misc.hiddenFeatureEnabled = hiddenFeatureEnabled
+                                    ConfigManager.misc.hiddenFeatureEnabled.value = hiddenFeatureValue
                                 } finally {
                                     importedSettings.close()
                                 }
