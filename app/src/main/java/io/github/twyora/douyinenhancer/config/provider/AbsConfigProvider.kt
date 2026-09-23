@@ -21,7 +21,7 @@ abstract class AbsConfigProvider(
         defValue: T,
         gate: RuleGate = RuleGate(
             AlwaysTrueRule,
-            ConfigValueMode.FORCE_DEFAULT,
+            ConfigValueMode.KEEP_STORED,
             ConfigStateMode.NORMAL
         )
     ) = ConfigItem(kvConfig, key, defValue, gate, ruleContextProvider).also {
