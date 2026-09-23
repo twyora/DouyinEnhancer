@@ -74,6 +74,7 @@ class SettingsDialog(context: Context) :
 
             preferenceManager.setField(
                 Field("mSharedPreferences"),
+                // TODO: Urgent refactor required. This relies on internal implementation details
                 ((ConfigManager.settingsStorage as FastKVStorage).fastKV) as SharedPreferences
             )
             preferenceManager.setField(Field("mEditor"), null)
