@@ -3,7 +3,6 @@ package io.github.twyora.douyinenhancer.config
 import android.content.Context
 import io.github.twyora.douyinenhancer.config.kvstorage.FastKVStorage
 import io.github.twyora.douyinenhancer.config.kvstorage.IKVStorage
-import io.github.twyora.douyinenhancer.config.rule.IRule
 import io.github.twyora.douyinenhancer.config.provider.FeedConfigProvider
 import io.github.twyora.douyinenhancer.config.provider.MiscConfigProvider
 import io.github.twyora.douyinenhancer.config.provider.ModuleConfigProvider
@@ -11,6 +10,7 @@ import io.github.twyora.douyinenhancer.config.provider.PlaybackComponentBlockCon
 import io.github.twyora.douyinenhancer.config.provider.RecommendedFeedFilterConfigProvider
 import io.github.twyora.douyinenhancer.config.provider.SaveConfigProvider
 import io.github.twyora.douyinenhancer.config.provider.UiConfigProvider
+import io.github.twyora.douyinenhancer.config.rule.IRule
 
 object ConfigManager {
     lateinit var settingsStorage: IKVStorage
@@ -74,4 +74,3 @@ object ConfigManager {
         )
     }
 }
-

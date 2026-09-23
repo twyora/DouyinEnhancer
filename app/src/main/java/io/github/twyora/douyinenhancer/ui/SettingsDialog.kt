@@ -23,17 +23,13 @@ import io.github.twyora.douyinenhancer.BuildConfig
 import io.github.twyora.douyinenhancer.R
 import io.github.twyora.douyinenhancer.config.ConfigManager
 import io.github.twyora.douyinenhancer.config.kvstorage.FastKVStorage
+import io.github.twyora.douyinenhancer.config.provider.MiscConfigProvider
+import io.github.twyora.douyinenhancer.config.provider.ModuleConfigProvider
 import io.github.twyora.douyinenhancer.hook.comment.CommentAudioHooker.hook
 import io.github.twyora.douyinenhancer.utils.Field
 import io.github.twyora.douyinenhancer.utils.Method
 import io.github.twyora.douyinenhancer.utils.resolveMethod
 import io.github.twyora.douyinenhancer.utils.setField
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import org.json.JSONObject
 import java.io.File
 import java.net.URL
 import java.security.DigestInputStream
@@ -46,20 +42,25 @@ import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 import java.util.zip.ZipOutputStream
 import kotlin.system.exitProcess
-import io.github.twyora.douyinenhancer.config.provider.ModuleConfigProvider
-import io.github.twyora.douyinenhancer.config.provider.MiscConfigProvider
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import org.json.JSONObject
 
 /**
  * Settings dialog for DouyinEnhancer.
  *
  * Referenced from [BiliRoaming](https://github.com/yujincheng08/BiliRoaming/blob/master/app/src/main/java/me/iacn/biliroaming/SettingDialog.kt)
  */
-class SettingsDialog(context: Context) : AlertDialog.Builder(
-    ContextThemeWrapper(
-        context,
-        R.style.MainTheme
-    )
-) {
+class SettingsDialog(context: Context) :
+    AlertDialog.Builder(
+        ContextThemeWrapper(
+            context,
+            R.style.MainTheme
+        )
+    ) {
     class PrefsFragment :
         PreferenceFragment(),
         Preference.OnPreferenceClickListener,

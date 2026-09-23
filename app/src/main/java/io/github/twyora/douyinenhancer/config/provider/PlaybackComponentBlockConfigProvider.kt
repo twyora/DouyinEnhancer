@@ -1,7 +1,7 @@
 package io.github.twyora.douyinenhancer.config.provider
 
-import io.github.twyora.douyinenhancer.config.gate.ConfigValueMode
 import io.github.twyora.douyinenhancer.config.gate.ConfigStateMode
+import io.github.twyora.douyinenhancer.config.gate.ConfigValueMode
 import io.github.twyora.douyinenhancer.config.gate.RuleGate
 import io.github.twyora.douyinenhancer.config.kvstorage.IKVStorage
 import io.github.twyora.douyinenhancer.config.rule.HiddenFeatureEnabledRule

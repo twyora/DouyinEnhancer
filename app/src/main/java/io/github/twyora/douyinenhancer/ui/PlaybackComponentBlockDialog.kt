@@ -13,8 +13,8 @@ import com.highcapable.yukihookapi.hook.factory.injectModuleAppResources
 import com.highcapable.yukihookapi.hook.log.YLog
 import io.github.twyora.douyinenhancer.R
 import io.github.twyora.douyinenhancer.config.ConfigManager
-import io.github.twyora.douyinenhancer.config.kvstorage.FastKVStorage
 import io.github.twyora.douyinenhancer.config.gate.ConfigStateMode
+import io.github.twyora.douyinenhancer.config.kvstorage.FastKVStorage
 import io.github.twyora.douyinenhancer.utils.Field
 import io.github.twyora.douyinenhancer.utils.setField
 
