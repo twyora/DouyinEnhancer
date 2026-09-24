@@ -43,20 +43,18 @@ class FastKVStorage(val fastKV: FastKV) : IKVStorage {
         fastKV.putAll(values)
     }
 
-    override fun <T : Any> observe(key: String, defValue: T): Flow<T> {
-        return callbackFlow {
-            trySend(get(key, defValue))
+    override fun <T : Any> observe(key: String, defValue: T): Flow<T> = callbackFlow {
+        trySend(get(key, defValue))
 
-            val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, changedKey ->
-                if (changedKey == null || changedKey == key) {
-                    trySend(get(key, defValue))
-                }
+        val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, changedKey ->
+            if (changedKey == null || changedKey == key) {
+                trySend(get(key, defValue))
             }
+        }
 
-            fastKV.registerOnSharedPreferenceChangeListener(listener)
-            awaitClose {
-                fastKV.unregisterOnSharedPreferenceChangeListener(listener)
-            }
+        fastKV.registerOnSharedPreferenceChangeListener(listener)
+        awaitClose {
+            fastKV.unregisterOnSharedPreferenceChangeListener(listener)
         }
     }
 

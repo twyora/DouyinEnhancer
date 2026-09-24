@@ -3,6 +3,7 @@
 package io.github.twyora.douyinenhancer.ui.legacy
 
 import android.app.Activity
+import android.app.Activity.RESULT_CANCELED
 import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
@@ -23,17 +24,13 @@ import io.github.twyora.douyinenhancer.BuildConfig
 import io.github.twyora.douyinenhancer.R
 import io.github.twyora.douyinenhancer.config.ConfigManager
 import io.github.twyora.douyinenhancer.config.kvstorage.FastKVStorage
+import io.github.twyora.douyinenhancer.config.provider.MiscConfigProvider
+import io.github.twyora.douyinenhancer.config.provider.ModuleConfigProvider
 import io.github.twyora.douyinenhancer.hook.comment.CommentAudioHooker.hook
 import io.github.twyora.douyinenhancer.utils.Field
 import io.github.twyora.douyinenhancer.utils.Method
 import io.github.twyora.douyinenhancer.utils.resolveMethod
 import io.github.twyora.douyinenhancer.utils.setField
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import org.json.JSONObject
 import java.io.File
 import java.net.URL
 import java.security.DigestInputStream
@@ -46,20 +43,26 @@ import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 import java.util.zip.ZipOutputStream
 import kotlin.system.exitProcess
-import io.github.twyora.douyinenhancer.config.provider.ModuleConfigProvider
-import io.github.twyora.douyinenhancer.config.provider.MiscConfigProvider
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlinx.io.IOException
+import org.json.JSONObject
 
 /**
  * Settings dialog for DouyinEnhancer.
  *
  * Referenced from [BiliRoaming](https://github.com/yujincheng08/BiliRoaming/blob/master/app/src/main/java/me/iacn/biliroaming/SettingDialog.kt)
  */
-class SettingsDialog(context: Context) : AlertDialog.Builder(
-    ContextThemeWrapper(
-        context,
-        R.style.MainTheme
-    )
-) {
+class SettingsDialog(context: Context) :
+    AlertDialog.Builder(
+        ContextThemeWrapper(
+            context,
+            R.style.MainTheme
+        )
+    ) {
     class PrefsFragment :
         PreferenceFragment(),
         Preference.OnPreferenceClickListener,
@@ -73,6 +76,7 @@ class SettingsDialog(context: Context) : AlertDialog.Builder(
 
             preferenceManager.setField(
                 Field("mSharedPreferences"),
+                // TODO: Urgent refactor required. This relies on internal implementation details
                 ((ConfigManager.settingsStorage as FastKVStorage).fastKV) as SharedPreferences
             )
             preferenceManager.setField(Field("mEditor"), null)
@@ -187,7 +191,7 @@ class SettingsDialog(context: Context) : AlertDialog.Builder(
                     val digest = MessageDigest.getInstance("SHA-256")
 
                     val uri = data?.data
-                    if (resultCode == Activity.RESULT_CANCELED || uri == null) {
+                    if (resultCode == RESULT_CANCELED || uri == null) {
                         return
                     }
 
@@ -277,15 +281,15 @@ class SettingsDialog(context: Context) : AlertDialog.Builder(
                                     "%02x".format(it)
                                 }
                                 if (checksum != expectedChecksum) {
-                                    throw kotlinx.io.IOException(context.getString(R.string.config_import_corrupted))
+                                    throw IOException(context.getString(R.string.config_import_corrupted))
                                 }
 
                                 val settings = ConfigManager.settingsStorage
-                                val hiddenFeatureEnabled = ConfigManager.misc.hiddenFeatureEnabled
+                                val hiddenFeatureValue = ConfigManager.misc.hiddenFeatureEnabled.value
                                 val importedSettings = FastKVStorage.open(context.cacheDir.absolutePath, tempBaseName)
                                 try {
                                     settings.putAll(importedSettings.getAll())
-                                    ConfigManager.misc.hiddenFeatureEnabled = hiddenFeatureEnabled
+                                    ConfigManager.misc.hiddenFeatureEnabled.value = hiddenFeatureValue
                                 } finally {
                                     importedSettings.close()
                                 }

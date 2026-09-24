@@ -1,7 +1,7 @@
 package io.github.twyora.douyinenhancer.config.kvstorage
 
-import kotlinx.coroutines.flow.Flow
 import java.io.File
+import kotlinx.coroutines.flow.Flow
 
 interface IKVStorage {
     fun <T : Any> get(key: String, defValue: T): T

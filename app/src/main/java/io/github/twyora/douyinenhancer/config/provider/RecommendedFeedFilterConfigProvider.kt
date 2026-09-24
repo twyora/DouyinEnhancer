@@ -1,7 +1,7 @@
 package io.github.twyora.douyinenhancer.config.provider
 
-import io.github.twyora.douyinenhancer.config.gate.ConfigValueMode
 import io.github.twyora.douyinenhancer.config.gate.ConfigStateMode
+import io.github.twyora.douyinenhancer.config.gate.ConfigValueMode
 import io.github.twyora.douyinenhancer.config.gate.RuleGate
 import io.github.twyora.douyinenhancer.config.kvstorage.IKVStorage
 import io.github.twyora.douyinenhancer.config.rule.HiddenFeatureEnabledRule
@@ -13,36 +13,36 @@ class RecommendedFeedFilterConfigProvider(
         IRule.Context(hiddenFeatureEnabled = true)
     }
 ) : AbsConfigProvider(kvConfig, ruleContextProvider) {
-    var mainSwitch = configItem(MAIN_SWITCH, false)
+    val mainSwitch = configItem(MAIN_SWITCH, false)
 
-    var blockAd = configItem(BLOCK_AD, false, RuleGate(HiddenFeatureEnabledRule, ConfigValueMode.FORCE_DEFAULT, ConfigStateMode.HIDDEN))
-    var blockEcom =
+    val blockAd = configItem(BLOCK_AD, false, RuleGate(HiddenFeatureEnabledRule, ConfigValueMode.FORCE_DEFAULT, ConfigStateMode.HIDDEN))
+    val blockEcom =
         configItem(BLOCK_ECOM, false, RuleGate(HiddenFeatureEnabledRule, ConfigValueMode.FORCE_DEFAULT, ConfigStateMode.HIDDEN))
-    var blockGrouponLargeCard =
+    val blockGrouponLargeCard =
         configItem(BLOCK_GROUPON, false, RuleGate(HiddenFeatureEnabledRule, ConfigValueMode.FORCE_DEFAULT, ConfigStateMode.HIDDEN))
-    var blockLive =
+    val blockLive =
         configItem(BLOCK_LIVE, false, RuleGate(HiddenFeatureEnabledRule, ConfigValueMode.FORCE_DEFAULT, ConfigStateMode.HIDDEN))
-    var blockMultiImage =
+    val blockMultiImage =
         configItem(BLOCK_MULTI_IMAGE, false, RuleGate(HiddenFeatureEnabledRule, ConfigValueMode.FORCE_DEFAULT, ConfigStateMode.HIDDEN))
 
-    var shortDurationLimit = configItem(SHORT_DURATION_LIMIT, 0)
-    var longDurationLimit = configItem(LONG_DURATION_LIMIT, Int.MAX_VALUE)
-    var collectCountMin = configItem(COLLECT_COUNT_MIN, 0)
-    var collectCountMax = configItem(COLLECT_COUNT_MAX, Int.MAX_VALUE)
-    var commentCountMin = configItem(COMMENT_COUNT_MIN, 0)
-    var commentCountMax = configItem(COMMENT_COUNT_MAX, Int.MAX_VALUE)
-    var diggCountMin = configItem(DIGG_COUNT_MIN, 0)
-    var diggCountMax = configItem(DIGG_COUNT_MAX, Int.MAX_VALUE)
-    var shareCountMin = configItem(SHARE_COUNT_MIN, 0)
-    var shareCountMax = configItem(SHARE_COUNT_MAX, Int.MAX_VALUE)
+    val shortDurationLimit = configItem(SHORT_DURATION_LIMIT, 0)
+    val longDurationLimit = configItem(LONG_DURATION_LIMIT, Int.MAX_VALUE)
+    val collectCountMin = configItem(COLLECT_COUNT_MIN, 0)
+    val collectCountMax = configItem(COLLECT_COUNT_MAX, Int.MAX_VALUE)
+    val commentCountMin = configItem(COMMENT_COUNT_MIN, 0)
+    val commentCountMax = configItem(COMMENT_COUNT_MAX, Int.MAX_VALUE)
+    val diggCountMin = configItem(DIGG_COUNT_MIN, 0)
+    val diggCountMax = configItem(DIGG_COUNT_MAX, Int.MAX_VALUE)
+    val shareCountMin = configItem(SHARE_COUNT_MIN, 0)
+    val shareCountMax = configItem(SHARE_COUNT_MAX, Int.MAX_VALUE)
 
-    var titleRegexMode = configItem(TITLE_REGEX_MODE, false)
-    var titleKeywords = configItem(TITLE_KEYWORDS, emptySet<String>())
-    var authorUidKeywords = configItem(AUTHOR_UID_KEYWORDS, emptySet<String>())
-    var authorNicknameRegexMode = configItem(AUTHOR_NICKNAME_REGEX_MODE, false)
-    var authorNicknameKeywords = configItem(AUTHOR_NICKNAME_KEYWORDS, emptySet<String>())
-    var descRegexMode = configItem(DESC_REGEX_MODE, false)
-    var descKeywords = configItem(DESC_KEYWORDS, emptySet<String>())
+    val titleRegexMode = configItem(TITLE_REGEX_MODE, false)
+    val titleKeywords = configItem(TITLE_KEYWORDS, emptySet<String>())
+    val authorUidKeywords = configItem(AUTHOR_UID_KEYWORDS, emptySet<String>())
+    val authorNicknameRegexMode = configItem(AUTHOR_NICKNAME_REGEX_MODE, false)
+    val authorNicknameKeywords = configItem(AUTHOR_NICKNAME_KEYWORDS, emptySet<String>())
+    val descRegexMode = configItem(DESC_REGEX_MODE, false)
+    val descKeywords = configItem(DESC_KEYWORDS, emptySet<String>())
 
     companion object {
         const val MAIN_SWITCH = "recommended_feed_filter_main_switch"

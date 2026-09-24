@@ -1,7 +1,7 @@
 package io.github.twyora.douyinenhancer.config.provider
 
-import io.github.twyora.douyinenhancer.config.gate.ConfigValueMode
 import io.github.twyora.douyinenhancer.config.gate.ConfigStateMode
+import io.github.twyora.douyinenhancer.config.gate.ConfigValueMode
 import io.github.twyora.douyinenhancer.config.gate.RuleGate
 import io.github.twyora.douyinenhancer.config.kvstorage.IKVStorage
 import io.github.twyora.douyinenhancer.config.rule.HiddenFeatureEnabledRule
@@ -13,83 +13,83 @@ class PlaybackComponentBlockConfigProvider(
         IRule.Context(hiddenFeatureEnabled = true)
     }
 ) : AbsConfigProvider(kvConfig, ruleContextProvider) {
-    var mainSwitch = configItem(MAIN_SWITCH, false)
+    val mainSwitch = configItem(MAIN_SWITCH, false)
 
-    var musicCoverBlock = configItem(MUSIC_COVER_BLOCK, false)
-    var musicListenCover = configItem(MUSIC_LISTEN_COVER, false)
-    var digg = configItem(DIGG, false)
-    var title = configItem(TITLE, false)
-    var musicCover = configItem(MUSIC_COVER, false)
-    var generalLabel = configItem(GENERAL_LABEL, false)
-    var feedLabelContainer = configItem(FEED_LABEL_CONTAINER, false)
-    var musicTitle = configItem(MUSIC_TITLE, false)
-    var story25DiverseDigg = configItem(STORY_25_DIVERSE_DIGG, false)
-    var ecomStore =
+    val musicCoverBlock = configItem(MUSIC_COVER_BLOCK, false)
+    val musicListenCover = configItem(MUSIC_LISTEN_COVER, false)
+    val digg = configItem(DIGG, false)
+    val title = configItem(TITLE, false)
+    val musicCover = configItem(MUSIC_COVER, false)
+    val generalLabel = configItem(GENERAL_LABEL, false)
+    val feedLabelContainer = configItem(FEED_LABEL_CONTAINER, false)
+    val musicTitle = configItem(MUSIC_TITLE, false)
+    val story25DiverseDigg = configItem(STORY_25_DIVERSE_DIGG, false)
+    val ecomStore =
         configItem(ECOM_STORE, false, RuleGate(HiddenFeatureEnabledRule, ConfigValueMode.FORCE_DEFAULT, ConfigStateMode.HIDDEN))
-    var buttonImQuickShare = configItem(BUTTON_IM_QUICK_SHARE, false)
-    var buttonFeedImShareGuideV2 = configItem(BUTTON_FEED_IM_SHARE_GUIDE_V2, false)
-    var buttonForceFeedImShareGuide = configItem(BUTTON_FORCE_FEED_IM_SHARE_GUIDE, false)
-    var socialNewCommentGuideBubble = configItem(
+    val buttonImQuickShare = configItem(BUTTON_IM_QUICK_SHARE, false)
+    val buttonFeedImShareGuideV2 = configItem(BUTTON_FEED_IM_SHARE_GUIDE_V2, false)
+    val buttonForceFeedImShareGuide = configItem(BUTTON_FORCE_FEED_IM_SHARE_GUIDE, false)
+    val socialNewCommentGuideBubble = configItem(
         SOCIAL_NEW_COMMENT_GUIDE_BUBBLE,
         false,
         RuleGate(HiddenFeatureEnabledRule, ConfigValueMode.FORCE_DEFAULT, ConfigStateMode.HIDDEN)
     )
-    var commentBottomAnimation = configItem(COMMENT_BOTTOM_ANIMATION, false)
-    var nearbyIdentityTag = configItem(NEARBY_IDENTITY_TAG, false)
-    var livePhotoTag = configItem(LIVE_PHOTO_TAG, false)
-    var photosTag = configItem(PHOTOS_TAG, false)
-    var story24Tag = configItem(STORY24_TAG, false)
-    var socialNewStyleStoryTag = configItem(SOCIAL_NEW_STYLE_STORY_TAG, false)
-    var longVideoHighlightTag = configItem(LONG_VIDEO_HIGHLIGHT_TAG, false)
-    var danmakuVertical = configItem(DANMAKU_VERTICAL, false)
-    var avatar = configItem(AVATAR, false)
-    var nickname = configItem(NICKNAME, false)
-    var postTime = configItem(POST_TIME, false)
-    var bellowDescTime = configItem(BELLOW_DESC_TIME, false)
-    var comment = configItem(COMMENT, false)
-    var reply = configItem(REPLY, false)
-    var share = configItem(SHARE, false)
-    var collect = configItem(COLLECT, false)
-    var anchorFramework = configItem(ANCHOR_FRAMEWORK, false)
-    var bottomBarCommon = configItem(BOTTOM_BAR_COMMON, false)
-    var commonButton = configItem(COMMON_BUTTON, false)
-    var sticker = configItem(STICKER, false)
-    var aiSearch = configItem(AI_SEARCH, false)
-    var c2Feed = configItem(C2_FEED, false)
-    var flow = configItem(FLOW, false, RuleGate(HiddenFeatureEnabledRule, ConfigValueMode.FORCE_DEFAULT, ConfigStateMode.HIDDEN))
-    var nearbyHotComment =
+    val commentBottomAnimation = configItem(COMMENT_BOTTOM_ANIMATION, false)
+    val nearbyIdentityTag = configItem(NEARBY_IDENTITY_TAG, false)
+    val livePhotoTag = configItem(LIVE_PHOTO_TAG, false)
+    val photosTag = configItem(PHOTOS_TAG, false)
+    val story24Tag = configItem(STORY24_TAG, false)
+    val socialNewStyleStoryTag = configItem(SOCIAL_NEW_STYLE_STORY_TAG, false)
+    val longVideoHighlightTag = configItem(LONG_VIDEO_HIGHLIGHT_TAG, false)
+    val danmakuVertical = configItem(DANMAKU_VERTICAL, false)
+    val avatar = configItem(AVATAR, false)
+    val nickname = configItem(NICKNAME, false)
+    val postTime = configItem(POST_TIME, false)
+    val bellowDescTime = configItem(BELLOW_DESC_TIME, false)
+    val comment = configItem(COMMENT, false)
+    val reply = configItem(REPLY, false)
+    val share = configItem(SHARE, false)
+    val collect = configItem(COLLECT, false)
+    val anchorFramework = configItem(ANCHOR_FRAMEWORK, false)
+    val bottomBarCommon = configItem(BOTTOM_BAR_COMMON, false)
+    val commonButton = configItem(COMMON_BUTTON, false)
+    val sticker = configItem(STICKER, false)
+    val aiSearch = configItem(AI_SEARCH, false)
+    val c2Feed = configItem(C2_FEED, false)
+    val flow = configItem(FLOW, false, RuleGate(HiddenFeatureEnabledRule, ConfigValueMode.FORCE_DEFAULT, ConfigStateMode.HIDDEN))
+    val nearbyHotComment =
         configItem(NEARBY_HOT_COMMENT, false, RuleGate(HiddenFeatureEnabledRule, ConfigValueMode.FORCE_DEFAULT, ConfigStateMode.HIDDEN))
-    var buttonUnfollowFamiliar = configItem(BUTTON_UNFOLLOW_FAMILIAR, false)
-    var buttonUnfollowFamiliarRec =
+    val buttonUnfollowFamiliar = configItem(BUTTON_UNFOLLOW_FAMILIAR, false)
+    val buttonUnfollowFamiliarRec =
         configItem(
             BUTTON_UNFOLLOW_FAMILIAR_REC,
             false,
             RuleGate(HiddenFeatureEnabledRule, ConfigValueMode.FORCE_DEFAULT, ConfigStateMode.HIDDEN)
         )
-    var coCreatorAuthor = configItem(CO_CREATOR_AUTHOR, false)
-    var chapterTag = configItem(CHAPTER_TAG, false)
-    var ecomTagFriend =
+    val coCreatorAuthor = configItem(CO_CREATOR_AUTHOR, false)
+    val chapterTag = configItem(CHAPTER_TAG, false)
+    val ecomTagFriend =
         configItem(ECOM_TAG_FRIEND, false, RuleGate(HiddenFeatureEnabledRule, ConfigValueMode.FORCE_DEFAULT, ConfigStateMode.HIDDEN))
-    var socialNewStylePostTimeBottom = configItem(SOCIAL_NEW_STYLE_POST_TIME_BOTTOM, false)
-    var socialNewStyleMusicBelow = configItem(SOCIAL_NEW_STYLE_MUSIC_BELOW, false)
-    var chapterDetail = configItem(CHAPTER_DETAIL, false)
-    var titleTagContainer = configItem(TITLE_TAG_CONTAINER, false)
-    var rightMenuLl = configItem(RIGHT_MENU_LL, false)
-    var musicMuteCover = configItem(MUSIC_MUTE_COVER, false)
-    var jxLeftBottomLongVideoPlusTitleTag =
+    val socialNewStylePostTimeBottom = configItem(SOCIAL_NEW_STYLE_POST_TIME_BOTTOM, false)
+    val socialNewStyleMusicBelow = configItem(SOCIAL_NEW_STYLE_MUSIC_BELOW, false)
+    val chapterDetail = configItem(CHAPTER_DETAIL, false)
+    val titleTagContainer = configItem(TITLE_TAG_CONTAINER, false)
+    val rightMenuLl = configItem(RIGHT_MENU_LL, false)
+    val musicMuteCover = configItem(MUSIC_MUTE_COVER, false)
+    val jxLeftBottomLongVideoPlusTitleTag =
         configItem(
             JX_LEFT_BOTTOM_LONG_VIDEO_PLUS_TITLE_TAG,
             false,
             RuleGate(HiddenFeatureEnabledRule, ConfigValueMode.FORCE_DEFAULT, ConfigStateMode.HIDDEN)
         )
-    var bottomBarMix = configItem(BOTTOM_BAR_MIX, false)
-    var bottomBarNormalSearch = configItem(BOTTOM_BAR_NORMAL_SEARCH, false)
-    var bottomBarCommonPrioritySearch = configItem(BOTTOM_BAR_COMMON_PRIORITY_SEARCH, false)
-    var jxPick = configItem(JX_PICK, false, RuleGate(HiddenFeatureEnabledRule, ConfigValueMode.FORCE_DEFAULT, ConfigStateMode.HIDDEN))
-    var bottomBarContainer = configItem(BOTTOM_BAR_CONTAINER, false)
-    var aiCoCreatorsThree =
+    val bottomBarMix = configItem(BOTTOM_BAR_MIX, false)
+    val bottomBarNormalSearch = configItem(BOTTOM_BAR_NORMAL_SEARCH, false)
+    val bottomBarCommonPrioritySearch = configItem(BOTTOM_BAR_COMMON_PRIORITY_SEARCH, false)
+    val jxPick = configItem(JX_PICK, false, RuleGate(HiddenFeatureEnabledRule, ConfigValueMode.FORCE_DEFAULT, ConfigStateMode.HIDDEN))
+    val bottomBarContainer = configItem(BOTTOM_BAR_CONTAINER, false)
+    val aiCoCreatorsThree =
         configItem(AI_CO_CREATORS_THREE, false, RuleGate(HiddenFeatureEnabledRule, ConfigValueMode.FORCE_DEFAULT, ConfigStateMode.HIDDEN))
-    var aigcCocreateStatusTitle =
+    val aigcCocreateStatusTitle =
         configItem(
             AIGC_COCREATE_STATUS_TITLE,
             false,

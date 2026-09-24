@@ -13,8 +13,8 @@ import com.highcapable.yukihookapi.hook.factory.injectModuleAppResources
 import com.highcapable.yukihookapi.hook.log.YLog
 import io.github.twyora.douyinenhancer.R
 import io.github.twyora.douyinenhancer.config.ConfigManager
-import io.github.twyora.douyinenhancer.config.kvstorage.FastKVStorage
 import io.github.twyora.douyinenhancer.config.gate.ConfigStateMode
+import io.github.twyora.douyinenhancer.config.kvstorage.FastKVStorage
 import io.github.twyora.douyinenhancer.utils.Field
 import io.github.twyora.douyinenhancer.utils.setField
 
@@ -26,16 +26,17 @@ class PlaybackComponentBlockDialog(context: Context) : AlertDialog.Builder(Conte
 
             preferenceManager.setField(
                 Field("mSharedPreferences"),
-                ((ConfigManager.settingsStorage as FastKVStorage).fastKV) as SharedPreferences
+                // TODO: Urgent refactor required. This relies on internal implementation details
+                ((ConfigManager.playbackComponentBlock.kvConfig as FastKVStorage).fastKV) as SharedPreferences
             )
             preferenceManager.setField(Field("mEditor"), null)
             addPreferencesFromResource(R.xml.pref_playback_component_block)
 
-            if (!ConfigManager.misc.hiddenFeatureEnabled.value) {
-                HIDDEN_KEYS.forEach { key ->
-                    findPreference(key)?.let {
-                        preferenceScreen?.removePreference(it)
-                    }
+            ConfigManager.playbackComponentBlock.allConfigItems.filter { configItem ->
+                configItem.status != ConfigStateMode.NORMAL
+            }.forEach { normalConfigItem ->
+                findPreference(normalConfigItem.key)?.let {
+                    preferenceScreen?.removePreference(it)
                 }
             }
         }
@@ -51,13 +52,7 @@ class PlaybackComponentBlockDialog(context: Context) : AlertDialog.Builder(Conte
         setView(prefsFragment.view)
         setTitle(R.string.playback_component_block_dialog_title)
         setNegativeButton(android.R.string.cancel, null)
-        setPositiveButton(android.R.string.ok) { _, _ ->
-            if (!ConfigManager.misc.hiddenFeatureEnabled.value) {
-                HIDDEN_KEYS.forEach { key ->
-                    ConfigManager.settingsStorage.put(key, false)
-                }
-            }
-        }
+        setPositiveButton(android.R.string.ok, null)
         setOnDismissListener {
             activity.fragmentManager.beginTransaction().remove(prefsFragment).commitAllowingStateLoss()
         }
@@ -65,13 +60,6 @@ class PlaybackComponentBlockDialog(context: Context) : AlertDialog.Builder(Conte
 
     companion object {
         private val TAG = this::class.simpleName
-
-        private val HIDDEN_KEYS
-            get() = ConfigManager.playbackComponentBlock.allConfigItems.filter {
-                it.status == ConfigStateMode.HIDDEN
-            }.map {
-                it.key
-            }.toSet()
 
         fun show(context: Context) {
             runCatching {

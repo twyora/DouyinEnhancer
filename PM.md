@@ -3,6 +3,7 @@
 ## In Progress
 
 - Improve module export configuration function
+- Rework the module UI
 
 ## TODO
 

@@ -1,7 +1,7 @@
 package io.github.twyora.douyinenhancer.config.provider
 
-import io.github.twyora.douyinenhancer.config.gate.ConfigValueMode
 import io.github.twyora.douyinenhancer.config.gate.ConfigStateMode
+import io.github.twyora.douyinenhancer.config.gate.ConfigValueMode
 import io.github.twyora.douyinenhancer.config.gate.RuleGate
 import io.github.twyora.douyinenhancer.config.kvstorage.IKVStorage
 import io.github.twyora.douyinenhancer.config.rule.AlwaysTrueRule
@@ -17,9 +17,11 @@ abstract class AbsConfigProvider(
     protected val configItemsInternal = mutableListOf<ConfigItem<*>>()
 
     protected fun <T : Any> configItem(
-        key: String, defValue: T, gate: RuleGate = RuleGate(
+        key: String,
+        defValue: T,
+        gate: RuleGate = RuleGate(
             AlwaysTrueRule,
-            ConfigValueMode.FORCE_DEFAULT,
+            ConfigValueMode.KEEP_STORED,
             ConfigStateMode.NORMAL
         )
     ) = ConfigItem(kvConfig, key, defValue, gate, ruleContextProvider).also {

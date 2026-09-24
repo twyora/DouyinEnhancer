@@ -9,7 +9,7 @@ class MiscConfigProvider(
         IRule.Context(hiddenFeatureEnabled = true)
     }
 ) : AbsConfigProvider(kvConfig, ruleContextProvider) {
-    var hiddenFeatureEnabled = configItem(ENABLE_HIDDEN_FEATURES, false)
+    val hiddenFeatureEnabled = configItem(ENABLE_HIDDEN_FEATURES, false)
 
     companion object {
         const val ENABLE_HIDDEN_FEATURES = "enable_hidden_features"

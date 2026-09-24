@@ -9,11 +9,11 @@ class FeedConfigProvider(
         IRule.Context(hiddenFeatureEnabled = true)
     }
 ) : AbsConfigProvider(kvConfig, ruleContextProvider) {
-    var bypassListenAwemeRestriction = configItem(BYPASS_LISTEN_AWEME_RESTRICTION, false)
-    var interceptDoubleTapDigg = configItem(FEED_DOUBLE_TAP_DIGG, false)
-    var doubleTapOpenComment = configItem(FEED_DOUBLE_TAP_OPEN_COMMENT, false)
-    var blockAutoReplay = configItem(FEED_BLOCK_AUTO_REPLAY, false)
-    var blockResumePlayback = configItem(FEED_BLOCK_RESUME_PLAYBACK, false)
+    val bypassListenAwemeRestriction = configItem(BYPASS_LISTEN_AWEME_RESTRICTION, false)
+    val interceptDoubleTapDigg = configItem(FEED_DOUBLE_TAP_DIGG, false)
+    val doubleTapOpenComment = configItem(FEED_DOUBLE_TAP_OPEN_COMMENT, false)
+    val blockAutoReplay = configItem(FEED_BLOCK_AUTO_REPLAY, false)
+    val blockResumePlayback = configItem(FEED_BLOCK_RESUME_PLAYBACK, false)
 
     companion object {
         const val BYPASS_LISTEN_AWEME_RESTRICTION = "bypass_listen_aweme_restriction"
