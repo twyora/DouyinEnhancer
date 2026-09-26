@@ -178,12 +178,16 @@ message ImageUrlStruct {
 
 message FeedResponseHandler {
   optional Class class = 1;
-  optional Method processAwemeList = 2;
+  optional Method process_aweme_list = 3;
+
+  reserved 2;
 }
 
 message CommentLongPressWhiteListProvider {
   optional Class class = 1;
-  optional Method buildWhiteList = 2;
+  optional Method build_white_list = 3;
+
+  reserved 2;
 }
 
 message MiscDownloadAddrUtil {
@@ -240,7 +244,9 @@ message GalleryShareHelper {
 message SharePrivacyVideoApi {
   optional Class class = 1;
   optional SharePrivacyVideoResponse privacy_video_response = 2;
-  optional Method getDownloadStatus = 3;
+  optional Method get_download_status = 4;
+
+  reserved 3;
 }
 
 message SharePrivacyVideoResponse {
