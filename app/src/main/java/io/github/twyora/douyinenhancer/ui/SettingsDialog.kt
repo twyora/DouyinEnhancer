@@ -24,7 +24,6 @@ import io.github.twyora.douyinenhancer.BuildConfig
 import io.github.twyora.douyinenhancer.R
 import io.github.twyora.douyinenhancer.config.ConfigManager
 import io.github.twyora.douyinenhancer.config.kvstorage.FastKVStorage
-import io.github.twyora.douyinenhancer.config.provider.MiscConfigProvider
 import io.github.twyora.douyinenhancer.config.provider.ModuleConfigProvider
 import io.github.twyora.douyinenhancer.hook.comment.CommentAudioHooker.hook
 import io.github.twyora.douyinenhancer.utils.Field
@@ -85,7 +84,7 @@ class SettingsDialog(context: Context) :
             if (!ConfigManager.misc.hiddenFeatureEnabled.value) {
                 val miscCategory = findPreference("pref_category_misc") as? PreferenceCategory
                 miscCategory?.let { category ->
-                    findPreference(MiscConfigProvider.ENABLE_HIDDEN_FEATURES)?.let {
+                    findPreference(ConfigManager.misc.hiddenFeatureEnabled.key)?.let {
                         category.removePreference(it)
                     }
                     if (category.preferenceCount == 0) {
