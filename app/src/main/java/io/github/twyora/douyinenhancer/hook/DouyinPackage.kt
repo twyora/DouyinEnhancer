@@ -19,6 +19,8 @@ import io.github.twyora.douyinenhancer.utils.Method
 import io.github.twyora.douyinenhancer.utils.toClass
 import io.github.twyora.douyinenhancer.utils.weak
 import io.github.twyora.douyinenhancer.utils.verifySha256RsaSignature
+import io.github.twyora.douyinenhancer.constant.HookInfoFiles
+import io.github.twyora.douyinenhancer.constant.SignatureKeys
 import org.erdtman.jcs.JsonCanonicalizer
 import org.json.JSONObject
 import java.io.File
@@ -1019,24 +1021,14 @@ class DouyinPackage(classLoader: ClassLoader, context: Context) {
         @Volatile
         lateinit var instance: DouyinPackage
 
-        const val CUSTOM_HOOK_INFO_PUBLIC_KEY_B64 = ("MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAsqO8x8yviloDw4iQ" +
-                "/YLefYe5CcBjOakizvC2b9bNcIv7+QQEsNmMWcUuD4yMxH1PX1jGeRWkhhRQ" +
-                "B5L+MAAMNDPOLv6gZmewWayV+gfV5k0IFRnrhg9fi7CGz5yaO4rJBi7H/jzn" +
-                "mwbbnuuxi9VOIfIoTn5trOFsECxi72GXlw+U05v5QTnfm4Uw+BV9nCplk4D+" +
-                "VvzaeJ+HtrI8W8rqrzjtWcwW+VGnLDUV851rCeX9K9OAaGpdzV7DYFo9k1zi" +
-                "MPOKLxZ6CfMTbhsMPpQM29QNTW8FQvulX/NIZL/LQ8HDTHRkAOciL9g4/NEd" +
-                "oB4fyEc2+ilkx1h1bGxf18fEWQIDAQAB"
-                )
 
         fun init(classLoader: ClassLoader, context: Context) {
             instance = DouyinPackage(classLoader, context)
         }
 
         private fun readHookInfo(context: Context): Configs.HookInfo {
-            val hookInfoFileName = "douyinenhancer_hookInfo"
-
             runCatching {
-                val hookInfoFile = File(context.cacheDir, hookInfoFileName)
+                val hookInfoFile = File(context.cacheDir, HookInfoFiles.HOOK_INFO_FILE_NAME)
                 if (!(hookInfoFile.isFile && hookInfoFile.canRead())) {
                     YLog.warn("$TAG: hookInfoFile is not a file or can not be read")
                     return@runCatching
@@ -1099,7 +1091,7 @@ class DouyinPackage(classLoader: ClassLoader, context: Context) {
             }
 
             return initHookInfo(context).also {
-                val hookInfoFile = File(context.cacheDir, hookInfoFileName)
+                val hookInfoFile = File(context.cacheDir, HookInfoFiles.HOOK_INFO_FILE_NAME)
                 if (hookInfoFile.exists()) {
                     hookInfoFile.delete()
                 }
@@ -1110,9 +1102,7 @@ class DouyinPackage(classLoader: ClassLoader, context: Context) {
         }
 
         private fun readCustomHookInfoOrNull(context: Context): Configs.HookInfo? = runCatching {
-            val hookInfoPresetFileName = "douyinenhancer_hookInfo_preset"
-
-            val hookInfoPresetFile = File(context.cacheDir, hookInfoPresetFileName)
+            val hookInfoPresetFile = File(context.cacheDir, HookInfoFiles.HOOK_INFO_PRESET_FILE_NAME)
             if (!hookInfoPresetFile.exists()) {
                 YLog.info("$TAG: no custom hook info present, skipping load")
                 return@runCatching null
@@ -1135,7 +1125,7 @@ class DouyinPackage(classLoader: ClassLoader, context: Context) {
                     verifySha256RsaSignature(
                         stream,
                         Base64.decode(expectedSignature),
-                        Base64.decode(CUSTOM_HOOK_INFO_PUBLIC_KEY_B64)
+                        Base64.decode(SignatureKeys.HOOK_INFO_PRESET_PUBLIC_KEY_B64)
                     )
                 }
             ) {
