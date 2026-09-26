@@ -177,6 +177,13 @@ class SettingsDialog(context: Context) :
 
             "invalid_hook_info" -> {
                 ConfigManager.module.hookInfoGeneration.value++
+                activity.runOnUiThread {
+                    Toast.makeText(
+                        context,
+                        context.getString(R.string.success),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
                 true
             }
 

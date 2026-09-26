@@ -183,6 +183,8 @@
     <string name="pref_about_back_then_title">Back Then🎵</string>
     <string name="pref_about_back_then_summary">春风化青芒 十年如一往\n岁月如白驹如萤火如夕阳\n年轻时许下的豪言万丈\n何日遣冯唐🎵</string>
 
+    <string name="success">Success</string>
+    <string name="failed">Failed</string>
     <string name="add">Add</string>
     <string name="delete">Delete</string>
     <string name="regex_mode">Regex mode</string>
