@@ -14,7 +14,7 @@ class ConfigItem<T : Any>(
     val storage: IKVStorage,
     val key: String,
     val defValue: T,
-    val ruleGate: RuleGate = RuleGate(AlwaysTrueRule, ConfigValueMode.FORCE_DEFAULT, ConfigStateMode.NORMAL),
+    val ruleGate: RuleGate = RuleGate(AlwaysTrueRule, ConfigValueMode.KEEP_STORED, ConfigStateMode.NORMAL),
     private val ruleContextProvider: () -> IRule.Context = {
         IRule.Context(hiddenFeatureEnabled = true)
     }
