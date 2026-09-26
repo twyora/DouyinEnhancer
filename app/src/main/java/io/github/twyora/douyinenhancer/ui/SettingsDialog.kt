@@ -354,14 +354,11 @@ class SettingsDialog(context: Context) :
         }
 
         private fun checkUpdate() = scope.launch {
+            val latestReleaseURL = context.getString(R.string.latest_release_api_url)
             val latestReleaseJson = runCatching {
                 withContext(Dispatchers.IO) {
                     JSONObject(
-                        URL(
-                            context.getString(
-                                R.string.latest_release_api_url
-                            )
-                        ).readText()
+                        URL(latestReleaseURL).readText()
                     )
                 }
             }.onFailure {
