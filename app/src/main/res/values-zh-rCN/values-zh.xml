@@ -152,6 +152,10 @@
     <string name="pref_module_disable_verbose_logs_title">禁用详细日志</string>
     <string name="pref_module_disable_verbose_logs_summary">报告问题要求包含详细日志</string>
 
+    <string name="pref_module_load_custom_hook_info_title">加载自定义混淆映射表</string>
+    <string name="load_custom_hook_info_chooser">选择自定义混淆映射表</string>
+    <string name="untrusted_obfuscation_map">不可信的混淆映射表</string>
+
     <string name="verify_dialog_title">验证</string>
     <string name="verify_dialog_description">模块仅在 GitHub 发布！为了尊重开发者的劳动成果，请输入模块下载地址进行验证。使用前请认真阅读仓库 README。</string>
     <string name="verify_dialog_input_hint">GitHub 地址</string>
@@ -180,6 +184,8 @@
     <string name="unknown">未知</string>
     <string name="regex_mode">正则模式</string>
     <string name="save_success_restart_required">保存成功，部分配置重启应用后生效</string>
+    <string name="import_success_restart_required">导入成功，部分配置重启应用后生效</string>
+    <string name="import_failed">导入失败: %s</string>
     <string name="restart_required">部分功能需重启应用后生效</string>
     <string name="notify_update_available">抖柚更新啦</string>
     <string name="save_failed_invalid_bounds">保存失败，上下限设置错误</string>

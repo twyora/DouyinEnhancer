@@ -120,6 +120,11 @@
             android:key="disable_verbose_logs"
             android:title="@string/pref_module_disable_verbose_logs_title"
             android:summary="@string/pref_module_disable_verbose_logs_summary" />
+
+        <Preference
+            android:defaultValue="false"
+            android:key="load_custom_hook_info"
+            android:title="@string/pref_module_load_custom_hook_info_title" />
     </PreferenceCategory>
 
     <PreferenceCategory

@@ -31,8 +31,14 @@ import io.github.twyora.douyinenhancer.utils.Field
 import io.github.twyora.douyinenhancer.utils.Method
 import io.github.twyora.douyinenhancer.utils.resolveMethod
 import io.github.twyora.douyinenhancer.utils.setField
+import io.github.twyora.douyinenhancer.utils.verifySha256RsaSignature
+import io.github.twyora.douyinenhancer.constant.HookInfoFiles
+import io.github.twyora.douyinenhancer.constant.SignatureKeys
+import java.io.ByteArrayInputStream
 import java.io.File
 import java.net.URL
+import kotlin.io.encoding.Base64
+import org.erdtman.jcs.JsonCanonicalizer
 import java.security.DigestInputStream
 import java.security.DigestOutputStream
 import java.security.MessageDigest
@@ -102,6 +108,7 @@ class SettingsDialog(context: Context) :
                 isChecked = ConfigManager.module.verboseDisabled.value
                 onPreferenceChangeListener = this@PrefsFragment
             }
+            findPreference("load_custom_hook_info")?.onPreferenceClickListener = this
             findPreference("version")?.summary = BuildConfig.VERSION_NAME
             findPreference("version")?.onPreferenceClickListener = this
             findPreference("build_time")?.summary =
@@ -166,6 +173,8 @@ class SettingsDialog(context: Context) :
             "export_config" -> onExportConfigClick()
 
             "import_config" -> onImportConfigClick()
+
+            "load_custom_hook_info" -> onLoadCustomHookInfoClick()
 
             else -> false
         }
@@ -313,6 +322,67 @@ class SettingsDialog(context: Context) :
                     }
                 }
 
+                LOAD_CUSTOM_HOOK_INFO -> {
+                    val uri = data?.data
+                    if (resultCode == RESULT_CANCELED || uri == null) {
+                        return
+                    }
+                    runCatching {
+                        val customHookInfoBytes = requireNotNull(
+                            activity.contentResolver.openInputStream(uri)
+                        ) {
+                            "custom hook info file input stream is null"
+                        }.use {
+                            it.readBytes()
+                        }
+                        val customHookInfoJson = JSONObject(customHookInfoBytes.toString(Charsets.UTF_8))
+                        val expectedSignature = customHookInfoJson.optString("signature")
+
+                        customHookInfoJson.remove("signature")
+                        val canonicalHookInfoPresetBytes = JsonCanonicalizer(
+                            customHookInfoJson.toString()
+                        ).encodedString.toByteArray(Charsets.UTF_8)
+
+                        if (expectedSignature.isBlank() ||
+                            ByteArrayInputStream(canonicalHookInfoPresetBytes).use { stream ->
+                                verifySha256RsaSignature(
+                                    stream,
+                                    Base64.decode(expectedSignature),
+                                    Base64.decode(SignatureKeys.HOOK_INFO_PRESET_PUBLIC_KEY_B64)
+                                )
+                            }
+                        ) {
+                            activity.runOnUiThread {
+                                Toast.makeText(
+                                    context,
+                                    context.getString(R.string.untrusted_obfuscation_map),
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        }
+
+                        File(
+                            context.cacheDir,
+                            HookInfoFiles.HOOK_INFO_PRESET_FILE_NAME
+                        ).outputStream().use { out ->
+                            out.write(customHookInfoBytes)
+                        }
+                    }.onFailure {
+                        activity.runOnUiThread {
+                            Toast.makeText(
+                                context,
+                                context.getString(R.string.import_failed, it.message),
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                        YLog.error("$TAG: load custom hook info failed", it)
+                    }.onSuccess {
+                        activity.runOnUiThread {
+                            Toast.makeText(context, R.string.import_success_restart_required, Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
+
                 else -> {}
             }
         }
@@ -344,6 +414,24 @@ class SettingsDialog(context: Context) :
             intent.addCategory(Intent.CATEGORY_OPENABLE)
             runCatching {
                 startActivityForResult(Intent.createChooser(intent, context.getString(R.string.config_import_chooser)), IMPORT_CONFIG)
+            }.onFailure {
+                activity.runOnUiThread {
+                    Toast.makeText(context, it.message, Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            return true
+        }
+
+        private fun onLoadCustomHookInfoClick(): Boolean {
+            val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
+            intent.type = "application/json"
+            intent.addCategory(Intent.CATEGORY_OPENABLE)
+            runCatching {
+                startActivityForResult(
+                    Intent.createChooser(intent, context.getString(R.string.load_custom_hook_info_chooser)),
+                    LOAD_CUSTOM_HOOK_INFO
+                )
             }.onFailure {
                 activity.runOnUiThread {
                     Toast.makeText(context, it.message, Toast.LENGTH_SHORT).show()
@@ -480,6 +568,7 @@ class SettingsDialog(context: Context) :
 
         private const val EXPORT_CONFIG = 0
         private const val IMPORT_CONFIG = 1
+        private const val LOAD_CUSTOM_HOOK_INFO = 2
 
         fun show(context: Context) {
             if (VerifyDialog.shouldVerify()) {
