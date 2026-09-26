@@ -4,7 +4,6 @@ package io.github.twyora.douyinenhancer.hook;
 
 option java_outer_classname = "Configs";
 option java_package = "io.github.twyora.douyinenhancer.hook";
-option optimize_for = LITE_RUNTIME;
 
 message Class {
   optional string name = 1;

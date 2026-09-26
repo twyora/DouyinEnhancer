@@ -142,12 +142,8 @@ protobuf {
     generateProtoTasks {
         all().forEach { task ->
             task.plugins {
-                id("java") {
-                    option("lite")
-                }
-                id("kotlin") {
-                    option("lite")
-                }
+                id("java")
+                id("kotlin")
             }
         }
     }
@@ -168,9 +164,11 @@ dependencies {
     implementation(libs.luckypray.dexkit)
     implementation(libs.gifkt)
     implementation(libs.fastkv)
-    implementation(libs.protobuf.javalite)
-    implementation(libs.protobuf.kotlin.lite)
+    implementation(libs.protobuf.java)
+    implementation(libs.protobuf.java.util)
+    implementation(libs.protobuf.kotlin)
     implementation(libs.commons.collections4)
+    implementation(libs.json.canonicalization)
 
     // ---------------------- HOOK ----------------------
     // 基础依赖

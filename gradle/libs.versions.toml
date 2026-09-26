@@ -22,6 +22,7 @@ auto-service-ksp = "1.2.0"
 jetbrainsKotlinJvm = "2.2.10"
 ksp-symbol-processing-api = "2.3.6"
 commonsCollections4 = "4.5.0"
+java-json-canonicalization = "1.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -41,8 +42,9 @@ kavaref-extension = { module = "com.highcapable.kavaref:kavaref-extension", vers
 xposed-api = { module = "de.robv.android.xposed:api", version = "82" }
 luckypray-dexkit = { group = "org.luckypray", name = "dexkit", version.ref = "dexkit" }
 gifkt = { module = "com.shakster:gifkt", version.ref = "gifkt" }
-protobuf-javalite = { module = "com.google.protobuf:protobuf-javalite", version.ref = "protobuf-lib" }
-protobuf-kotlin-lite = { module = "com.google.protobuf:protobuf-kotlin-lite", version.ref = "protobuf-lib" }
+protobuf-java = { module = "com.google.protobuf:protobuf-java", version.ref = "protobuf-lib" }
+protobuf-java-util = { module = "com.google.protobuf:protobuf-java-util", version.ref = "protobuf-lib" }
+protobuf-kotlin = { module = "com.google.protobuf:protobuf-kotlin", version.ref = "protobuf-lib" }
 protobuf-protoc = { module = "com.google.protobuf:protoc", version.ref = "protobuf-lib" }
 fastkv = { module = "io.github.billywei01:fastkv", version.ref = "fastkv" }
 kotlinpoet = { module = "com.squareup:kotlinpoet", version.ref = "kotlinpoet" }
@@ -51,6 +53,7 @@ auto-service-annotations = { module = "com.google.auto.service:auto-service-anno
 auto-service-ksp = { module = "dev.zacsweers.autoservice:auto-service-ksp", version.ref = "auto-service-ksp" }
 ksp-symbol-processing-api = { module = "com.google.devtools.ksp:symbol-processing-api", version.ref = "ksp-symbol-processing-api" }
 commons-collections4 = { group = "org.apache.commons", name = "commons-collections4", version.ref = "commonsCollections4" }
+json-canonicalization = { module = "io.github.erdtman:java-json-canonicalization", version.ref = "java-json-canonicalization" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
