@@ -345,7 +345,7 @@ class SettingsDialog(context: Context) :
 
                         if (expectedSignature.isBlank() ||
                             ByteArrayInputStream(canonicalHookInfoPresetBytes).use { stream ->
-                                verifySha256RsaSignature(
+                                !verifySha256RsaSignature(
                                     stream,
                                     Base64.decode(expectedSignature),
                                     Base64.decode(SignatureKeys.HOOK_INFO_PRESET_PUBLIC_KEY_B64)
