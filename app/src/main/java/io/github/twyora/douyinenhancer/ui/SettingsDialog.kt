@@ -108,6 +108,7 @@ class SettingsDialog(context: Context) :
                 isChecked = ConfigManager.module.verboseDisabled.value
                 onPreferenceChangeListener = this@PrefsFragment
             }
+            findPreference("invalid_hook_info")?.onPreferenceClickListener = this
             findPreference("load_custom_hook_info")?.onPreferenceClickListener = this
             findPreference("version")?.summary = BuildConfig.VERSION_NAME
             findPreference("version")?.onPreferenceClickListener = this
@@ -173,6 +174,11 @@ class SettingsDialog(context: Context) :
             "export_config" -> onExportConfigClick()
 
             "import_config" -> onImportConfigClick()
+
+            "invalid_hook_info" -> {
+                ConfigManager.module.hookInfoGeneration.value++
+                true
+            }
 
             "load_custom_hook_info" -> onLoadCustomHookInfoClick()
 

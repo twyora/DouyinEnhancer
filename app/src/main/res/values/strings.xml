@@ -154,6 +154,8 @@
     <string name="pref_module_disable_verbose_logs_summary">Report issues request to include verbose logs</string>
 
     <string name="pref_module_load_custom_hook_info_title">Load custom obfuscation map</string>
+    <string name="pref_module_invalid_hook_info_title">Invalidate obfuscation map</string>
+    <string name="pref_module_invalid_hook_info_summary">This forces the module to re-search methods and rebuild the obfuscation map</string>
     <string name="load_custom_hook_info_chooser">Choose custom obfuscation map</string>
     <string name="untrusted_obfuscation_map">Untrusted obfuscation map</string>
 

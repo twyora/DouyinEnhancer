@@ -153,6 +153,8 @@
     <string name="pref_module_disable_verbose_logs_summary">报告问题要求包含详细日志</string>
 
     <string name="pref_module_load_custom_hook_info_title">加载自定义混淆映射表</string>
+    <string name="pref_module_invalid_hook_info_title">无效化混淆映射表</string>
+    <string name="pref_module_invalid_hook_info_summary">这将迫使模块重新搜索方法以重建混淆映射表</string>
     <string name="load_custom_hook_info_chooser">选择自定义混淆映射表</string>
     <string name="untrusted_obfuscation_map">不可信的混淆映射表</string>
 
