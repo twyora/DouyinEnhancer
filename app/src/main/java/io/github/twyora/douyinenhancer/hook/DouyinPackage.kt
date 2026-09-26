@@ -1137,7 +1137,7 @@ class DouyinPackage(classLoader: ClassLoader, context: Context) {
                 val snapshotGeneration = generatedHookInfo.generation
 
                 YLog.warn("$TAG: merging custom hook info into hookInfo")
-                generatedHookInfo.overlayWith(customHookInfoJson)
+                generatedHookInfo.applyFrom(customHookInfoJson)
                 generatedHookInfo.lastUpdateTime = snapshotLastUpdateTime
                 generatedHookInfo.generation = snapshotGeneration
             }.onFailure {
@@ -1155,27 +1155,24 @@ class DouyinPackage(classLoader: ClassLoader, context: Context) {
             }
         }
 
-        private fun Configs.HookInfo.Builder.overlayWith(hookInfoJson: JSONObject) {
-            this.clearFieldsFromJson(hookInfoJson)
-            JsonFormat.parser().ignoringUnknownFields().merge(
-                hookInfoJson.toString(),
-                this
-            )
+        private fun Configs.HookInfo.Builder.applyFrom(hookInfoJson: JSONObject) {
+            val preset = Configs.HookInfo.newBuilder().apply {
+                JsonFormat.parser().ignoringUnknownFields().merge(
+                    hookInfoJson.toString(), this
+                )
+            }.build()
+            this.applyFrom(preset)
         }
 
-        private fun Message.Builder.clearFieldsFromJson(hookInfoJson: JSONObject) {
-            hookInfoJson.keys().forEach { fieldName ->
-                this.descriptorForType.findFieldByName(fieldName)?.let { descriptor ->
-                    this.clearField(descriptor)
-                }
+        private fun Message.Builder.applyFrom(hookInfoMessage: Message) {
+            hookInfoMessage.allFields.forEach { (field, value) ->
+                when {
+                    field.isRepeated -> this.setField(field, value)
 
-                val fieldValue = hookInfoJson.get(fieldName)
-                if (fieldValue is JSONObject) {
-                    this.descriptorForType.findFieldByName(fieldName)?.let { field ->
-                        if (field.type == Descriptors.FieldDescriptor.Type.MESSAGE) {
-                            this.getFieldBuilder(field)?.clearFieldsFromJson(fieldValue)
-                        }
-                    }
+                    field.type == Descriptors.FieldDescriptor.Type.MESSAGE ->
+                        this.getFieldBuilder(field).applyFrom(value as Message)
+
+                    else -> this.setField(field, value)
                 }
             }
         }
