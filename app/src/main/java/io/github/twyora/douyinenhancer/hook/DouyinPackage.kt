@@ -6,6 +6,7 @@ package io.github.twyora.douyinenhancer.hook
 
 import android.app.AndroidAppHelper
 import android.content.Context
+import com.google.protobuf.util.JsonFormat
 import com.highcapable.kavaref.KavaRef.Companion.resolve
 import com.highcapable.kavaref.condition.type.Modifiers
 import com.highcapable.kavaref.extension.asParameterizedTypeOrNull
@@ -17,7 +18,11 @@ import io.github.twyora.douyinenhancer.utils.Field
 import io.github.twyora.douyinenhancer.utils.Method
 import io.github.twyora.douyinenhancer.utils.toClass
 import io.github.twyora.douyinenhancer.utils.weak
+import io.github.twyora.douyinenhancer.utils.verifySha256RsaSignature
+import org.erdtman.jcs.JsonCanonicalizer
+import org.json.JSONObject
 import java.io.File
+import java.io.ByteArrayInputStream
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.lang.reflect.Modifier
@@ -25,6 +30,7 @@ import kotlin.time.measureTimedValue
 import org.luckypray.dexkit.DexKitBridge
 import org.luckypray.dexkit.query.enums.StringMatchType
 import org.luckypray.dexkit.query.matchers.base.OpCodesMatcher
+import kotlin.io.encoding.Base64
 
 val Configs.Class.nameOrNull
     get() = if (hasName()) {
@@ -1013,6 +1019,15 @@ class DouyinPackage(classLoader: ClassLoader, context: Context) {
         @Volatile
         lateinit var instance: DouyinPackage
 
+        const val CUSTOM_HOOK_INFO_PUBLIC_KEY_B64 = ("MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAsqO8x8yviloDw4iQ" +
+                "/YLefYe5CcBjOakizvC2b9bNcIv7+QQEsNmMWcUuD4yMxH1PX1jGeRWkhhRQ" +
+                "B5L+MAAMNDPOLv6gZmewWayV+gfV5k0IFRnrhg9fi7CGz5yaO4rJBi7H/jzn" +
+                "mwbbnuuxi9VOIfIoTn5trOFsECxi72GXlw+U05v5QTnfm4Uw+BV9nCplk4D+" +
+                "VvzaeJ+HtrI8W8rqrzjtWcwW+VGnLDUV851rCeX9K9OAaGpdzV7DYFo9k1zi" +
+                "MPOKLxZ6CfMTbhsMPpQM29QNTW8FQvulX/NIZL/LQ8HDTHRkAOciL9g4/NEd" +
+                "oB4fyEc2+ilkx1h1bGxf18fEWQIDAQAB"
+                )
+
         fun init(classLoader: ClassLoader, context: Context) {
             instance = DouyinPackage(classLoader, context)
         }
@@ -1024,40 +1039,61 @@ class DouyinPackage(classLoader: ClassLoader, context: Context) {
                 val hookInfoFile = File(context.cacheDir, hookInfoFileName)
                 if (!(hookInfoFile.isFile && hookInfoFile.canRead())) {
                     YLog.warn("$TAG: hookInfoFile is not a file or can not be read")
-                    return@runCatching null
+                    return@runCatching
                 }
 
                 val hostAppPackageInfo = context.packageManager.getPackageInfo(
                     AndroidAppHelper.currentPackageName(),
                     0
                 )
-                val hostAppLastUpdateTime = hostAppPackageInfo.lastUpdateTime
                 val hostAppVersionCode = hostAppPackageInfo.versionCode
 
-                val moduleLastUpdateTime = runCatching {
-                    context.packageManager
-                        .getPackageInfo(
-                            AppProperties.PROJECT_APPLICATION_ID,
+                val lastUpdateTime = maxOf(
+                    hostAppPackageInfo.lastUpdateTime,
+                    runCatching {
+                        context.packageManager.getPackageInfo(
+                            AppProperties.PROJECT_NAMESPACE,
                             0
                         ).lastUpdateTime
-                }.getOrDefault(hostAppLastUpdateTime)
+                    }.getOrDefault(hostAppPackageInfo.lastUpdateTime)
+                )
 
-                val hookInfo = FileInputStream(hookInfoFile).use {
+                val hookInfoBuilder = FileInputStream(hookInfoFile).use {
                     runCatching {
-                        Configs.HookInfo.parseFrom(it)
-                    }.getOrNull() ?: Configs.HookInfo.newBuilder().build()
+                        Configs.HookInfo.newBuilder().mergeFrom(it)
+                    }.getOrNull() ?: Configs.HookInfo.newBuilder()
+                }
+                if (hookInfoBuilder.lastUpdateTime < lastUpdateTime ||
+                    hookInfoBuilder.hostVersionCode != hostAppVersionCode ||
+                    hookInfoBuilder.moduleVersionCode != BuildConfig.VERSION_CODE ||
+                    hookInfoBuilder.moduleVersionName != BuildConfig.VERSION_NAME
+                ) {
+                    YLog.info("$TAG: hookInfo is outdated, will re-generate")
+                    return@runCatching
                 }
 
-                if (hookInfo.lastUpdateTime >= moduleLastUpdateTime &&
-                    hookInfo.lastUpdateTime >= hostAppLastUpdateTime &&
-                    hookInfo.hostVersionCode == hostAppVersionCode &&
-                    hookInfo.moduleVersionCode == BuildConfig.VERSION_CODE &&
-                    hookInfo.moduleVersionName == BuildConfig.VERSION_NAME
-                ) {
-                    return hookInfo
-                } else {
-                    YLog.debug("$TAG: hookInfo is outdated, will re-generate")
+                readCustomHookInfoOrNull(context)?.let { customHookInfo ->
+                    if (customHookInfo.hostVersionCode != hostAppVersionCode ||
+                        customHookInfo.moduleVersionName != hookInfoBuilder.moduleVersionName ||
+                        customHookInfo.moduleVersionCode != hookInfoBuilder.moduleVersionCode
+                    ) {
+                        YLog.warn("$TAG: custom hook info version mismatch, skipping loading")
+                        return@let
+                    }
+
+                    hookInfoBuilder.apply {
+                        // do not overlay lastUpdateTime and generation fields from auto-generated HookInfo
+                        val snapshotLastUpdateTime = this.lastUpdateTime
+                        val snapshotGeneration = this.generation
+
+                        YLog.warn("$TAG: merging custom hook info into hookInfo")
+                        mergeFrom(customHookInfo)
+
+                        this.lastUpdateTime = snapshotLastUpdateTime
+                        this.generation = snapshotGeneration
+                    }
                 }
+                return hookInfoBuilder.build()
             }.onFailure {
                 YLog.error("$TAG: failed to read hookInfo: ", it)
             }
@@ -1072,6 +1108,85 @@ class DouyinPackage(classLoader: ClassLoader, context: Context) {
                 }
             }
         }
+
+        private fun readCustomHookInfoOrNull(context: Context): Configs.HookInfo? = runCatching {
+            val hookInfoPresetFileName = "douyinenhancer_hookInfo_preset"
+
+            val hookInfoPresetFile = File(context.cacheDir, hookInfoPresetFileName)
+            if (!hookInfoPresetFile.exists()) {
+                YLog.info("$TAG: no custom hook info present, skipping load")
+                return@runCatching null
+            } else if (!(hookInfoPresetFile.isFile && hookInfoPresetFile.canRead())) {
+                YLog.warn("$TAG: custom hookInfoFile is not a file or can not be read")
+                return@runCatching null
+            }
+
+            val hookInfoPresetJson = JSONObject(hookInfoPresetFile.readText(Charsets.UTF_8))
+            val customHookInfoJson = hookInfoPresetJson.getJSONObject("hookInfo")
+            val expectedSignature = hookInfoPresetJson.optString("signature")
+
+            // "signature" not included for signature checking
+            hookInfoPresetJson.remove("signature")
+            val hookInfoPresetBytes = JsonCanonicalizer(
+                hookInfoPresetJson.toString()
+            ).encodedString.toByteArray(Charsets.UTF_8)
+
+            if (expectedSignature.isNotBlank() && ByteArrayInputStream(hookInfoPresetBytes).use { stream ->
+                    verifySha256RsaSignature(
+                        stream,
+                        Base64.decode(expectedSignature),
+                        Base64.decode(CUSTOM_HOOK_INFO_PUBLIC_KEY_B64)
+                    )
+                }
+            ) {
+                YLog.info("$TAG: custom hook info signature verified")
+            } else {
+                if (expectedSignature.isBlank()) {
+                    YLog.warn("$TAG: custom hook info has no signature")
+                } else {
+                    YLog.warn("$TAG: custom hook info signature verification failed, expected: $expectedSignature")
+                }
+                YLog.warn(
+                    "$TAG: Loading custom HookInfo from UNTRUSTED SOURCES may cause malfunctions." +
+                            " You will LOSE the right to submit bug reports to maintainers until you clear custom HookInfo!"
+                )
+            }
+
+            val customHookInfoBuilder = Configs.HookInfo.newBuilder().apply {
+                JsonFormat.parser().ignoringUnknownFields().merge(
+                    customHookInfoJson.toString(),
+                    this
+                )
+
+                // NOTE: JSON parsing accepts both snake_case and camelCase names, but the checks
+                // below only match the camelCase keys. If you author a preset using
+                // snake_case, these fields fall back to defaults and a possibly stale
+                // custom hook info may load unconditionally and malfunction — that's on you.
+
+                if (!customHookInfoJson.has("moduleVersionCode") ||
+                    customHookInfoJson.isNull("moduleVersionCode")
+                ) {
+                    moduleVersionCode = BuildConfig.VERSION_CODE
+                }
+                if (!customHookInfoJson.has("moduleVersionName") ||
+                    customHookInfoJson.isNull("moduleVersionName")
+                ) {
+                    moduleVersionName = BuildConfig.VERSION_NAME
+                }
+                if (!customHookInfoJson.has("hostVersionCode") ||
+                    customHookInfoJson.isNull("hostVersionCode")
+                ) {
+                    hostVersionCode = context.packageManager.getPackageInfo(
+                        AndroidAppHelper.currentPackageName(),
+                        0
+                    ).versionCode
+                }
+            }
+
+            return@runCatching customHookInfoBuilder.build()
+        }.onFailure {
+            YLog.error("$TAG: failed to read custom hook info: ", it)
+        }.getOrNull()
 
         private fun initHookInfo(context: Context) = hookInfo {
             val symbolNotFoundMsg = "%s: unable to populate %s config, possibly due to unfound obfuscated symbols"
@@ -1271,10 +1386,10 @@ class DouyinPackage(classLoader: ClassLoader, context: Context) {
                                 searchClasses = listOf(it)
                                 matcher {
                                     type = "com.ss.android.ugc.aweme.comment.model.Comment"
-                                    saveImageMethodData?.let {
+                                    saveImageMethodData?.let { methodData ->
                                         readMethods {
                                             add {
-                                                descriptor = it.descriptor
+                                                descriptor = methodData.descriptor
                                             }
                                         }
                                     }
