@@ -34,8 +34,8 @@ class PlaybackComponentBlockDialog(context: Context) : AlertDialog.Builder(Conte
 
             ConfigManager.playbackComponentBlock.allConfigItems.filter { configItem ->
                 configItem.status != ConfigStateMode.NORMAL
-            }.forEach { normalConfigItem ->
-                findPreference(normalConfigItem.key)?.let {
+            }.forEach { hiddenConfigItem ->
+                findPreference(hiddenConfigItem.key)?.let {
                     preferenceScreen?.removePreference(it)
                 }
             }
