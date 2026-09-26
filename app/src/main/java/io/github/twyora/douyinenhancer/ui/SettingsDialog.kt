@@ -367,6 +367,7 @@ class SettingsDialog(context: Context) :
                         ).outputStream().use { out ->
                             out.write(customHookInfoBytes)
                         }
+                        ConfigManager.module.hookInfoGeneration.value++
                     }.onFailure {
                         activity.runOnUiThread {
                             Toast.makeText(

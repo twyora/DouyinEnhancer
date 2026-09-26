@@ -1057,7 +1057,8 @@ class DouyinPackage(classLoader: ClassLoader, context: Context) {
                         Configs.HookInfo.newBuilder().mergeFrom(it)
                     }.getOrNull() ?: Configs.HookInfo.newBuilder()
                 }
-                if (hookInfoBuilder.lastUpdateTime < lastUpdateTime ||
+                if (hookInfoBuilder.generation != ConfigManager.module.hookInfoGeneration.value ||
+                    hookInfoBuilder.lastUpdateTime < lastUpdateTime ||
                     hookInfoBuilder.hostVersionCode != hostAppVersionCode ||
                     hookInfoBuilder.moduleVersionCode != BuildConfig.VERSION_CODE ||
                     hookInfoBuilder.moduleVersionName != BuildConfig.VERSION_NAME
@@ -1202,7 +1203,7 @@ class DouyinPackage(classLoader: ClassLoader, context: Context) {
             moduleVersionCode = BuildConfig.VERSION_CODE
             moduleVersionName = BuildConfig.VERSION_NAME
             hostVersionCode = hostAppPackageInfo.versionCode
-            generation = 0
+            generation = ConfigManager.module.hookInfoGeneration.value
 
             runCatching {
                 System.loadLibrary("dexkit")
