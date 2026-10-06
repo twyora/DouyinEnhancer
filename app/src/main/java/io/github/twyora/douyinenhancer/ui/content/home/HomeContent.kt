@@ -71,19 +71,15 @@ fun HomeContent(uiState: HomeContentUiState, modifier: Modifier = Modifier, uiAc
                 } else {
                     stringResource(R.string.pref_about_update_available_title)
                 },
-                summary = if (BuildConfig.VERSION_NAME == uiState.updateState.latestVersionName) {
-                    stringResource(R.string.pref_about_up_to_date_summary)
-                } else {
-                    uiState.updateState.releaseBody?.takeIf {
-                        it.isNotBlank()
-                    }?.let {
-                        if (it.length > 80) {
-                            it.take(80) + "..."
-                        } else {
-                            it
-                        }
-                    } ?: stringResource(R.string.pref_about_update_available_summary)
-                }
+                summary = uiState.updateState.releaseBody?.takeIf {
+                    it.isNotBlank()
+                }?.let {
+                    if (it.length > 80) {
+                        it.take(80) + "..."
+                    } else {
+                        it
+                    }
+                } ?: stringResource(R.string.pref_about_update_available_summary)
             ) {
                 uiActions.onViewRelease()
             }
