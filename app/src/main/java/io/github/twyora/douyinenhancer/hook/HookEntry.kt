@@ -8,6 +8,7 @@ import com.highcapable.yukihookapi.hook.xposed.YukiHookXposedModule
 import io.github.twyora.douyinenhancer.BuildConfig
 import io.github.twyora.douyinenhancer.bridge.ModuleApp
 import io.github.twyora.douyinenhancer.config.ConfigManager
+import io.github.twyora.douyinenhancer.config.kvstorage.FastKVStorage
 
 @YukiHookLibXposedEntry(
     targetApiVersion = 102,
@@ -32,7 +33,7 @@ object HookEntry : YukiHookXposedModule {
             withProcess(mainProcessName) {
                 withApplicationReady { application ->
                     ModuleApp.init(this@withProcess)
-                    ConfigManager.init(application)
+                    ConfigManager.init(application, FastKVStorage.Companion)
                     // load cached HookInfo and run hooks when app context is available
                     DouyinPackage.init(application.classLoader, application)
 

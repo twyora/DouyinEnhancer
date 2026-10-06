@@ -1,8 +1,8 @@
 package io.github.twyora.douyinenhancer.config
 
 import android.content.Context
-import io.github.twyora.douyinenhancer.config.kvstorage.FastKVStorage
 import io.github.twyora.douyinenhancer.config.kvstorage.IKVStorage
+import io.github.twyora.douyinenhancer.config.kvstorage.TransientKVStorage
 import io.github.twyora.douyinenhancer.config.provider.FeedConfigProvider
 import io.github.twyora.douyinenhancer.config.provider.HomeTabBlockConfigProvider
 import io.github.twyora.douyinenhancer.config.provider.MiscConfigProvider
@@ -68,12 +68,12 @@ object ConfigManager {
         HomeTabBlockConfigProvider(settingsStorage)
     }
 
-    fun init(context: Context) {
-        settingsStorage = FastKVStorage.open(
+    fun init(context: Context, ikvFactory: IKVStorage.IKVFactory = TransientKVStorage.Companion) {
+        settingsStorage = ikvFactory.open(
             context,
             "douyinenhancer_prefs"
         )
-        moduleStorage = FastKVStorage.open(
+        moduleStorage = ikvFactory.open(
             context,
             "douyinenhancer_module"
         )
