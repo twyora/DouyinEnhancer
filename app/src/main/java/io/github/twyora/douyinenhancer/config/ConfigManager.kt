@@ -68,12 +68,12 @@ object ConfigManager {
         HomeTabBlockConfigProvider(settingsStorage)
     }
 
-    fun init(context: Context) {
-        settingsStorage = FastKVStorage.open(
+    fun init(context: Context, ikvFactory: IKVStorage.IKVFactory = FastKVStorage.Companion) {
+        settingsStorage = ikvFactory.open(
             context.filesDir.absolutePath + "/fastkv/",
             "douyinenhancer_prefs"
         )
-        moduleStorage = FastKVStorage.open(
+        moduleStorage = ikvFactory.open(
             context.filesDir.absolutePath + "/fastkv/",
             "douyinenhancer_module"
         )
