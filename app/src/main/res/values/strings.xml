@@ -32,7 +32,7 @@
     <string name="pref_feed_block_resume_playback_title">Block Resume Playback</string>
     <string name="pref_feed_block_resume_playback_summary">Prevent automatic video resumption when returning to the foreground</string>
     <string name="pref_ui_keep_danmaku_visible_title">Keep Danmaku Visible</string>
-    <string name="pref_ui_keep_danmaku_visible_summary">Keep danmaku visible when entering clean mode</string>
+    <string name="pref_ui_keep_danmaku_visible_summary">Keep danmaku in the native clear-screen whitelist; enabled automatically for Clean Mode</string>
     <string name="recommended_feed_filter_main_switch_title">Main switch</string>
     <string name="recommended_feed_filter_main_switch_summary">Turn on to use recommended feed filtering features</string>
     <string name="recommended_feed_filter_block_followed_author_title">Hide content from followed creators</string>
@@ -226,6 +226,9 @@
     <string name="pref_about_activation_status_deactivated_summary">Douyin Enhancer not activated</string>
     <string name="pref_about_activation_status_activated_title">Enabled</string>
     <string name="pref_about_activation_status_activated_summary">Douyin Enhancer activated</string>
+    <string name="pref_category_clean_mode">Clean Mode</string>
+    <string name="pref_clean_mode_main_title">Clean Mode (OLED anti burn-in)</string>
+    <string name="pref_clean_mode_main_summary">Use native clear-screen playback while keeping video, progress and danmaku. Pause to restore controls; resume to hide them. Applies to feed pages only. Restart Douyin after changing this setting.</string>
     <string name="pref_settings_main_help_title">Help</string>
     <string name="pref_settings_main_help_summary">Tap to view full documentation, guides and FAQs</string>
 </resources>

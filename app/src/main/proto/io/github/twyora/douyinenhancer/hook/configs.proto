@@ -361,15 +361,29 @@ message VideoEvent {
   reserved 2;
 }
 
-message CleanModePresenter {
-  optional Class class = 1;
-  optional Method enter_clean_mode = 2;
-  optional Method set_visibility = 3;
+message NativeCleanMode {
+  optional Class service_class = 1;
+  optional Class command_class = 2;
+  optional Method service_instance = 3;
+  optional Method toggle = 4;
+  optional Method inverse = 5;
+  optional Field auto_quit = 6;
+  optional Field content = 7;
+  optional Class danmaku_policy_class = 8;
+  optional Method danmaku_policy_factory = 9;
+  optional Field white_list = 10;
+  optional Method append_white_list = 11;
 }
 
-message DanmakuView {
-  optional Class class = 1;
-  optional Method on_attached_to_window = 2;
+message CleanModeChrome {
+  optional Class top_view_class = 1;
+  optional Method apply_top_visibility = 2;
+  optional Class bottom_view_class = 3;
+  optional Method apply_bottom_visibility = 4;
+  optional Class ui_service_class = 5;
+  optional Field ui_service_instance = 6;
+  optional Method top_container_id = 7;
+  optional Method top_shadow_id = 8;
 }
 
 message Heif {
@@ -457,8 +471,6 @@ message HookInfo {
   optional ListenAwemeFilter listen_aweme_filter = 50;
   optional BaseListFragmentPanel base_list_fragment_panel = 51;
   optional VideoEvent video_event = 52;
-  optional CleanModePresenter clean_mode_presenter = 53;
-  optional DanmakuView danmaku_view = 54;
   optional FluxComponentId flux_component_id = 56;
   optional FluxComponentDataAction flux_component_data_action = 57;
   optional Heif heif = 58;
@@ -469,6 +481,9 @@ message HookInfo {
   optional VideoPlayerStatus video_player_status = 63;
   optional HomeTabDataSourceServer home_tab_data_source_server = 66;
   optional HomeTabDataSourceDefault home_tab_data_source_default = 67;
+  optional NativeCleanMode native_clean_mode = 68;
+  optional CleanModeChrome clean_mode_chrome = 69;
 
-  reserved 13, 18, 32, 35, 36, 38, 39, 40, 55, 64, 65;
+  reserved 13, 18, 32, 35, 36, 38, 39, 40, 53, 54, 55, 64, 65;
+  reserved "clean_mode_presenter", "danmaku_view", "tab_node", "mpf_bottom_tab_component";
 }

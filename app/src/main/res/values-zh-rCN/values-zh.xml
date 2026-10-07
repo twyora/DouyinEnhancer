@@ -33,7 +33,7 @@
     <string name="pref_feed_block_resume_playback_title">阻止恢复播放</string>
     <string name="pref_feed_block_resume_playback_summary">返回前台时不主动恢复视频播放</string>
     <string name="pref_ui_keep_danmaku_visible_title">阻止弹幕隐藏</string>
-    <string name="pref_ui_keep_danmaku_visible_summary">使弹幕在清屏模式下仍然保持可见</string>
+    <string name="pref_ui_keep_danmaku_visible_summary">通过原生清屏白名单保留弹幕；清爽模式开启时自动生效</string>
     <string name="recommended_feed_filter_main_switch_title">总开关</string>
     <string name="recommended_feed_filter_main_switch_summary">开启后可以使用推荐流过滤功能</string>
     <string name="recommended_feed_filter_block_followed_author_title">隐藏已关注作者的内容</string>
@@ -227,6 +227,9 @@
     <string name="pref_about_activation_status_deactivated_summary">抖柚未激活</string>
     <string name="pref_about_activation_status_activated_title">已启用</string>
     <string name="pref_about_activation_status_activated_summary">抖柚已激活</string>
+    <string name="pref_category_clean_mode">清爽模式</string>
+    <string name="pref_clean_mode_main_title">清爽模式(防烧屏模式 OLED救星)</string>
+    <string name="pref_clean_mode_main_summary">播放时调用抖音原生清屏，保留视频、进度条与弹幕；暂停时恢复控件，继续播放后再次隐藏。仅作用于视频页，修改后需重启抖音。</string>
     <string name="pref_settings_main_help_title">帮助</string>
     <string name="pref_settings_main_help_summary">点击查看完整文档、使用指南与常见问题</string>
 </resources>
