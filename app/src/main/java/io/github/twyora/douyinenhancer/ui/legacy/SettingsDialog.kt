@@ -149,7 +149,12 @@ class SettingsDialog(context: Context) :
                         ConfigManager.misc.hiddenFeatureEnabled.value = true
                         context.toast(ModuleApp.instance.resources.getString(R.string.pref_misc_enable_hidden_features_restart_required))
                     } else if (hiddenFeatureClickCount >= HIDDEN_FEATURE_HINT_FROM_CLICK_COUNT) {
-                        context.toast(ModuleApp.instance.resources.getString(R.string.pref_misc_enable_hidden_features_steps_remaining))
+                        context.toast(
+                            ModuleApp.instance.resources.getString(
+                                R.string.pref_misc_enable_hidden_features_steps_remaining,
+                                HIDDEN_FEATURE_TRIGGER_CLICK_COUNT - hiddenFeatureClickCount
+                            )
+                        )
                     }
                 } else {
                     context.toast(ModuleApp.instance.resources.getString(R.string.pref_misc_enable_hidden_features_already_enabled))
