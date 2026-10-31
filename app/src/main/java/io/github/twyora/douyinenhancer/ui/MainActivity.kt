@@ -41,7 +41,33 @@ import io.github.twyora.douyinenhancer.utils.android.openUrl
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.onEach
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.material3.Text
+import androidx.compose.ui.platform.LocalResources
+import androidx.navigation3.runtime.NavBackStack
+import io.github.twyora.douyinenhancer.ui.content.settings.SettingsContent
+import io.github.twyora.douyinenhancer.ui.content.settings.SettingsContentActions
+import io.github.twyora.douyinenhancer.ui.content.settings.SettingsContentViewModel
+import java.io.File
+import java.nio.file.Files
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import java.util.zip.ZipInputStream
 import kotlinx.coroutines.launch
+import androidx.navigation3.runtime.NavKey
+import com.highcapable.yukihookapi.hook.log.YLog
+import io.github.twyora.douyinenhancer.config.ConfigManager
+import io.github.twyora.douyinenhancer.constant.HookInfoFiles.HOOK_INFO_PRESET_FILE_NAME
+import io.github.twyora.douyinenhancer.ui.content.settings.SettingsContentConfigActions
+import io.github.twyora.douyinenhancer.ui.content.settings.SettingsContentFeedActions
+import io.github.twyora.douyinenhancer.ui.content.settings.SettingsContentModuleActions
+import io.github.twyora.douyinenhancer.ui.content.settings.SettingsContentSaveActions
+import io.github.twyora.douyinenhancer.ui.content.settings.SettingsContentUiActions
+import io.github.twyora.douyinenhancer.ui.event.SnackEvent
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.conflate
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -69,6 +95,10 @@ class MainActivity : ComponentActivity() {
                         when (key) {
                             AppRoutes.Home -> NavEntry(key) {
                                 HomeScreen()
+                            }
+
+                            AppRoutes.Settings.Main -> NavEntry(key) {
+                                SettingsScreen(backstack = backstack)
                             }
 
                             else -> NavEntry(key) {
@@ -171,4 +201,287 @@ class MainActivity : ComponentActivity() {
             )
         }
     }
+
+    @Composable
+    private fun SettingsScreen(
+        backstack: NavBackStack<NavKey>,
+        modifier: Modifier = Modifier
+    ) {
+        val vm: SettingsContentViewModel = viewModel()
+        val settingsConfig by vm.settingsConfig.collectAsStateWithLifecycle()
+
+        val currLocalResources = LocalResources.current
+
+        val snackbarHostState = remember {
+            SnackbarHostState()
+        }
+
+        LaunchedEffect(Unit) {
+            vm.triggerNavigation.collect {
+                backstack.add(it)
+            }
+        }
+
+        LaunchedEffect(currLocalResources) {
+            vm.snackFlow.conflate().collect { event ->
+                val message = if (event.args.isEmpty()) {
+                    currLocalResources.getString(event.resId)
+                } else {
+                    currLocalResources.getString(event.resId, *event.args.toTypedArray())
+                }
+                snackbarHostState.showSnackbar(message, duration = SnackbarDuration.Short)
+            }
+        }
+
+        val scope = rememberCoroutineScope()
+
+        val exportKVConfigLauncher = rememberLauncherForActivityResult(
+            ActivityResultContracts.CreateDocument("application/zip")
+        ) { uri ->
+            uri?.let { uri ->
+                scope.launch(Dispatchers.IO) {
+                    runCatching {
+                        val exportStream = requireNotNull(applicationContext.contentResolver.openOutputStream(uri)) {
+                            "cannot open output uri"
+                        }
+                        exportStream.use { stream ->
+                            val storages = listOf(ConfigManager.settingsStorage, ConfigManager.moduleStorage)
+                            val tempZip = File.createTempFile("douyinenhancer_kv_export_", "", applicationContext.cacheDir)
+                            try {
+                                vm.exportConfigZip(storages, tempZip.outputStream())
+                                tempZip.inputStream().use { tempZipOut ->
+                                    tempZipOut.copyTo(stream)
+                                }
+                            } finally {
+                                tempZip.delete()
+                            }
+                        }
+                    }.onFailure { e ->
+                        YLog.error("$TAG: export config failed", e)
+                        vm.sendSnack(SnackEvent(R.string.config_export_failed, listOf(e.message ?: e.toString())))
+                    }.onSuccess {
+                        vm.sendSnack(SnackEvent(R.string.config_export_success))
+                    }
+                }
+            }
+        }
+
+        val importKVConfigLauncher = rememberLauncherForActivityResult(
+            ActivityResultContracts.GetContent()
+        ) { uri ->
+            uri?.let { uri ->
+                scope.launch(Dispatchers.IO) {
+                    runCatching {
+                        val zipInputStream = requireNotNull(applicationContext.contentResolver.openInputStream(uri)) {
+                            "empty import"
+                        }
+                        zipInputStream.use { zipIn ->
+                            val tempDir =
+                                Files.createTempDirectory(applicationContext.cacheDir.toPath(), "douyinenhancer_kv_import_").toFile()
+                            try {
+                                ZipInputStream(zipIn).use { zip ->
+                                    generateSequence {
+                                        zip.nextEntry
+                                    }.forEach { entry ->
+                                        File(tempDir, entry.name).writeBytes(zip.readBytes())
+                                        zip.closeEntry()
+                                    }
+                                }
+
+                                vm.importConfigZip(
+                                    listOf(ConfigManager.settingsStorage, ConfigManager.moduleStorage),
+                                    inputFiles = tempDir.listFiles()?.filter { file ->
+                                        file.name != "manifest.json"
+                                    }?.toList() ?: emptyList(),
+                                    manifestFile = File(tempDir, "manifest.json")
+                                )
+                            } finally {
+                                tempDir.deleteRecursively()
+                            }
+                        }
+                    }.onFailure { e ->
+                        YLog.error("$TAG: import config failed", e)
+                        vm.sendSnack(SnackEvent(R.string.config_import_failed, listOf(e.message ?: e.toString())))
+                    }.onSuccess {
+                        vm.sendSnack(SnackEvent(R.string.config_import_success))
+                    }
+                }
+            }
+        }
+
+        val loadMappingLauncher = rememberLauncherForActivityResult(
+            ActivityResultContracts.GetContent()
+        ) { uri ->
+            uri?.let { uri ->
+                scope.launch(Dispatchers.IO) {
+                    runCatching {
+                        val hookInfoInputStream = requireNotNull(applicationContext.contentResolver.openInputStream(uri)) {
+                            "custom hook info file input stream is null"
+                        }
+                        val presetOutputStream =
+                            File(applicationContext.cacheDir, HOOK_INFO_PRESET_FILE_NAME).outputStream()
+                        hookInfoInputStream.use { hookInfoStream ->
+                            presetOutputStream.use { presetStream ->
+                                vm.loadCustomHookInfo(hookInfoStream, presetStream)
+                            }
+                        }
+                    }.onFailure { e ->
+                        YLog.error("$TAG: load custom hook info failed", e)
+                        vm.sendSnack(SnackEvent(R.string.import_failed, listOf(e.message ?: e.toString())))
+                    }.onSuccess { isTrusted ->
+                        if (!isTrusted) {
+                            vm.sendSnack(SnackEvent(R.string.untrusted_obfuscation_map))
+                        } else {
+                            vm.sendSnack(SnackEvent(R.string.import_success_restart_required))
+                        }
+                    }
+                }
+            }
+        }
+
+        LaunchedEffect(Unit) {
+            vm.triggerExportConfig.collect {
+                exportKVConfigLauncher.launch(
+                    "douyinenhancer_backup_${
+                        SimpleDateFormat("yyMMdd-HHmmss", Locale.getDefault()).format(Date())
+                    }.zip"
+                )
+            }
+        }
+
+        LaunchedEffect(Unit) {
+            vm.triggerImportConfig.collect {
+                importKVConfigLauncher.launch("application/zip")
+            }
+        }
+
+        LaunchedEffect(Unit) {
+            vm.triggerLoadCustomMapping.collect {
+                loadMappingLauncher.launch("application/json")
+            }
+        }
+
+        LaunchedEffect(Unit) {
+            vm.triggerClearCustomMapping.collect {
+                runCatching {
+                    File(applicationContext.cacheDir, HOOK_INFO_PRESET_FILE_NAME).delete()
+                }.onFailure {
+                    YLog.error("$TAG: failed to delete custom mapping cache file", it)
+                    vm.sendSnack(SnackEvent(R.string.failed))
+                }.onSuccess {
+                    vm.sendSnack(SnackEvent(R.string.success))
+                }
+            }
+        }
+
+        val saveActions = remember {
+            SettingsContentSaveActions(
+                onPurifyCommentImageChange = {
+                    vm.setPurifyCommentImage(it)
+                },
+                onUnlockCommentEmojiChange = {
+                    vm.setUnlockCommentEmoji(it)
+                },
+                onDownloadCommentAudioChange = {
+                    vm.setDownloadCommentAudio(it)
+                },
+                onRemoveVideoWatermarkChange = {
+                    vm.setRemoveVideoWatermark(it)
+                },
+                onBypassVideoDownloadChange = {
+                    vm.setBypassVideoDownload(it)
+                },
+                onRemoveMultiImageWatermarkChange = {
+                    vm.setRemoveMultiImageWatermark(it)
+                }
+            )
+        }
+        val feedActions = remember {
+            SettingsContentFeedActions(
+                onNavigateToRecommendedFeedFilter = {
+                    vm.requestNavigation(AppRoutes.Settings.RecommendedFeedFilter)
+                },
+                onDisableDoubleTapDiggChange = {
+                    vm.setDisableDoubleTapDigg(it)
+                },
+                onDoubleTabOpenCommentChange = {
+                    vm.setDoubleTapOpenComment(it)
+                },
+                onBypassListenAwemeChange = {
+                    vm.setBypassListenAweme(it)
+                },
+                onBlockAutoReplayChange = {
+                    vm.setBlockAutoReplay(it)
+                },
+                onBlockResumePlaybackChange = {
+                    vm.setBlockResumePlayback(it)
+                }
+            )
+        }
+        val uiActions = remember {
+            SettingsContentUiActions(
+                onNavigateToPlaybackComponent = {
+                    vm.requestNavigation(AppRoutes.Settings.PlaybackComponent)
+                },
+                onNavigateToHomeTab = {
+                    vm.requestNavigation(AppRoutes.Settings.HomeTab)
+                },
+                onKeepDanmakuVisibleChange = {
+                    vm.setKeepDanmakuVisible(it)
+                },
+                onHideFollowButtonChange = {
+                    vm.setHideFollowButton(it)
+                }
+            )
+        }
+        val configActions = remember {
+            SettingsContentConfigActions(
+                onExportConfig = {
+                    vm.requestExportConfig()
+                },
+                onImportConfig = {
+                    vm.requestImportConfig()
+                }
+            )
+        }
+        val moduleActions = remember {
+            SettingsContentModuleActions(
+                onHiddenFeatureChange = {
+                    vm.setHiddenFeature(it)
+                },
+                onDisableVerboseChange = {
+                    vm.setVerboseDisabled(it)
+                },
+                onResetMapping = {
+                    vm.resetMapping()
+                },
+                onLoadCustomMapping = {
+                    vm.requestLoadCustomMapping()
+                },
+                onClearCustomMapping = {
+                    vm.requestClearCustomMapping()
+                }
+            )
+        }
+
+        Scaffold(
+            modifier = modifier,
+            snackbarHost = {
+                SnackbarHost(snackbarHostState)
+            }
+        ) { paddingValues ->
+            SettingsContent(
+                state = settingsConfig,
+                actions = remember(saveActions, feedActions, uiActions, configActions, moduleActions) {
+                    SettingsContentActions(saveActions, feedActions, uiActions, configActions, moduleActions)
+                },
+                modifier = modifier.padding(paddingValues)
+            )
+        }
+    }
+
+    companion object {
+        val TAG = this::class.simpleName
+    }
 }
+
