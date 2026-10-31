@@ -10,5 +10,14 @@ object AppRoutes {
     object Settings {
         @Serializable
         data object Main : NavKey
+
+        @Serializable
+        data object RecommendedFeedFilter : NavKey
+
+        @Serializable
+        data object PlaybackComponent : NavKey
+
+        @Serializable
+        data object HomeTab : NavKey
     }
 }
