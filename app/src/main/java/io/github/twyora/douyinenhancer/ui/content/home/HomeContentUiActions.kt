@@ -1,6 +1,9 @@
 package io.github.twyora.douyinenhancer.ui.content.home
 
-data class HomeContentUiActions(
+import androidx.compose.runtime.Stable
+
+@Stable
+class HomeContentUiActions(
     val onLauncherIconChange: (Boolean) -> Unit = {},
     val onOpenHelp: () -> Unit = {},
     val onOpenAuthor: () -> Unit = {},
