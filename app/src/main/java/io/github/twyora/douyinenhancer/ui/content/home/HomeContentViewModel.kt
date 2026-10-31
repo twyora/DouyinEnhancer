@@ -26,24 +26,24 @@ class HomeContentViewModel(application: Application) : AndroidViewModel(applicat
         "io.github.twyora.douyinenhancer.ui.MainActivityAlias"
     )
 
-    private val uiStateInternal = MutableStateFlow(
-        HomeContentUiState(
-            launcherIconHidden = false,
-            moduleActivationState = false,
-            updateState = HomeContentUpdateState(
-                latestVersionName = BuildConfig.VERSION_NAME,
-                releaseBody = null
+    val uiState: StateFlow<HomeContentUiState>
+        field = MutableStateFlow(
+            HomeContentUiState(
+                launcherIconHidden = false,
+                moduleActivationState = false,
+                updateState = HomeContentUpdateState(
+                    latestVersionName = BuildConfig.VERSION_NAME,
+                    releaseBody = null
+                )
             )
         )
-    )
-    val uiState: StateFlow<HomeContentUiState> get() = uiStateInternal
 
-    private val updateNotifyEventInternal = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
-    val updateNotifyEvent: SharedFlow<Unit> get() = updateNotifyEventInternal
+    val updateNotifyEvent: SharedFlow<Unit>
+        field = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
 
     init {
         viewModelScope.launch {
-            uiStateInternal.update {
+            uiState.update {
                 it.copy(
                     launcherIconHidden = getApplication<Application>().packageManager.getComponentEnabledSetting(
                         launcherAlias
@@ -52,12 +52,12 @@ class HomeContentViewModel(application: Application) : AndroidViewModel(applicat
                 )
             }
             fetchUpdateInfo()?.let { updateInfo ->
-                uiStateInternal.update {
+                uiState.update {
                     it.copy(updateState = updateInfo)
                 }
 
                 if (BuildConfig.VERSION_NAME != updateInfo.latestVersionName) {
-                    updateNotifyEventInternal.tryEmit(Unit)
+                    updateNotifyEvent.tryEmit(Unit)
                 }
             }
         }
@@ -75,7 +75,7 @@ class HomeContentViewModel(application: Application) : AndroidViewModel(applicat
                 PackageManager.DONT_KILL_APP
             )
         }.onSuccess {
-            uiStateInternal.update {
+            uiState.update {
                 it.copy(launcherIconHidden = hidden)
             }
         }
