@@ -18,8 +18,8 @@ import io.github.twyora.douyinenhancer.hook.HookOnMainProcess
 import io.github.twyora.douyinenhancer.ui.legacy.SettingsDialog
 import io.github.twyora.douyinenhancer.utils.reflect.getFieldOrNull
 import io.github.twyora.douyinenhancer.utils.reflect.invokeMethodOnly
-import io.github.twyora.douyinenhancer.utils.reflect.invokeMethodOrNull
 import io.github.twyora.douyinenhancer.utils.reflect.resolveMethodOrNull
+import androidx.core.net.toUri
 
 @HookOnMainProcess
 object SettingsEntryHooker : YukiBaseHooker() {
@@ -149,7 +149,12 @@ object SettingsEntryHooker : YukiBaseHooker() {
                 YLog.debug("$TAG: attaching long click listener on about_ame view to open settings dialog")
             }
             aboutAwemeView.setOnLongClickListener {
-                SettingsDialog.show(activity)
+                activity.startActivity(
+                    Intent(
+                        Intent.ACTION_VIEW,
+                        "douyinenhancer://io.github.twyora.douyinenhancer/settings/main".toUri()
+                    )
+                )
                 true
             }
 

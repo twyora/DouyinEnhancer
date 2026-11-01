@@ -1,5 +1,6 @@
 package io.github.twyora.douyinenhancer.ui
 
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -70,6 +71,9 @@ import java.util.Locale
 import java.util.zip.ZipInputStream
 import kotlinx.coroutines.launch
 import androidx.navigation3.runtime.NavKey
+import androidx.navigation3.runtime.deeplink.DeepLinkRequest
+import androidx.navigation3.runtime.deeplink.DeepLinkUri
+import androidx.navigation3.runtime.deeplink.UriDeepLinkMatcher
 import com.highcapable.yukihookapi.hook.log.YLog
 import io.github.twyora.douyinenhancer.config.ConfigManager
 import io.github.twyora.douyinenhancer.constant.HookInfoFiles.HOOK_INFO_PRESET_FILE_NAME
@@ -79,9 +83,38 @@ import io.github.twyora.douyinenhancer.ui.content.settings.SettingsContentModule
 import io.github.twyora.douyinenhancer.ui.content.settings.SettingsContentSaveActions
 import io.github.twyora.douyinenhancer.ui.content.settings.SettingsContentUiActions
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.conflate
+import kotlinx.serialization.serializer
 
 class MainActivity : ComponentActivity() {
+    private val newLinkFlow = MutableSharedFlow<DeepLinkRequest>(
+        replay = 1
+    )
+
+    private val uriDeepLinkMatchers = listOf(
+        UriDeepLinkMatcher(
+            DeepLinkUri("douyinenhancer://io.github.twyora.douyinenhancer/home"),
+            serializer = serializer<AppRoutes.Home>()
+        ),
+        UriDeepLinkMatcher(
+            DeepLinkUri("douyinenhancer://io.github.twyora.douyinenhancer/settings/main"),
+            serializer = serializer<AppRoutes.Settings.Main>()
+        ),
+        UriDeepLinkMatcher(
+            DeepLinkUri("douyinenhancer://io.github.twyora.douyinenhancer/settings/recommended-feed-filter"),
+            serializer = serializer<AppRoutes.Settings.RecommendedFeedFilter>()
+        ),
+        UriDeepLinkMatcher(
+            DeepLinkUri("douyinenhancer://io.github.twyora.douyinenhancer/settings/hometab"),
+            serializer = serializer<AppRoutes.Settings.HomeTab>()
+        ),
+        UriDeepLinkMatcher(
+            DeepLinkUri("douyinenhancer://io.github.twyora.douyinenhancer/settings/playback-component"),
+            serializer = serializer<AppRoutes.Settings.PlaybackComponent>()
+        )
+    )
+
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
@@ -101,6 +134,21 @@ class MainActivity : ComponentActivity() {
                 }
             ) {
                 val backstack = rememberNavBackStack(AppRoutes.Home)
+
+                LaunchedEffect(Unit) {
+                    newLinkFlow.collect { req ->
+                        uriDeepLinkMatchers.mapNotNull {
+                            it.match(req)
+                        }.maxOrNull()?.let {
+                            backstack.clear()
+                            backstack.add(it.key)
+                        }
+                    }
+                }
+                intent?.data?.let {
+                    newLinkFlow.tryEmit(DeepLinkRequest(it))
+                }
+
                 NavDisplay(
                     backStack = backstack,
                     entryProvider = { key ->
@@ -131,6 +179,13 @@ class MainActivity : ComponentActivity() {
                     }
                 )
             }
+        }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        intent.data?.let {
+            newLinkFlow.tryEmit(DeepLinkRequest(it))
         }
     }
 
