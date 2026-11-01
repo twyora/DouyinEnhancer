@@ -46,6 +46,11 @@ import io.github.twyora.douyinenhancer.ui.content.settings.filter.recommended_fe
 import io.github.twyora.douyinenhancer.ui.content.settings.filter.recommended_feed.RecommendedFeedFilterTitleKeywordActions
 import io.github.twyora.douyinenhancer.ui.content.settings.filter.recommended_feed.RecommendedFeedFilterUidKeywordActions
 import io.github.twyora.douyinenhancer.ui.content.settings.filter.recommended_feed.RecommendedFeedFilterViewModel
+import io.github.twyora.douyinenhancer.ui.content.settings.visiblity.hometab.tabs.HomeBottomTabVisibilityActions
+import io.github.twyora.douyinenhancer.ui.content.settings.visiblity.hometab.tabs.HomeTabVisibilityActions
+import io.github.twyora.douyinenhancer.ui.content.settings.visiblity.hometab.tabs.HomeTabVisibilityContent
+import io.github.twyora.douyinenhancer.ui.content.settings.visiblity.hometab.tabs.HomeTabVisibilityViewModel
+import io.github.twyora.douyinenhancer.ui.content.settings.visiblity.hometab.tabs.HomeTopTabVisibilityActions
 import io.github.twyora.douyinenhancer.ui.navigation.AppRoutes
 import io.github.twyora.douyinenhancer.utils.android.openUrl
 import kotlinx.coroutines.flow.collect
@@ -120,7 +125,7 @@ class MainActivity : ComponentActivity() {
                             }
 
                             AppRoutes.Settings.HomeTab -> NavEntry(key) {
-                                Text("HomeTab (TODO)")
+                                HomeTabVisibilityScreen()
                             }
 
                             else -> NavEntry(key) {
@@ -659,6 +664,49 @@ class MainActivity : ComponentActivity() {
                         keyword = keywordActions,
                     )
                 },
+                modifier = modifier.padding(paddingValues)
+            )
+        }
+    }
+
+    @Composable
+    private fun HomeTabVisibilityScreen(modifier: Modifier = Modifier) {
+        val vm: HomeTabVisibilityViewModel = viewModel()
+        val tabConfig by vm.tabConfig.collectAsStateWithLifecycle()
+        val actions = remember {
+            HomeTabVisibilityActions(
+                top = HomeTopTabVisibilityActions(
+                    onMainSwitchChange = {
+                        vm.onTopMainSwitchChange(it)
+                    },
+                    onSwitchChange = { key, checked ->
+                        vm.onSwitchChange(key, checked)
+                    },
+                ),
+                bottom = HomeBottomTabVisibilityActions(
+                    onMainSwitchChange = {
+                        vm.onBottomMainSwitchChange(it)
+                    },
+                    onSwitchChange = { key, checked ->
+                        vm.onSwitchChange(key, checked)
+                    },
+                ),
+            )
+        }
+
+        val snackbarHostState = remember {
+            SnackbarHostState()
+        }
+
+        Scaffold(
+            modifier = modifier,
+            snackbarHost = {
+                SnackbarHost(snackbarHostState)
+            }
+        ) { paddingValues ->
+            HomeTabVisibilityContent(
+                config = tabConfig,
+                actions = actions,
                 modifier = modifier.padding(paddingValues)
             )
         }
