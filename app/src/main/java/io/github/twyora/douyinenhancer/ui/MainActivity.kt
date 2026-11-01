@@ -1,6 +1,5 @@
 package io.github.twyora.douyinenhancer.ui
 
-import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -25,7 +24,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.runtime.NavEntry
@@ -56,13 +54,11 @@ import io.github.twyora.douyinenhancer.ui.content.settings.visiblity.playback.co
 import io.github.twyora.douyinenhancer.ui.content.settings.visiblity.playback.components.PlaybackComponentVisibilityViewModel
 import io.github.twyora.douyinenhancer.ui.navigation.AppRoutes
 import io.github.twyora.douyinenhancer.utils.android.openUrl
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.onEach
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.ui.platform.LocalResources
 import androidx.navigation3.runtime.NavBackStack
+import io.github.twyora.douyinenhancer.ui.event.SnackEvent
 import io.github.twyora.douyinenhancer.ui.content.settings.SettingsContent
 import io.github.twyora.douyinenhancer.ui.content.settings.SettingsContentActions
 import io.github.twyora.douyinenhancer.ui.content.settings.SettingsContentViewModel
@@ -82,7 +78,6 @@ import io.github.twyora.douyinenhancer.ui.content.settings.SettingsContentFeedAc
 import io.github.twyora.douyinenhancer.ui.content.settings.SettingsContentModuleActions
 import io.github.twyora.douyinenhancer.ui.content.settings.SettingsContentSaveActions
 import io.github.twyora.douyinenhancer.ui.content.settings.SettingsContentUiActions
-import io.github.twyora.douyinenhancer.ui.event.SnackEvent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.conflate
 
@@ -111,7 +106,7 @@ class MainActivity : ComponentActivity() {
                     entryProvider = { key ->
                         when (key) {
                             AppRoutes.Home -> NavEntry(key) {
-                                HomeScreen()
+                                HomeScreen(backstack = backstack)
                             }
 
                             AppRoutes.Settings.Main -> NavEntry(key) {
@@ -140,7 +135,7 @@ class MainActivity : ComponentActivity() {
     }
 
     @Composable
-    fun HomeScreen(modifier: Modifier = Modifier) {
+    fun HomeScreen(modifier: Modifier = Modifier, backstack: NavBackStack<NavKey>) {
         val mainVm: HomeContentViewModel = viewModel()
         val mainUiState by mainVm.uiState.collectAsStateWithLifecycle()
         val currLocalContext = LocalContext.current
@@ -148,25 +143,30 @@ class MainActivity : ComponentActivity() {
         val snackbarHostState = remember {
             SnackbarHostState()
         }
-        val scope = rememberCoroutineScope()
 
-        val docsUrl = stringResource(R.string.docs_url)
-        val authorUrl = stringResource(R.string.author_url)
-        val releasePageUrl = stringResource(R.string.latest_release_page_url)
-        val repositoryUrl = stringResource(R.string.repository_url)
-        val telegramUrl = stringResource(R.string.telegram_url)
-        val deactivatedHint = stringResource(R.string.pref_about_activation_status_deactivated_summary)
-        val updateNotifyText = stringResource(R.string.notify_update_available)
+        val currLocalResources = LocalResources.current
+
+        LaunchedEffect(currLocalResources) {
+            mainVm.snackFlow.conflate().collect { event ->
+                val message = if (event.args.isEmpty()) {
+                    currLocalResources.getString(event.resId)
+                } else {
+                    currLocalResources.getString(event.resId, *event.args.toTypedArray())
+                }
+                snackbarHostState.showSnackbar(message, duration = SnackbarDuration.Short)
+            }
+        }
 
         LaunchedEffect(Unit) {
-            mainVm.updateNotifyEvent.filter {
-                snackbarHostState.currentSnackbarData == null
-            }.onEach {
-                snackbarHostState.showSnackbar(
-                    message = updateNotifyText,
-                    duration = SnackbarDuration.Short
-                )
-            }.collect()
+            mainVm.triggerOpenUrl.collect { resId ->
+                currLocalContext.openUrl(currLocalResources.getString(resId))
+            }
+        }
+
+        LaunchedEffect(Unit) {
+            mainVm.triggerNavigation.collect {
+                backstack.add(it)
+            }
         }
 
         Scaffold(
@@ -181,38 +181,27 @@ class MainActivity : ComponentActivity() {
                         mainVm.setLauncherIconHidden(it)
                     },
                     onOpenHelp = {
-                        currLocalContext.openUrl(docsUrl)
+                        mainVm.requestOpenUrl(R.string.docs_url)
                     },
                     onOpenAuthor = {
-                        currLocalContext.openUrl(authorUrl)
+                        mainVm.requestOpenUrl(R.string.author_url)
                     },
                     onOpenRepository = {
-                        currLocalContext.openUrl(repositoryUrl)
+                        mainVm.requestOpenUrl(R.string.repository_url)
                     },
                     onViewRelease = {
-                        currLocalContext.openUrl(releasePageUrl)
+                        mainVm.requestOpenUrl(R.string.latest_release_page_url)
                     },
                     onJoinTelegramGroup = {
-                        currLocalContext.openUrl(telegramUrl)
+                        mainVm.requestOpenUrl(R.string.telegram_url)
                     },
                     onNavigateToSettings = {
-                        // Before the settings screen is migrated to the module side,
-                        // we still need to use startActivity
                         if (mainUiState.moduleActivationState) {
-                            currLocalContext.packageManager.getLaunchIntentForPackage(
-                                "com.ss.android.ugc.aweme"
-                            )?.run {
-                                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP)
-                                putExtra("douyinenhancer_start_settings", true)
-                                currLocalContext.startActivity(this)
-                            }
-                        } else if (snackbarHostState.currentSnackbarData == null) {
-                            scope.launch {
-                                snackbarHostState.showSnackbar(
-                                    message = deactivatedHint,
-                                    duration = SnackbarDuration.Short
-                                )
-                            }
+                            mainVm.requestNavigate(AppRoutes.Settings.Main)
+                        } else {
+                            mainVm.sendSnack(
+                                SnackEvent(R.string.pref_about_activation_status_deactivated_summary)
+                            )
                         }
                     }
                 )

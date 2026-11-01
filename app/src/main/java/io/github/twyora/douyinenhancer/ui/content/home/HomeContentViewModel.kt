@@ -9,11 +9,15 @@ import com.highcapable.yukihookapi.YukiHook
 import com.highcapable.yukihookapi.hook.log.YLog
 import io.github.twyora.douyinenhancer.BuildConfig
 import io.github.twyora.douyinenhancer.R
+import androidx.annotation.StringRes
+import androidx.navigation3.runtime.NavKey
+import io.github.twyora.douyinenhancer.ui.event.SnackEvent
 import java.net.URL
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -38,8 +42,17 @@ class HomeContentViewModel(application: Application) : AndroidViewModel(applicat
             )
         )
 
-    val updateNotifyEvent: SharedFlow<Unit>
-        field = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    val snackFlow: SharedFlow<SnackEvent>
+        field = MutableSharedFlow<SnackEvent>(
+            extraBufferCapacity = 1,
+            onBufferOverflow = BufferOverflow.DROP_OLDEST
+        )
+
+    val triggerOpenUrl: SharedFlow<Int>
+        field = MutableSharedFlow<Int>(extraBufferCapacity = 1)
+
+    val triggerNavigation: SharedFlow<NavKey>
+        field = MutableSharedFlow<NavKey>(extraBufferCapacity = 1)
 
     init {
         viewModelScope.launch {
@@ -57,7 +70,7 @@ class HomeContentViewModel(application: Application) : AndroidViewModel(applicat
                 }
 
                 if (BuildConfig.VERSION_NAME != updateInfo.latestVersionName) {
-                    updateNotifyEvent.tryEmit(Unit)
+                    sendSnack(SnackEvent(R.string.notify_update_available))
                 }
             }
         }
@@ -102,6 +115,18 @@ class HomeContentViewModel(application: Application) : AndroidViewModel(applicat
     }.onFailure {
         YLog.error("$TAG: fetch latest release failed", it)
     }.getOrNull()
+
+    fun requestOpenUrl(@StringRes resId: Int) {
+        triggerOpenUrl.tryEmit(resId)
+    }
+
+    fun requestNavigate(navKey: NavKey) {
+        triggerNavigation.tryEmit(navKey)
+    }
+
+    fun sendSnack(event: SnackEvent) {
+        snackFlow.tryEmit(event)
+    }
 
     companion object {
         private val TAG = this::class.simpleName
