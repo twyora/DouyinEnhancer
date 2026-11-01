@@ -57,6 +57,14 @@ import io.github.twyora.douyinenhancer.ui.navigation.AppRoutes
 import io.github.twyora.douyinenhancer.utils.android.openUrl
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.ui.platform.LocalResources
 import androidx.navigation3.runtime.NavBackStack
 import io.github.twyora.douyinenhancer.ui.event.SnackEvent
@@ -74,6 +82,7 @@ import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.deeplink.DeepLinkRequest
 import androidx.navigation3.runtime.deeplink.DeepLinkUri
 import androidx.navigation3.runtime.deeplink.UriDeepLinkMatcher
+import androidx.navigationevent.NavigationEvent
 import com.highcapable.yukihookapi.hook.log.YLog
 import io.github.twyora.douyinenhancer.config.ConfigManager
 import io.github.twyora.douyinenhancer.constant.HookInfoFiles.HOOK_INFO_PRESET_FILE_NAME
@@ -176,6 +185,38 @@ class MainActivity : ComponentActivity() {
                             else -> NavEntry(key) {
                             }
                         }
+                    },
+                    // Animation referenced from:
+                    // [fdroidclient](https://github.com/f-droid/fdroidclient/blob/master/app/src/main/kotlin/org/fdroid/ui/MainContent.kt)
+                    transitionSpec = {
+                        slideInHorizontally {
+                            it
+                        } togetherWith
+                            slideOutHorizontally {
+                                -it / 3
+                            } + scaleOut(targetScale = 0.9f) + fadeOut(tween())
+                    },
+                    popTransitionSpec = {
+                        slideInHorizontally {
+                            -it / 3
+                        } + scaleIn(
+                            initialScale = 0.9f
+                        ) + fadeIn(
+                            tween()
+                        ) togetherWith slideOutHorizontally {
+                            it / 3
+                        } + fadeOut(tween())
+                    },
+                    predictivePopTransitionSpec = {
+                        slideInHorizontally {
+                            -it / 3
+                        } + scaleIn(
+                            initialScale = 0.9f
+                        ) + fadeIn(
+                            tween()
+                        ) togetherWith slideOutHorizontally {
+                            it / 3
+                        } + fadeOut(tween())
                     }
                 )
             }

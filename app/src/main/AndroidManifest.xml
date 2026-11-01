@@ -22,10 +22,12 @@
 
         <activity
             android:name=".ui.MainActivity"
+            android:enableOnBackInvokedCallback="true"
             android:exported="true"
             android:showForAllUsers="true"
             android:launchMode="singleTask"
-            android:theme="@style/MainTheme">
+            android:theme="@style/MainTheme"
+            tools:targetApi="33">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="de.robv.android.xposed.category.MODULE_SETTINGS" />
