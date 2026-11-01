@@ -51,6 +51,9 @@ import io.github.twyora.douyinenhancer.ui.content.settings.visiblity.hometab.tab
 import io.github.twyora.douyinenhancer.ui.content.settings.visiblity.hometab.tabs.HomeTabVisibilityContent
 import io.github.twyora.douyinenhancer.ui.content.settings.visiblity.hometab.tabs.HomeTabVisibilityViewModel
 import io.github.twyora.douyinenhancer.ui.content.settings.visiblity.hometab.tabs.HomeTopTabVisibilityActions
+import io.github.twyora.douyinenhancer.ui.content.settings.visiblity.playback.components.PlaybackComponentVisibilityActions
+import io.github.twyora.douyinenhancer.ui.content.settings.visiblity.playback.components.PlaybackComponentVisibilityContext
+import io.github.twyora.douyinenhancer.ui.content.settings.visiblity.playback.components.PlaybackComponentVisibilityViewModel
 import io.github.twyora.douyinenhancer.ui.navigation.AppRoutes
 import io.github.twyora.douyinenhancer.utils.android.openUrl
 import kotlinx.coroutines.flow.collect
@@ -58,7 +61,6 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.onEach
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.material3.Text
 import androidx.compose.ui.platform.LocalResources
 import androidx.navigation3.runtime.NavBackStack
 import io.github.twyora.douyinenhancer.ui.content.settings.SettingsContent
@@ -121,7 +123,7 @@ class MainActivity : ComponentActivity() {
                             }
 
                             AppRoutes.Settings.PlaybackComponent -> NavEntry(key) {
-                                Text("PlaybackComponent (TODO)")
+                                PlaybackComponentVisibilityScreen()
                             }
 
                             AppRoutes.Settings.HomeTab -> NavEntry(key) {
@@ -706,6 +708,38 @@ class MainActivity : ComponentActivity() {
         ) { paddingValues ->
             HomeTabVisibilityContent(
                 config = tabConfig,
+                actions = actions,
+                modifier = modifier.padding(paddingValues)
+            )
+        }
+    }
+
+    @Composable
+    private fun PlaybackComponentVisibilityScreen(modifier: Modifier = Modifier) {
+        val vm: PlaybackComponentVisibilityViewModel = viewModel()
+        val configs by vm.playbackComponentConfig.collectAsStateWithLifecycle()
+        val actions = remember {
+            PlaybackComponentVisibilityActions(
+                onMainSwitchChange = {
+                    vm.onMainSwitchChange(it)
+                },
+                onSwitchChange = { key, checked ->
+                    vm.onSwitchChange(key, checked)
+                }
+            )
+        }
+        val snackbarHostState = remember {
+            SnackbarHostState()
+        }
+
+        Scaffold(
+            modifier = modifier,
+            snackbarHost = {
+                SnackbarHost(snackbarHostState)
+            }
+        ) { paddingValues ->
+            PlaybackComponentVisibilityContext(
+                config = configs,
                 actions = actions,
                 modifier = modifier.padding(paddingValues)
             )
