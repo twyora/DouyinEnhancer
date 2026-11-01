@@ -36,6 +36,16 @@ import io.github.twyora.douyinenhancer.ui.content.home.HomeContent
 import io.github.twyora.douyinenhancer.ui.content.home.HomeContentUiActions
 import io.github.twyora.douyinenhancer.ui.content.home.HomeContentUiState
 import io.github.twyora.douyinenhancer.ui.content.home.HomeContentViewModel
+import io.github.twyora.douyinenhancer.ui.content.settings.filter.recommended_feed.RecommendedFeedFilterActions
+import io.github.twyora.douyinenhancer.ui.content.settings.filter.recommended_feed.RecommendedFeedFilterContent
+import io.github.twyora.douyinenhancer.ui.content.settings.filter.recommended_feed.RecommendedFeedFilterCountActions
+import io.github.twyora.douyinenhancer.ui.content.settings.filter.recommended_feed.RecommendedFeedFilterDescKeywordActions
+import io.github.twyora.douyinenhancer.ui.content.settings.filter.recommended_feed.RecommendedFeedFilterKeywordActions
+import io.github.twyora.douyinenhancer.ui.content.settings.filter.recommended_feed.RecommendedFeedFilterNicknameKeywordActions
+import io.github.twyora.douyinenhancer.ui.content.settings.filter.recommended_feed.RecommendedFeedFilterSwitchActions
+import io.github.twyora.douyinenhancer.ui.content.settings.filter.recommended_feed.RecommendedFeedFilterTitleKeywordActions
+import io.github.twyora.douyinenhancer.ui.content.settings.filter.recommended_feed.RecommendedFeedFilterUidKeywordActions
+import io.github.twyora.douyinenhancer.ui.content.settings.filter.recommended_feed.RecommendedFeedFilterViewModel
 import io.github.twyora.douyinenhancer.ui.navigation.AppRoutes
 import io.github.twyora.douyinenhancer.utils.android.openUrl
 import kotlinx.coroutines.flow.collect
@@ -99,6 +109,18 @@ class MainActivity : ComponentActivity() {
 
                             AppRoutes.Settings.Main -> NavEntry(key) {
                                 SettingsScreen(backstack = backstack)
+                            }
+
+                            AppRoutes.Settings.RecommendedFeedFilter -> NavEntry(key) {
+                                RecommendedFeedFilterScreen()
+                            }
+
+                            AppRoutes.Settings.PlaybackComponent -> NavEntry(key) {
+                                Text("PlaybackComponent (TODO)")
+                            }
+
+                            AppRoutes.Settings.HomeTab -> NavEntry(key) {
+                                Text("HomeTab (TODO)")
                             }
 
                             else -> NavEntry(key) {
@@ -474,6 +496,168 @@ class MainActivity : ComponentActivity() {
                 state = settingsConfig,
                 actions = remember(saveActions, feedActions, uiActions, configActions, moduleActions) {
                     SettingsContentActions(saveActions, feedActions, uiActions, configActions, moduleActions)
+                },
+                modifier = modifier.padding(paddingValues)
+            )
+        }
+    }
+
+    @Composable
+    private fun RecommendedFeedFilterScreen(
+        modifier: Modifier = Modifier
+    ) {
+        val vm: RecommendedFeedFilterViewModel = viewModel()
+
+        val currLocalResources = LocalResources.current
+
+        val snackbarHostState = remember {
+            SnackbarHostState()
+        }
+
+        LaunchedEffect(currLocalResources) {
+            vm.snackFlow.conflate().collect { event ->
+                val message = if (event.args.isEmpty()) {
+                    currLocalResources.getString(event.resId)
+                } else {
+                    currLocalResources.getString(event.resId, *event.args.toTypedArray())
+                }
+                snackbarHostState.showSnackbar(message, duration = SnackbarDuration.Short)
+            }
+        }
+
+        val switchActions = remember {
+            RecommendedFeedFilterSwitchActions(
+                onMainSwitchChange = {
+                    vm.setMainSwitch(it)
+                },
+                onBlockFollowedAuthorChange = {
+                    vm.setBlockFollowedAuthor(it)
+                },
+                onBlockAdChange = {
+                    vm.setBlockAd(it)
+                },
+                onBlockEcomChange = {
+                    vm.setBlockEcom(it)
+                },
+                onBlockGrouponChange = {
+                    vm.setBlockGrouponLargeCard(it)
+                },
+                onBlockLiveChange = {
+                    vm.setBlockLive(it)
+                },
+                onBlockMultiImageChange = {
+                    vm.setBlockMultiImage(it)
+                },
+            )
+        }
+        val countActions = remember {
+            RecommendedFeedFilterCountActions(
+                onShortDurationChange = {
+                    vm.setShortDuration(it)
+                },
+                onLongDurationChange = {
+                    vm.setLongDuration(it)
+                },
+                onCollectCountMinChange = {
+                    vm.setCollectCountMin(it)
+                },
+                onCollectCountMaxChange = {
+                    vm.setCollectCountMax(it)
+                },
+                onCommentCountMinChange = {
+                    vm.setCommentCountMin(it)
+                },
+                onCommentCountMaxChange = {
+                    vm.setCommentCountMax(it)
+                },
+                onDiggCountMinChange = {
+                    vm.setDiggCountMin(it)
+                },
+                onDiggCountMaxChange = {
+                    vm.setDiggCountMax(it)
+                },
+                onShareCountMinChange = {
+                    vm.setShareCountMin(it)
+                },
+                onShareCountMaxChange = {
+                    vm.setShareCountMax(it)
+                },
+            )
+        }
+        val keywordActions = remember {
+            RecommendedFeedFilterKeywordActions(
+                title = RecommendedFeedFilterTitleKeywordActions(
+                    onAdd = {
+                        vm.addTitleKeyword()
+                    },
+                    onTextChange = { index, text ->
+                        vm.setTitleKeywordText(index, text)
+                    },
+                    onRemove = { index ->
+                        vm.removeTitleKeyword(index)
+                    },
+                    onRegexChange = {
+                        vm.setTitleRegex(it)
+                    },
+                ),
+                uid = RecommendedFeedFilterUidKeywordActions(
+                    onAdd = {
+                        vm.addUidKeyword()
+                    },
+                    onTextChange = { index, text ->
+                        vm.setUidKeywordText(index, text)
+                    },
+                    onRemove = { index ->
+                        vm.removeUidKeyword(index)
+                    },
+                ),
+                nickname = RecommendedFeedFilterNicknameKeywordActions(
+                    onAdd = {
+                        vm.addNicknameKeyword()
+                    },
+                    onTextChange = { index, text ->
+                        vm.setNicknameKeywordText(index, text)
+                    },
+                    onRemove = { index ->
+                        vm.removeNicknameKeyword(index)
+                    },
+                    onRegexChange = {
+                        vm.setNicknameRegex(it)
+                    },
+                ),
+                desc = RecommendedFeedFilterDescKeywordActions(
+                    onAdd = {
+                        vm.addDescKeyword()
+                    },
+                    onTextChange = { index, text ->
+                        vm.setDescKeywordText(index, text)
+                    },
+                    onRemove = { index ->
+                        vm.removeDescKeyword(index)
+                    },
+                    onRegexChange = {
+                        vm.setDescRegex(it)
+                    },
+                ),
+            )
+        }
+
+        val filterConfig by vm.filterConfig.collectAsStateWithLifecycle()
+
+        Scaffold(
+            modifier = modifier,
+            snackbarHost = {
+                SnackbarHost(snackbarHostState)
+            }
+        ) { paddingValues ->
+            RecommendedFeedFilterContent(
+                state = filterConfig,
+                actions = remember(switchActions, countActions, keywordActions) {
+                    RecommendedFeedFilterActions(
+                        switch = switchActions,
+                        count = countActions,
+                        keyword = keywordActions,
+                    )
                 },
                 modifier = modifier.padding(paddingValues)
             )
