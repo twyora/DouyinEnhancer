@@ -5,6 +5,7 @@
 package io.github.twyora.douyinenhancer.hook
 
 import android.content.Context
+import android.os.Build
 import com.google.protobuf.Descriptors
 import com.google.protobuf.Message
 import com.google.protobuf.util.JsonFormat
@@ -1206,7 +1207,12 @@ class DouyinPackage(classLoader: ClassLoader, context: Context) {
                     context.packageName,
                     0
                 )
-                val hostAppVersionCode = hostAppPackageInfo.longVersionCode.toInt()
+                val hostAppVersionCode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                    hostAppPackageInfo.longVersionCode.toInt()
+                } else {
+                    @Suppress("DEPRECATION")
+                    hostAppPackageInfo.versionCode
+                }
 
                 val lastUpdateTime = maxOf(
                     hostAppPackageInfo.lastUpdateTime,
@@ -1403,7 +1409,12 @@ class DouyinPackage(classLoader: ClassLoader, context: Context) {
             )
             moduleVersionCode = BuildConfig.VERSION_CODE
             moduleVersionName = BuildConfig.VERSION_NAME
-            hostVersionCode = hostAppPackageInfo.longVersionCode.toInt()
+            hostVersionCode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                hostAppPackageInfo.longVersionCode.toInt()
+            } else {
+                @Suppress("DEPRECATION")
+                hostAppPackageInfo.versionCode
+            }
             generation = ConfigManager.module.hookInfoGeneration.value
 
             runCatching {
