@@ -82,10 +82,8 @@ import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.deeplink.DeepLinkRequest
 import androidx.navigation3.runtime.deeplink.DeepLinkUri
 import androidx.navigation3.runtime.deeplink.UriDeepLinkMatcher
-import androidx.navigationevent.NavigationEvent
 import com.highcapable.yukihookapi.hook.log.YLog
 import io.github.twyora.douyinenhancer.config.ConfigManager
-import io.github.twyora.douyinenhancer.constant.HookInfoFiles.HOOK_INFO_PRESET_FILE_NAME
 import io.github.twyora.douyinenhancer.ui.content.settings.SettingsContentConfigActions
 import io.github.twyora.douyinenhancer.ui.content.settings.SettingsContentFeedActions
 import io.github.twyora.douyinenhancer.ui.content.settings.SettingsContentModuleActions
@@ -432,22 +430,12 @@ class MainActivity : ComponentActivity() {
                         val hookInfoInputStream = requireNotNull(applicationContext.contentResolver.openInputStream(uri)) {
                             "custom hook info file input stream is null"
                         }
-                        val presetOutputStream =
-                            File(applicationContext.cacheDir, HOOK_INFO_PRESET_FILE_NAME).outputStream()
                         hookInfoInputStream.use { hookInfoStream ->
-                            presetOutputStream.use { presetStream ->
-                                vm.loadCustomHookInfo(hookInfoStream, presetStream)
-                            }
+                            vm.loadCustomHookInfo(hookInfoStream)
                         }
                     }.onFailure { e ->
                         YLog.error("$TAG: load custom hook info failed", e)
                         vm.sendSnack(SnackEvent(R.string.import_failed, listOf(e.message ?: e.toString())))
-                    }.onSuccess { isTrusted ->
-                        if (!isTrusted) {
-                            vm.sendSnack(SnackEvent(R.string.untrusted_obfuscation_map))
-                        } else {
-                            vm.sendSnack(SnackEvent(R.string.import_success_restart_required))
-                        }
                     }
                 }
             }
@@ -472,19 +460,6 @@ class MainActivity : ComponentActivity() {
         LaunchedEffect(Unit) {
             vm.triggerLoadCustomMapping.collect {
                 loadMappingLauncher.launch("application/json")
-            }
-        }
-
-        LaunchedEffect(Unit) {
-            vm.triggerClearCustomMapping.collect {
-                runCatching {
-                    File(applicationContext.cacheDir, HOOK_INFO_PRESET_FILE_NAME).delete()
-                }.onFailure {
-                    YLog.error("$TAG: failed to delete custom mapping cache file", it)
-                    vm.sendSnack(SnackEvent(R.string.failed))
-                }.onSuccess {
-                    vm.sendSnack(SnackEvent(R.string.success))
-                }
             }
         }
 
@@ -573,7 +548,7 @@ class MainActivity : ComponentActivity() {
                     vm.requestLoadCustomMapping()
                 },
                 onClearCustomMapping = {
-                    vm.requestClearCustomMapping()
+                    vm.clearCustomMapping()
                 }
             )
         }

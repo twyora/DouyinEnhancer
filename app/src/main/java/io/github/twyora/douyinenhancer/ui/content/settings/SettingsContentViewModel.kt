@@ -3,12 +3,15 @@ package io.github.twyora.douyinenhancer.ui.content.settings
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation3.runtime.NavKey
+import com.highcapable.yukihookapi.YukiHook
 import io.github.twyora.douyinenhancer.BuildConfig
 import io.github.twyora.douyinenhancer.R
 import io.github.twyora.douyinenhancer.config.ConfigManager
 import io.github.twyora.douyinenhancer.config.kvstorage.decodeAsKVMap
 import io.github.twyora.douyinenhancer.config.kvstorage.encodeToKVBytes
 import io.github.twyora.douyinenhancer.config.kvstorage.IKVStorage
+import io.github.twyora.douyinenhancer.config.provider.ModuleConfigProvider
+import io.github.twyora.douyinenhancer.constant.HookInfoFiles
 import io.github.twyora.douyinenhancer.utils.crypto.sha256Hex
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
@@ -48,9 +51,6 @@ class SettingsContentViewModel : ViewModel() {
         field = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
 
     val triggerLoadCustomMapping: SharedFlow<Unit>
-        field = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
-
-    val triggerClearCustomMapping: SharedFlow<Unit>
         field = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
 
     private val saveConfig = with(ConfigManager.save) {
@@ -240,26 +240,32 @@ class SettingsContentViewModel : ViewModel() {
         ConfigManager.misc.hiddenFeatureEnabled.value = snapshotHiddenFeature
     }
 
-    fun loadCustomHookInfo(hookInfoInputStream: InputStream, presetOutputStream: OutputStream): Boolean {
+    fun loadCustomHookInfo(hookInfoInputStream: InputStream) {
         val customHookInfoBytes = hookInfoInputStream.readBytes()
         val customHookInfoJson = JSONObject(String(customHookInfoBytes, Charsets.UTF_8))
-        val expectedSignature = customHookInfoJson.optString("signature")
+        val declaredSignature = customHookInfoJson.optString("signature")
         customHookInfoJson.remove("signature")
-        val canonicalHookInfoPresetBytes = JsonCanonicalizer(customHookInfoJson.toString())
-            .encodedString
-            .toByteArray(Charsets.UTF_8)
-        val isTrusted = expectedSignature.isNotBlank() &&
+        val canonicalHookInfoPresetBytes = JsonCanonicalizer(
+            customHookInfoJson.toString()
+        ).encodedString.toByteArray(Charsets.UTF_8)
+        val signatureVerified = declaredSignature.isNotBlank() &&
             ByteArrayInputStream(canonicalHookInfoPresetBytes).use { stream ->
                 verifySha256RsaSignature(
                     stream,
-                    Base64.decode(expectedSignature),
+                    Base64.decode(declaredSignature),
                     Base64.decode(SignatureKeys.HOOK_INFO_PRESET_PUBLIC_KEY_B64)
                 )
             }
-        presetOutputStream.write(customHookInfoBytes)
-        ConfigManager.module.hookInfoGeneration.value++
 
-        return isTrusted
+        if (signatureVerified) {
+            ConfigManager.module.hookInfoSource.value = ModuleConfigProvider.HOOK_INFO_SOURCE_TRUSTED_OVERLAY
+            sendSnack(SnackEvent(R.string.import_success_restart_required))
+        } else {
+            ConfigManager.module.hookInfoSource.value = ModuleConfigProvider.HOOK_INFO_SOURCE_UNTRUSTED_OVERLAY
+            sendSnack(SnackEvent(R.string.untrusted_obfuscation_map))
+        }
+
+        ConfigManager.module.hookInfoGeneration.value++
     }
 
     fun setPurifyCommentImage(enable: Boolean) {
@@ -328,9 +334,14 @@ class SettingsContentViewModel : ViewModel() {
     }
 
 
-    fun requestClearCustomMapping() {
+    fun clearCustomMapping() {
+        YukiHook.Module.sharedFiles.delete(
+            HookInfoFiles.HOOK_INFO_PRESET_FILE_NAME
+        )
+        ConfigManager.module.hookInfoSource.value = ModuleConfigProvider.HOOK_INFO_SOURCE_BUILTIN
+
         ConfigManager.module.hookInfoGeneration.value++
-        triggerClearCustomMapping.tryEmit(Unit)
+        sendSnack(SnackEvent(R.string.success))
     }
 
     fun requestNavigation(navKey: NavKey) {
