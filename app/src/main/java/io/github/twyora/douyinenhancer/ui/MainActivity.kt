@@ -66,7 +66,6 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.ui.platform.LocalResources
-import androidx.navigation3.runtime.NavBackStack
 import io.github.twyora.douyinenhancer.ui.event.SnackEvent
 import io.github.twyora.douyinenhancer.ui.content.settings.SettingsContent
 import io.github.twyora.douyinenhancer.ui.content.settings.SettingsContentActions
@@ -90,13 +89,17 @@ import io.github.twyora.douyinenhancer.ui.content.settings.SettingsContentModule
 import io.github.twyora.douyinenhancer.ui.content.settings.SettingsContentSaveActions
 import io.github.twyora.douyinenhancer.ui.content.settings.SettingsContentUiActions
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.conflate
 import kotlinx.serialization.serializer
 
 class MainActivity : ComponentActivity() {
-    private val newLinkFlow = MutableSharedFlow<DeepLinkRequest>(
-        replay = 1
+    private val navFlow = MutableSharedFlow<NavKey>(
+        extraBufferCapacity = 1,
+        replay = 1,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
     )
 
     private val uriDeepLinkMatchers = listOf(
@@ -122,9 +125,19 @@ class MainActivity : ComponentActivity() {
         )
     )
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
+
+        intent.data?.let {
+            val req = DeepLinkRequest(it)
+            uriDeepLinkMatchers.mapNotNull { matcher ->
+                matcher.match(req)
+            }.maxOrNull()?.let { matchResult ->
+                navFlow.tryEmit(matchResult.key)
+            }
+        }
 
         setContent {
             val currLocalContext = LocalContext.current
@@ -143,17 +156,10 @@ class MainActivity : ComponentActivity() {
                 val backstack = rememberNavBackStack(AppRoutes.Home)
 
                 LaunchedEffect(Unit) {
-                    newLinkFlow.collect { req ->
-                        uriDeepLinkMatchers.mapNotNull {
-                            it.match(req)
-                        }.maxOrNull()?.let {
-                            backstack.clear()
-                            backstack.add(it.key)
-                        }
+                    navFlow.collect { navKey ->
+                        backstack.add(navKey)
+                        navFlow.resetReplayCache()
                     }
-                }
-                intent?.data?.let {
-                    newLinkFlow.tryEmit(DeepLinkRequest(it))
                 }
 
                 NavDisplay(
@@ -161,11 +167,15 @@ class MainActivity : ComponentActivity() {
                     entryProvider = { key ->
                         when (key) {
                             AppRoutes.Home -> NavEntry(key) {
-                                HomeScreen(backstack = backstack)
+                                HomeScreen(onNavigate = {
+                                    navFlow.tryEmit(it)
+                                })
                             }
 
                             AppRoutes.Settings.Main -> NavEntry(key) {
-                                SettingsScreen(backstack = backstack)
+                                SettingsScreen(onNavigate = {
+                                    navFlow.tryEmit(it)
+                                })
                             }
 
                             AppRoutes.Settings.RecommendedFeedFilter -> NavEntry(key) {
@@ -224,12 +234,17 @@ class MainActivity : ComponentActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         intent.data?.let {
-            newLinkFlow.tryEmit(DeepLinkRequest(it))
+            val req = DeepLinkRequest(it)
+            uriDeepLinkMatchers.mapNotNull { matcher ->
+                matcher.match(req)
+            }.maxOrNull()?.let { matchResult ->
+                navFlow.tryEmit(matchResult.key)
+            }
         }
     }
 
     @Composable
-    fun HomeScreen(modifier: Modifier = Modifier, backstack: NavBackStack<NavKey>) {
+    fun HomeScreen(modifier: Modifier = Modifier, onNavigate: (NavKey) -> Unit) {
         val mainVm: HomeContentViewModel = viewModel()
         val mainUiState by mainVm.uiState.collectAsStateWithLifecycle()
         val currLocalContext = LocalContext.current
@@ -259,7 +274,7 @@ class MainActivity : ComponentActivity() {
 
         LaunchedEffect(Unit) {
             mainVm.triggerNavigation.collect {
-                backstack.add(it)
+                onNavigate(it)
             }
         }
 
@@ -291,7 +306,7 @@ class MainActivity : ComponentActivity() {
                     },
                     onNavigateToSettings = {
                         if (mainUiState.moduleActivationState) {
-                            mainVm.requestNavigate(AppRoutes.Settings.Main)
+                            mainVm.requestNavigation(AppRoutes.Settings.Main)
                         } else {
                             mainVm.sendSnack(
                                 SnackEvent(R.string.pref_about_activation_status_deactivated_summary)
@@ -316,8 +331,8 @@ class MainActivity : ComponentActivity() {
 
     @Composable
     private fun SettingsScreen(
-        backstack: NavBackStack<NavKey>,
-        modifier: Modifier = Modifier
+        modifier: Modifier = Modifier,
+        onNavigate: (NavKey) -> Unit
     ) {
         val vm: SettingsContentViewModel = viewModel()
         val settingsConfig by vm.settingsConfig.collectAsStateWithLifecycle()
@@ -330,7 +345,7 @@ class MainActivity : ComponentActivity() {
 
         LaunchedEffect(Unit) {
             vm.triggerNavigation.collect {
-                backstack.add(it)
+                onNavigate(it)
             }
         }
 

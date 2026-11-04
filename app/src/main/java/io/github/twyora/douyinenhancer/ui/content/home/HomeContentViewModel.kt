@@ -120,7 +120,7 @@ class HomeContentViewModel(application: Application) : AndroidViewModel(applicat
         triggerOpenUrl.tryEmit(resId)
     }
 
-    fun requestNavigate(navKey: NavKey) {
+    fun requestNavigation(navKey: NavKey) {
         triggerNavigation.tryEmit(navKey)
     }
 
