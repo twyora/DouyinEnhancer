@@ -443,7 +443,7 @@ class MainActivity : ComponentActivity() {
                             "cannot open output uri"
                         }
                         exportStream.use { stream ->
-                            val storages = listOf(ConfigManager.settingsStorage, ConfigManager.moduleStorage)
+                            val storages = listOf(ConfigManager.settingsStorage)
                             val tempZip = File.createTempFile("douyinenhancer_kv_export_", "", applicationContext.cacheDir)
                             try {
                                 vm.exportConfigZip(storages, tempZip.outputStream())
@@ -504,7 +504,7 @@ class MainActivity : ComponentActivity() {
                                         file.name == "manifest.json"
                                     } -> {
                                         vm.importConfigZip(
-                                            listOf(ConfigManager.settingsStorage, ConfigManager.moduleStorage),
+                                            listOf(ConfigManager.settingsStorage),
                                             inputFiles = extractedFiles.filter { file ->
                                                 file.name != "manifest.json"
                                             },
