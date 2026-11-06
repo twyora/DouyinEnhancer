@@ -486,13 +486,45 @@ class MainActivity : ComponentActivity() {
                                     }
                                 }
 
-                                vm.importConfigZip(
-                                    listOf(ConfigManager.settingsStorage, ConfigManager.moduleStorage),
-                                    inputFiles = tempDir.listFiles()?.filter { file ->
-                                        file.name != "manifest.json"
-                                    }?.toList() ?: emptyList(),
-                                    manifestFile = File(tempDir, "manifest.json")
-                                )
+                                val extractedFiles = tempDir.listFiles()?.toList().orEmpty()
+                                when {
+                                    extractedFiles.any { file ->
+                                        file.name == "checksum"
+                                    } -> {
+                                        vm.importV1ConfigZip(
+                                            storages = listOf(ConfigManager.settingsStorage),
+                                            checksumFile = extractedFiles.first { file ->
+                                                file.name == "checksum"
+                                            },
+                                            storageDir = tempDir
+                                        )
+                                    }
+
+                                    extractedFiles.any { file ->
+                                        file.name == "manifest.json"
+                                    } -> {
+                                        vm.importConfigZip(
+                                            listOf(ConfigManager.settingsStorage, ConfigManager.moduleStorage),
+                                            inputFiles = extractedFiles.filter { file ->
+                                                file.name != "manifest.json"
+                                            },
+                                            manifestFile = extractedFiles.first { file ->
+                                                file.name == "manifest.json"
+                                            }
+                                        )
+                                    }
+
+                                    else -> {
+                                        YLog.error("$TAG: unrecognized config archive")
+                                        vm.sendSnack(
+                                            SnackEvent(
+                                                R.string.config_import_failed,
+                                                listOf("unrecognized config archive format")
+                                            )
+                                        )
+                                        return@launch
+                                    }
+                                }
                             } finally {
                                 tempDir.deleteRecursively()
                             }

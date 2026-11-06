@@ -7,6 +7,7 @@ import com.highcapable.yukihookapi.YukiHook
 import io.github.twyora.douyinenhancer.BuildConfig
 import io.github.twyora.douyinenhancer.R
 import io.github.twyora.douyinenhancer.config.ConfigManager
+import io.github.twyora.douyinenhancer.config.kvstorage.FastKVStorage
 import io.github.twyora.douyinenhancer.config.kvstorage.decodeAsKVMap
 import io.github.twyora.douyinenhancer.config.kvstorage.encodeToKVBytes
 import io.github.twyora.douyinenhancer.config.kvstorage.IKVStorage
@@ -27,6 +28,7 @@ import java.io.InputStream
 import io.github.twyora.douyinenhancer.constant.SignatureKeys
 import io.github.twyora.douyinenhancer.ui.event.SnackEvent
 import io.github.twyora.douyinenhancer.utils.crypto.verifySha256RsaSignature
+import java.security.MessageDigest
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -200,6 +202,35 @@ class SettingsContentViewModel : ViewModel() {
         }
     }
 
+    fun importV1ConfigZip(storages: List<IKVStorage>, checksumFile: File, storageDir: File) {
+        val digest = MessageDigest.getInstance("SHA-256")
+        storages.forEach { storage ->
+            listOf("kva", "kvb").forEach { extension ->
+                val file = File(storageDir, "${storage.name}.$extension")
+                if (file.exists()) {
+                    digest.update(file.readBytes())
+                }
+            }
+        }
+        val actualChecksum = digest.digest().joinToString("") {
+            "%02x".format(it)
+        }
+        require(checksumFile.readText() == actualChecksum) {
+            "v1 config checksum mismatch"
+        }
+
+        val snapshotHiddenFeature = ConfigManager.misc.hiddenFeatureEnabled.value
+        storages.forEach { storage ->
+            val importedSettings = FastKVStorage.open(storageDir.absolutePath, storage.name)
+            try {
+                storage.putAll(importedSettings.getAll())
+            } finally {
+                importedSettings.close()
+            }
+        }
+        ConfigManager.misc.hiddenFeatureEnabled.value = snapshotHiddenFeature
+    }
+
     fun importConfigZip(storages: List<IKVStorage>, inputFiles: List<File>, manifestFile: File) {
         if (!manifestFile.exists()) {
             throw IllegalArgumentException("manifest.json missing")
@@ -228,7 +259,9 @@ class SettingsContentViewModel : ViewModel() {
             file
         }
 
-        val storagesByName = storages.associateBy { it.name }
+        val storagesByName = storages.associateBy {
+            it.name
+        }
         val snapshotHiddenFeature = ConfigManager.misc.hiddenFeatureEnabled.value
         verifiedFiles.forEach { file ->
             val live = storagesByName[file.name] ?: return@forEach
