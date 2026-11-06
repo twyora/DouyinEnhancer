@@ -31,6 +31,10 @@ import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
 import io.github.twyora.douyinenhancer.R
+import io.github.twyora.douyinenhancer.ui.content.attest.VerifyDialogContent
+import io.github.twyora.douyinenhancer.ui.content.attest.VerifyDialogUiActions
+import io.github.twyora.douyinenhancer.ui.content.attest.VerifyDialogViewModel
+import io.github.twyora.douyinenhancer.ui.content.attest.VerifyDialogViewModelFactory
 import io.github.twyora.douyinenhancer.ui.content.home.HomeContent
 import io.github.twyora.douyinenhancer.ui.content.home.HomeContentUiActions
 import io.github.twyora.douyinenhancer.ui.content.home.HomeContentUiState
@@ -65,7 +69,11 @@ import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalResources
+import androidx.lifecycle.lifecycleScope
 import io.github.twyora.douyinenhancer.ui.event.SnackEvent
 import io.github.twyora.douyinenhancer.ui.content.settings.SettingsContent
 import io.github.twyora.douyinenhancer.ui.content.settings.SettingsContentActions
@@ -81,7 +89,9 @@ import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.deeplink.DeepLinkRequest
 import androidx.navigation3.runtime.deeplink.DeepLinkUri
 import androidx.navigation3.runtime.deeplink.UriDeepLinkMatcher
+import androidx.navigation3.scene.DialogSceneStrategy
 import com.highcapable.yukihookapi.hook.log.YLog
+import io.github.twyora.douyinenhancer.BuildConfig
 import io.github.twyora.douyinenhancer.config.ConfigManager
 import io.github.twyora.douyinenhancer.ui.content.settings.SettingsContentConfigActions
 import io.github.twyora.douyinenhancer.ui.content.settings.SettingsContentFeedActions
@@ -92,7 +102,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.conflate
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.serializer
 
 class MainActivity : ComponentActivity() {
@@ -100,6 +113,14 @@ class MainActivity : ComponentActivity() {
         extraBufferCapacity = 1,
         replay = 1,
         onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
+
+    private var pendingNavKey: NavKey? = null
+
+    private val lastVerifiedVersionFlow = ConfigManager.module.lastVerifiedVersion.observe().stateIn(
+        scope = lifecycleScope,
+        started = SharingStarted.Eagerly,
+        initialValue = 0
     )
 
     private val uriDeepLinkMatchers = listOf(
@@ -155,9 +176,28 @@ class MainActivity : ComponentActivity() {
             ) {
                 val backstack = rememberNavBackStack(AppRoutes.Home)
 
-                LaunchedEffect(Unit) {
+                val langCode = LocalConfiguration.current.locales[0].language
+                LaunchedEffect(langCode) {
                     navFlow.collect { navKey ->
-                        backstack.add(navKey)
+                        if (backstack.lastOrNull() is AppRoutes.Verification) {
+                            return@collect
+                        }
+
+                        val shouldVerify = !(
+                            BuildConfig.DEBUG ||
+                                (langCode != Locale.CHINESE.language) ||
+                                lastVerifiedVersionFlow.value == BuildConfig.VERSION_CODE
+                            )
+
+                        val target = if (navKey is AppRoutes.Settings && shouldVerify) {
+                            YLog.info("verification required, redirecting for verification")
+
+                            pendingNavKey = navKey
+                            AppRoutes.Verification
+                        } else {
+                            navKey
+                        }
+                        backstack.add(target)
                         navFlow.resetReplayCache()
                     }
                 }
@@ -190,10 +230,41 @@ class MainActivity : ComponentActivity() {
                                 HomeTabVisibilityScreen()
                             }
 
+                            AppRoutes.Verification -> NavEntry(
+                                key,
+                                metadata = DialogSceneStrategy.dialog() +
+                                    NavDisplay.transitionSpec {
+                                        fadeIn(tween(220)) togetherWith ExitTransition.None
+                                    } +
+                                    NavDisplay.popTransitionSpec {
+                                        EnterTransition.None togetherWith fadeOut(tween(220))
+                                    }
+                            ) {
+                                VerifyDialogScreen(
+                                    onVerified = {
+                                        pendingNavKey?.let {
+                                            pendingNavKey = null
+                                            lifecycleScope.launch(Dispatchers.IO) {
+                                                ConfigManager.module.lastVerifiedVersion.value = BuildConfig.VERSION_CODE
+                                                withContext(Dispatchers.Main) {
+                                                    backstack.remove(AppRoutes.Verification)
+                                                    navFlow.tryEmit(it)
+                                                }
+                                            }
+                                        }
+                                    },
+                                    onDismiss = {
+                                        pendingNavKey = null
+                                        backstack.remove(AppRoutes.Verification)
+                                    }
+                                )
+                            }
+
                             else -> NavEntry(key) {
                             }
                         }
                     },
+                    sceneStrategies = listOf(DialogSceneStrategy()),
                     // Animation referenced from:
                     // [fdroidclient](https://github.com/f-droid/fdroidclient/blob/master/app/src/main/kotlin/org/fdroid/ui/MainContent.kt)
                     transitionSpec = {
@@ -819,6 +890,67 @@ class MainActivity : ComponentActivity() {
                 modifier = modifier.padding(paddingValues)
             )
         }
+    }
+
+    @Composable
+    private fun VerifyDialogScreen(
+        onVerified: () -> Unit,
+        onDismiss: () -> Unit,
+        modifier: Modifier = Modifier
+    ) {
+        val currLocalResources = LocalResources.current
+        val vm: VerifyDialogViewModel = viewModel(
+            factory = VerifyDialogViewModelFactory(
+                currLocalResources.getStringArray(R.array.valid_verification_urls)
+            )
+        )
+        val uiState by vm.uiState.collectAsStateWithLifecycle()
+        val snackbarHostState = remember {
+            SnackbarHostState()
+        }
+
+        LaunchedEffect(Unit) {
+            vm.triggerVerifySuccess.collect {
+                onVerified()
+            }
+        }
+
+        LaunchedEffect(Unit) {
+            vm.triggerVerifyFailure.collect {
+                onDismiss()
+            }
+        }
+
+        LaunchedEffect(currLocalResources) {
+            vm.snackFlow.conflate().collect { event ->
+                val message = if (event.args.isEmpty()) {
+                    currLocalResources.getString(event.resId)
+                } else {
+                    currLocalResources.getString(event.resId, *event.args.toTypedArray())
+                }
+                snackbarHostState.showSnackbar(message, duration = SnackbarDuration.Short)
+            }
+        }
+
+        val actions = remember {
+            VerifyDialogUiActions(
+                onInputUrlChange = {
+                    vm.onInputTextChanged(it)
+                },
+                onConfirm = {
+                    vm.onConfirm(it)
+                },
+                onCancel = {
+                    vm.onCancel()
+                }
+            )
+        }
+
+        VerifyDialogContent(
+            state = uiState,
+            actions = actions,
+            modifier = modifier
+        )
     }
 
     companion object {
