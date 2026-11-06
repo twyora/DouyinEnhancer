@@ -81,46 +81,58 @@ private fun RecommendedFeedFilterSwitchSection(
         ) {
             actions.onMainSwitchChange(it)
         }
-        SwitchPreferenceItem(
-            title = stringResource(R.string.recommended_feed_filter_block_followed_author_title),
-            checked = state.blockFollowedAuthor
-        ) {
-            actions.onBlockFollowedAuthorChange(it)
+        if (state.blockFollowedAuthorVisible) {
+            SwitchPreferenceItem(
+                title = stringResource(R.string.recommended_feed_filter_block_followed_author_title),
+                checked = state.blockFollowedAuthor
+            ) {
+                actions.onBlockFollowedAuthorChange(it)
+            }
         }
-        SwitchPreferenceItem(
-            title = stringResource(R.string.recommended_feed_filter_block_ad_title),
-            summary = stringResource(R.string.recommended_feed_filter_block_ad_summary),
-            checked = state.blockAd
-        ) {
-            actions.onBlockAdChange(it)
+        if (state.blockAdVisible) {
+            SwitchPreferenceItem(
+                title = stringResource(R.string.recommended_feed_filter_block_ad_title),
+                summary = stringResource(R.string.recommended_feed_filter_block_ad_summary),
+                checked = state.blockAd
+            ) {
+                actions.onBlockAdChange(it)
+            }
         }
-        SwitchPreferenceItem(
-            title = stringResource(R.string.recommended_feed_filter_block_ecom_aweme_title),
-            summary = stringResource(R.string.recommended_feed_filter_block_ecom_aweme_summary),
-            checked = state.blockEcom
-        ) {
-            actions.onBlockEcomChange(it)
+        if (state.blockEcomVisible) {
+            SwitchPreferenceItem(
+                title = stringResource(R.string.recommended_feed_filter_block_ecom_aweme_title),
+                summary = stringResource(R.string.recommended_feed_filter_block_ecom_aweme_summary),
+                checked = state.blockEcom
+            ) {
+                actions.onBlockEcomChange(it)
+            }
         }
-        SwitchPreferenceItem(
-            title = stringResource(R.string.recommended_feed_filter_block_groupon_large_card_title),
-            summary = stringResource(R.string.recommended_feed_filter_block_groupon_large_card_summary),
-            checked = state.blockGrouponLargeCard
-        ) {
-            actions.onBlockGrouponChange(it)
+        if (state.blockGrouponLargeCardVisible) {
+            SwitchPreferenceItem(
+                title = stringResource(R.string.recommended_feed_filter_block_groupon_large_card_title),
+                summary = stringResource(R.string.recommended_feed_filter_block_groupon_large_card_summary),
+                checked = state.blockGrouponLargeCard
+            ) {
+                actions.onBlockGrouponChange(it)
+            }
         }
-        SwitchPreferenceItem(
-            title = stringResource(R.string.recommended_feed_filter_block_live_title),
-            summary = stringResource(R.string.recommended_feed_filter_block_live_summary),
-            checked = state.blockLive
-        ) {
-            actions.onBlockLiveChange(it)
+        if (state.blockLiveVisible) {
+            SwitchPreferenceItem(
+                title = stringResource(R.string.recommended_feed_filter_block_live_title),
+                summary = stringResource(R.string.recommended_feed_filter_block_live_summary),
+                checked = state.blockLive
+            ) {
+                actions.onBlockLiveChange(it)
+            }
         }
-        SwitchPreferenceItem(
-            title = stringResource(R.string.recommended_feed_filter_block_multi_image_title),
-            summary = stringResource(R.string.recommended_feed_filter_block_multi_image_summary),
-            checked = state.blockMultiImage
-        ) {
-            actions.onBlockMultiImageChange(it)
+        if (state.blockMultiImageVisible) {
+            SwitchPreferenceItem(
+                title = stringResource(R.string.recommended_feed_filter_block_multi_image_title),
+                summary = stringResource(R.string.recommended_feed_filter_block_multi_image_summary),
+                checked = state.blockMultiImage
+            ) {
+                actions.onBlockMultiImageChange(it)
+            }
         }
     }
 }
@@ -548,11 +560,17 @@ private fun RecommendedFeedFilterContentPreview() {
             switch = RecommendedFeedFilterSwitchConfig(
                 mainSwitch = false,
                 blockFollowedAuthor = false,
+                blockFollowedAuthorVisible = true,
                 blockAd = false,
+                blockAdVisible = true,
                 blockEcom = false,
+                blockEcomVisible = true,
                 blockGrouponLargeCard = false,
+                blockGrouponLargeCardVisible = true,
                 blockLive = false,
+                blockLiveVisible = true,
                 blockMultiImage = false,
+                blockMultiImageVisible = true,
             ),
             count = RecommendedFeedFilterCountConfig(
                 shortDuration = 0,

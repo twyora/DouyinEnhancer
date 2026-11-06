@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.highcapable.yukihookapi.hook.log.YLog
 import io.github.twyora.douyinenhancer.R
 import io.github.twyora.douyinenhancer.config.ConfigManager
+import io.github.twyora.douyinenhancer.config.gate.ConfigStateMode
 import io.github.twyora.douyinenhancer.ui.event.SnackEvent
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -25,6 +26,12 @@ class RecommendedFeedFilterViewModel : ViewModel() {
             onBufferOverflow = BufferOverflow.DROP_OLDEST
         )
 
+    // TODO: Interim solution — non-NORMAL items are dropped while hidden features are off, with
+    // GRAYED intentionally unhandled for now (no configItem refactor intended). The gating layer was
+    // over-engineered ahead of any real usage and will need its own rework; when that happens this site
+    // must receive the full, correct implementation instead of this shortcut.
+    private val hiddenFeatureEnabled = ConfigManager.misc.hiddenFeatureEnabled.observe()
+
     private val switchConfig = with(ConfigManager.recommendedFeedFilter) {
         combine(
             mainSwitch.observe(),
@@ -34,15 +41,22 @@ class RecommendedFeedFilterViewModel : ViewModel() {
             blockGrouponLargeCard.observe(),
             blockLive.observe(),
             blockMultiImage.observe(),
-        ) {
+            hiddenFeatureEnabled,
+        ) { values ->
             RecommendedFeedFilterSwitchConfig(
-                mainSwitch = it[0],
-                blockFollowedAuthor = it[1],
-                blockAd = it[2],
-                blockEcom = it[3],
-                blockGrouponLargeCard = it[4],
-                blockLive = it[5],
-                blockMultiImage = it[6]
+                mainSwitch = values[0],
+                blockFollowedAuthor = values[1],
+                blockFollowedAuthorVisible = blockFollowedAuthor.status == ConfigStateMode.NORMAL,
+                blockAd = values[2],
+                blockAdVisible = blockAd.status == ConfigStateMode.NORMAL,
+                blockEcom = values[3],
+                blockEcomVisible = blockEcom.status == ConfigStateMode.NORMAL,
+                blockGrouponLargeCard = values[4],
+                blockGrouponLargeCardVisible = blockGrouponLargeCard.status == ConfigStateMode.NORMAL,
+                blockLive = values[5],
+                blockLiveVisible = blockLive.status == ConfigStateMode.NORMAL,
+                blockMultiImage = values[6],
+                blockMultiImageVisible = blockMultiImage.status == ConfigStateMode.NORMAL,
             )
         }
     }
@@ -248,11 +262,17 @@ class RecommendedFeedFilterViewModel : ViewModel() {
                 RecommendedFeedFilterSwitchConfig(
                     mainSwitch = mainSwitch.defValue,
                     blockFollowedAuthor = blockFollowedAuthor.defValue,
+                    blockFollowedAuthorVisible = blockFollowedAuthor.status == ConfigStateMode.NORMAL,
                     blockAd = blockAd.defValue,
+                    blockAdVisible = blockAd.status == ConfigStateMode.NORMAL,
                     blockEcom = blockEcom.defValue,
+                    blockEcomVisible = blockEcom.status == ConfigStateMode.NORMAL,
                     blockGrouponLargeCard = blockGrouponLargeCard.defValue,
+                    blockGrouponLargeCardVisible = blockGrouponLargeCard.status == ConfigStateMode.NORMAL,
                     blockLive = blockLive.defValue,
-                    blockMultiImage = blockMultiImage.defValue
+                    blockLiveVisible = blockLive.status == ConfigStateMode.NORMAL,
+                    blockMultiImage = blockMultiImage.defValue,
+                    blockMultiImageVisible = blockMultiImage.status == ConfigStateMode.NORMAL,
                 )
             },
             count = with(ConfigManager.recommendedFeedFilter) {

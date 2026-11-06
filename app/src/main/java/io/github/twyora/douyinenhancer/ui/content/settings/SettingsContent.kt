@@ -241,14 +241,16 @@ fun SettingsContentModuleSection(
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 8.dp)
     ) {
-        PreferenceCategory(stringResource(R.string.pref_category_misc))
+        if (moduleState.hiddenFeature) {
+            PreferenceCategory(stringResource(R.string.pref_category_misc))
 
-        SwitchPreferenceItem(
-            title = stringResource(R.string.pref_misc_enable_hidden_features_title),
-            summary = stringResource(R.string.pref_misc_enable_hidden_features_summary),
-            checked = moduleState.hiddenFeature
-        ) {
-            moduleActions.onHiddenFeatureChange(it)
+            SwitchPreferenceItem(
+                title = stringResource(R.string.pref_misc_enable_hidden_features_title),
+                summary = stringResource(R.string.pref_misc_enable_hidden_features_summary),
+                checked = true
+            ) {
+                moduleActions.onHiddenFeatureChange(it)
+            }
         }
 
         PreferenceCategory(stringResource(R.string.pref_category_module))

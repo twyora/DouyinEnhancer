@@ -4,11 +4,17 @@ package io.github.twyora.douyinenhancer.ui.content.settings.filter.recommended_f
 data class RecommendedFeedFilterSwitchConfig(
     val mainSwitch: Boolean,
     val blockFollowedAuthor: Boolean,
+    val blockFollowedAuthorVisible: Boolean,
     val blockAd: Boolean,
+    val blockAdVisible: Boolean,
     val blockEcom: Boolean,
+    val blockEcomVisible: Boolean,
     val blockGrouponLargeCard: Boolean,
+    val blockGrouponLargeCardVisible: Boolean,
     val blockLive: Boolean,
+    val blockLiveVisible: Boolean,
     val blockMultiImage: Boolean,
+    val blockMultiImageVisible: Boolean,
 )
 
 data class RecommendedFeedFilterCountConfig(
