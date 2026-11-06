@@ -7,6 +7,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
@@ -176,6 +177,24 @@ class MainActivity : ComponentActivity() {
             ) {
                 val backstack = rememberNavBackStack(AppRoutes.Home)
 
+                val snackbarHostState = remember {
+                    SnackbarHostState()
+                }
+                val snackbarResources = LocalResources.current
+                val snackbarScope = rememberCoroutineScope()
+                val onShowSnackbar: (SnackEvent) -> Unit = remember(snackbarHostState, snackbarResources, snackbarScope) {
+                    { event ->
+                        val message = if (event.args.isEmpty()) {
+                            snackbarResources.getString(event.resId)
+                        } else {
+                            snackbarResources.getString(event.resId, *event.args.toTypedArray())
+                        }
+                        snackbarScope.launch {
+                            snackbarHostState.showSnackbar(message, duration = SnackbarDuration.Short)
+                        }
+                    }
+                }
+
                 val langCode = LocalConfiguration.current.locales[0].language
                 LaunchedEffect(langCode) {
                     navFlow.collect { navKey ->
@@ -206,28 +225,50 @@ class MainActivity : ComponentActivity() {
                     backStack = backstack,
                     entryProvider = { key ->
                         when (key) {
-                            AppRoutes.Home -> NavEntry(key) {
-                                HomeScreen(onNavigate = {
-                                    navFlow.tryEmit(it)
-                                })
-                            }
-
-                            AppRoutes.Settings.Main -> NavEntry(key) {
-                                SettingsScreen(onNavigate = {
-                                    navFlow.tryEmit(it)
-                                })
-                            }
-
-                            AppRoutes.Settings.RecommendedFeedFilter -> NavEntry(key) {
-                                RecommendedFeedFilterScreen()
-                            }
-
-                            AppRoutes.Settings.PlaybackComponent -> NavEntry(key) {
-                                PlaybackComponentVisibilityScreen()
-                            }
-
+                            AppRoutes.Home,
+                            AppRoutes.Settings.Main,
+                            AppRoutes.Settings.RecommendedFeedFilter,
+                            AppRoutes.Settings.PlaybackComponent,
                             AppRoutes.Settings.HomeTab -> NavEntry(key) {
-                                HomeTabVisibilityScreen()
+                                Scaffold(
+                                    snackbarHost = {
+                                        SnackbarHost(snackbarHostState)
+                                    }
+                                ) { innerPadding ->
+                                    when (key) {
+                                        AppRoutes.Home -> HomeScreen(
+                                            onNavigate = {
+                                                navFlow.tryEmit(it)
+                                            },
+                                            innerPadding = innerPadding,
+                                            onShowSnackbar = onShowSnackbar
+                                        )
+
+                                        AppRoutes.Settings.Main -> SettingsScreen(
+                                            onNavigate = {
+                                                navFlow.tryEmit(it)
+                                            },
+                                            innerPadding = innerPadding,
+                                            onShowSnackbar = onShowSnackbar
+                                        )
+
+                                        AppRoutes.Settings.RecommendedFeedFilter -> RecommendedFeedFilterScreen(
+                                            innerPadding = innerPadding,
+                                            onShowSnackbar = onShowSnackbar
+                                        )
+
+                                        AppRoutes.Settings.PlaybackComponent -> PlaybackComponentVisibilityScreen(
+                                            innerPadding = innerPadding
+                                        )
+
+                                        AppRoutes.Settings.HomeTab -> HomeTabVisibilityScreen(
+                                            innerPadding = innerPadding
+                                        )
+
+                                        else -> {
+                                        }
+                                    }
+                                }
                             }
 
                             AppRoutes.Verification -> NavEntry(
@@ -256,7 +297,8 @@ class MainActivity : ComponentActivity() {
                                     onDismiss = {
                                         pendingNavKey = null
                                         backstack.remove(AppRoutes.Verification)
-                                    }
+                                    },
+                                    onShowSnackbar = onShowSnackbar
                                 )
                             }
 
@@ -315,25 +357,20 @@ class MainActivity : ComponentActivity() {
     }
 
     @Composable
-    fun HomeScreen(modifier: Modifier = Modifier, onNavigate: (NavKey) -> Unit) {
+    fun HomeScreen(
+        modifier: Modifier = Modifier,
+        onNavigate: (NavKey) -> Unit,
+        onShowSnackbar: (SnackEvent) -> Unit,
+        innerPadding: PaddingValues
+    ) {
         val mainVm: HomeContentViewModel = viewModel()
         val mainUiState by mainVm.uiState.collectAsStateWithLifecycle()
         val currLocalContext = LocalContext.current
-
-        val snackbarHostState = remember {
-            SnackbarHostState()
-        }
-
         val currLocalResources = LocalResources.current
 
-        LaunchedEffect(currLocalResources) {
+        LaunchedEffect(Unit) {
             mainVm.snackFlow.conflate().collect { event ->
-                val message = if (event.args.isEmpty()) {
-                    currLocalResources.getString(event.resId)
-                } else {
-                    currLocalResources.getString(event.resId, *event.args.toTypedArray())
-                }
-                snackbarHostState.showSnackbar(message, duration = SnackbarDuration.Short)
+                onShowSnackbar(event)
             }
         }
 
@@ -349,70 +386,59 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-        Scaffold(
-            modifier = modifier,
-            snackbarHost = {
-                SnackbarHost(snackbarHostState)
-            }
-        ) { paddingValues ->
-            val uiActions = remember {
-                HomeContentUiActions(
-                    onLauncherIconChange = {
-                        mainVm.setLauncherIconHidden(it)
-                    },
-                    onOpenHelp = {
-                        mainVm.requestOpenUrl(R.string.docs_url)
-                    },
-                    onOpenAuthor = {
-                        mainVm.requestOpenUrl(R.string.author_url)
-                    },
-                    onOpenRepository = {
-                        mainVm.requestOpenUrl(R.string.repository_url)
-                    },
-                    onViewRelease = {
-                        mainVm.requestOpenUrl(R.string.latest_release_page_url)
-                    },
-                    onJoinTelegramGroup = {
-                        mainVm.requestOpenUrl(R.string.telegram_url)
-                    },
-                    onNavigateToSettings = {
-                        if (mainUiState.moduleActivationState) {
-                            mainVm.requestNavigation(AppRoutes.Settings.Main)
-                        } else {
-                            mainVm.sendSnack(
-                                SnackEvent(R.string.pref_about_activation_status_deactivated_summary)
-                            )
-                        }
+        val uiActions = remember {
+            HomeContentUiActions(
+                onLauncherIconChange = {
+                    mainVm.setLauncherIconHidden(it)
+                },
+                onOpenHelp = {
+                    mainVm.requestOpenUrl(R.string.docs_url)
+                },
+                onOpenAuthor = {
+                    mainVm.requestOpenUrl(R.string.author_url)
+                },
+                onOpenRepository = {
+                    mainVm.requestOpenUrl(R.string.repository_url)
+                },
+                onViewRelease = {
+                    mainVm.requestOpenUrl(R.string.latest_release_page_url)
+                },
+                onJoinTelegramGroup = {
+                    mainVm.requestOpenUrl(R.string.telegram_url)
+                },
+                onNavigateToSettings = {
+                    if (mainUiState.moduleActivationState) {
+                        mainVm.requestNavigation(AppRoutes.Settings.Main)
+                    } else {
+                        mainVm.sendSnack(
+                            SnackEvent(R.string.pref_about_activation_status_deactivated_summary)
+                        )
                     }
-                )
-            }
-            HomeContent(
-                uiState = HomeContentUiState(
-                    launcherIconHidden = mainUiState.launcherIconHidden,
-                    moduleActivationState = mainUiState.moduleActivationState,
-                    updateState = mainUiState.updateState
-                ),
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-                uiActions = uiActions
+                }
             )
         }
+        HomeContent(
+            uiState = HomeContentUiState(
+                launcherIconHidden = mainUiState.launcherIconHidden,
+                moduleActivationState = mainUiState.moduleActivationState,
+                updateState = mainUiState.updateState
+            ),
+            modifier = modifier
+                .fillMaxSize()
+                .padding(innerPadding),
+            uiActions = uiActions
+        )
     }
 
     @Composable
     private fun SettingsScreen(
         modifier: Modifier = Modifier,
-        onNavigate: (NavKey) -> Unit
+        onNavigate: (NavKey) -> Unit,
+        onShowSnackbar: (SnackEvent) -> Unit,
+        innerPadding: PaddingValues
     ) {
         val vm: SettingsContentViewModel = viewModel()
         val settingsConfig by vm.settingsConfig.collectAsStateWithLifecycle()
-
-        val currLocalResources = LocalResources.current
-
-        val snackbarHostState = remember {
-            SnackbarHostState()
-        }
 
         LaunchedEffect(Unit) {
             vm.triggerNavigation.collect {
@@ -420,14 +446,9 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-        LaunchedEffect(currLocalResources) {
+        LaunchedEffect(Unit) {
             vm.snackFlow.conflate().collect { event ->
-                val message = if (event.args.isEmpty()) {
-                    currLocalResources.getString(event.resId)
-                } else {
-                    currLocalResources.getString(event.resId, *event.args.toTypedArray())
-                }
-                snackbarHostState.showSnackbar(message, duration = SnackbarDuration.Short)
+                onShowSnackbar(event)
             }
         }
 
@@ -671,42 +692,26 @@ class MainActivity : ComponentActivity() {
             )
         }
 
-        Scaffold(
-            modifier = modifier,
-            snackbarHost = {
-                SnackbarHost(snackbarHostState)
-            }
-        ) { paddingValues ->
-            SettingsContent(
-                state = settingsConfig,
-                actions = remember(saveActions, feedActions, uiActions, configActions, moduleActions) {
-                    SettingsContentActions(saveActions, feedActions, uiActions, configActions, moduleActions)
-                },
-                modifier = modifier.padding(paddingValues)
-            )
-        }
+        SettingsContent(
+            state = settingsConfig,
+            actions = remember(saveActions, feedActions, uiActions, configActions, moduleActions) {
+                SettingsContentActions(saveActions, feedActions, uiActions, configActions, moduleActions)
+            },
+            modifier = modifier.padding(innerPadding)
+        )
     }
 
     @Composable
     private fun RecommendedFeedFilterScreen(
-        modifier: Modifier = Modifier
+        modifier: Modifier = Modifier,
+        onShowSnackbar: (SnackEvent) -> Unit,
+        innerPadding: PaddingValues
     ) {
         val vm: RecommendedFeedFilterViewModel = viewModel()
 
-        val currLocalResources = LocalResources.current
-
-        val snackbarHostState = remember {
-            SnackbarHostState()
-        }
-
-        LaunchedEffect(currLocalResources) {
+        LaunchedEffect(Unit) {
             vm.snackFlow.conflate().collect { event ->
-                val message = if (event.args.isEmpty()) {
-                    currLocalResources.getString(event.resId)
-                } else {
-                    currLocalResources.getString(event.resId, *event.args.toTypedArray())
-                }
-                snackbarHostState.showSnackbar(message, duration = SnackbarDuration.Short)
+                onShowSnackbar(event)
             }
         }
 
@@ -829,28 +834,24 @@ class MainActivity : ComponentActivity() {
 
         val filterConfig by vm.filterConfig.collectAsStateWithLifecycle()
 
-        Scaffold(
-            modifier = modifier,
-            snackbarHost = {
-                SnackbarHost(snackbarHostState)
-            }
-        ) { paddingValues ->
-            RecommendedFeedFilterContent(
-                state = filterConfig,
-                actions = remember(switchActions, countActions, keywordActions) {
-                    RecommendedFeedFilterActions(
-                        switch = switchActions,
-                        count = countActions,
-                        keyword = keywordActions,
-                    )
-                },
-                modifier = modifier.padding(paddingValues)
-            )
-        }
+        RecommendedFeedFilterContent(
+            state = filterConfig,
+            actions = remember(switchActions, countActions, keywordActions) {
+                RecommendedFeedFilterActions(
+                    switch = switchActions,
+                    count = countActions,
+                    keyword = keywordActions,
+                )
+            },
+            modifier = modifier.padding(innerPadding)
+        )
     }
 
     @Composable
-    private fun HomeTabVisibilityScreen(modifier: Modifier = Modifier) {
+    private fun HomeTabVisibilityScreen(
+        modifier: Modifier = Modifier,
+        innerPadding: PaddingValues
+    ) {
         val vm: HomeTabVisibilityViewModel = viewModel()
         val tabConfig by vm.tabConfig.collectAsStateWithLifecycle()
         val actions = remember {
@@ -874,26 +875,18 @@ class MainActivity : ComponentActivity() {
             )
         }
 
-        val snackbarHostState = remember {
-            SnackbarHostState()
-        }
-
-        Scaffold(
-            modifier = modifier,
-            snackbarHost = {
-                SnackbarHost(snackbarHostState)
-            }
-        ) { paddingValues ->
-            HomeTabVisibilityContent(
-                config = tabConfig,
-                actions = actions,
-                modifier = modifier.padding(paddingValues)
-            )
-        }
+        HomeTabVisibilityContent(
+            config = tabConfig,
+            actions = actions,
+            modifier = modifier.padding(innerPadding)
+        )
     }
 
     @Composable
-    private fun PlaybackComponentVisibilityScreen(modifier: Modifier = Modifier) {
+    private fun PlaybackComponentVisibilityScreen(
+        modifier: Modifier = Modifier,
+        innerPadding: PaddingValues
+    ) {
         val vm: PlaybackComponentVisibilityViewModel = viewModel()
         val configs by vm.playbackComponentConfig.collectAsStateWithLifecycle()
         val actions = remember {
@@ -906,29 +899,20 @@ class MainActivity : ComponentActivity() {
                 }
             )
         }
-        val snackbarHostState = remember {
-            SnackbarHostState()
-        }
 
-        Scaffold(
-            modifier = modifier,
-            snackbarHost = {
-                SnackbarHost(snackbarHostState)
-            }
-        ) { paddingValues ->
-            PlaybackComponentVisibilityContext(
-                config = configs,
-                actions = actions,
-                modifier = modifier.padding(paddingValues)
-            )
-        }
+        PlaybackComponentVisibilityContext(
+            config = configs,
+            actions = actions,
+            modifier = modifier.padding(innerPadding)
+        )
     }
 
     @Composable
     private fun VerifyDialogScreen(
+        modifier: Modifier = Modifier,
         onVerified: () -> Unit,
         onDismiss: () -> Unit,
-        modifier: Modifier = Modifier
+        onShowSnackbar: (SnackEvent) -> Unit
     ) {
         val currLocalResources = LocalResources.current
         val vm: VerifyDialogViewModel = viewModel(
@@ -937,9 +921,6 @@ class MainActivity : ComponentActivity() {
             )
         )
         val uiState by vm.uiState.collectAsStateWithLifecycle()
-        val snackbarHostState = remember {
-            SnackbarHostState()
-        }
 
         LaunchedEffect(Unit) {
             vm.triggerVerifySuccess.collect {
@@ -953,14 +934,9 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-        LaunchedEffect(currLocalResources) {
+        LaunchedEffect(Unit) {
             vm.snackFlow.conflate().collect { event ->
-                val message = if (event.args.isEmpty()) {
-                    currLocalResources.getString(event.resId)
-                } else {
-                    currLocalResources.getString(event.resId, *event.args.toTypedArray())
-                }
-                snackbarHostState.showSnackbar(message, duration = SnackbarDuration.Short)
+                onShowSnackbar(event)
             }
         }
 
