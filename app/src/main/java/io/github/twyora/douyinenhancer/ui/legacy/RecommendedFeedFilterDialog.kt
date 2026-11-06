@@ -17,6 +17,10 @@ import io.github.twyora.douyinenhancer.databinding.ItemInputWithDeleteBinding
 import io.github.twyora.douyinenhancer.databinding.RecommendedFeedFilterDialogBinding
 import io.github.twyora.douyinenhancer.utils.android.toast
 
+@Deprecated(
+    "V1 config dialogs are no longer maintained in the host;" +
+        " use the Compose-based settings in the module environment instead."
+)
 class RecommendedFeedFilterDialog(context: Context) : AlertDialog.Builder(ContextThemeWrapper(context, R.style.MainTheme)) {
     init {
         val recommendedFeedFilterDialogBinding = RecommendedFeedFilterDialogBinding.inflate(
@@ -247,6 +251,10 @@ class RecommendedFeedFilterDialog(context: Context) : AlertDialog.Builder(Contex
     companion object {
         private val TAG = this::class.simpleName
 
+        @Deprecated(
+            "V1 config dialogs are no longer maintained in the host;" +
+                " use the Compose-based settings in the module environment instead."
+        )
         fun show(context: Context) {
             runCatching {
                 context.injectModuleResources()

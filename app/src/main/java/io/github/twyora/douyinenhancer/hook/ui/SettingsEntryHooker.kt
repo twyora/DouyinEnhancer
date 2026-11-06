@@ -15,11 +15,11 @@ import io.github.twyora.douyinenhancer.R
 import io.github.twyora.douyinenhancer.config.ConfigManager
 import io.github.twyora.douyinenhancer.hook.DouyinPackage
 import io.github.twyora.douyinenhancer.hook.HookOnMainProcess
-import io.github.twyora.douyinenhancer.ui.legacy.SettingsDialog
 import io.github.twyora.douyinenhancer.utils.reflect.getFieldOrNull
 import io.github.twyora.douyinenhancer.utils.reflect.invokeMethodOnly
 import io.github.twyora.douyinenhancer.utils.reflect.resolveMethodOrNull
 import androidx.core.net.toUri
+import io.github.twyora.douyinenhancer.ui.legacy.LegacyConfigDeprecationDialog
 
 @HookOnMainProcess
 object SettingsEntryHooker : YukiBaseHooker() {
@@ -34,8 +34,6 @@ object SettingsEntryHooker : YukiBaseHooker() {
     override fun onHook() {
         installModuleSettingsEntryHook()
         installAboutAwemeLongClickOpenSettingsHook()
-        installLaunchStartSettingsIntentHook()
-        installIncomingStartSettingsIntentHook()
     }
 
     private fun installModuleSettingsEntryHook(): YukiHookCreator.MemberHooker<*>.Handle? {
@@ -92,8 +90,19 @@ object SettingsEntryHooker : YukiBaseHooker() {
                 ViewGroup.LayoutParams.WRAP_CONTENT
             )
 
-            moduleSettingsCommonItemView.setOnClickListener {
-                SettingsDialog.show(activity)
+            moduleSettingsCommonItemView.apply {
+                setOnClickListener {
+                    activity.startActivity(
+                        Intent(
+                            Intent.ACTION_VIEW,
+                            "douyinenhancer://io.github.twyora.douyinenhancer/settings/main".toUri()
+                        )
+                    )
+                }
+                setOnLongClickListener {
+                    LegacyConfigDeprecationDialog.show(activity)
+                    true
+                }
             }
 
             // prefer inserting above the logout button; fallback to direct insert
@@ -162,75 +171,6 @@ object SettingsEntryHooker : YukiBaseHooker() {
         }?.apply {
             onCallbackFailure { _, throwable ->
                 YLog.error("$TAG: failed to attach long click to open settings", throwable)
-            }
-        }
-    }
-
-    private fun installLaunchStartSettingsIntentHook(): YukiHookCreator.MemberHooker<*>.Handle? {
-        return packageInstance.mainActivity.selfClass?.resolveMethodOrNull(
-            packageInstance.mainActivity.onResume()
-        )?.intercept {
-            val activity = instanceOrNull<Activity>() ?: run {
-                YLog.error("$TAG: ${instance::class.qualifiedName} is not an Activity")
-                return@intercept proceed()
-            }
-
-            val shouldStartSettings = activity.intent?.getBooleanExtra(
-                "douyinenhancer_start_settings",
-                false
-            )
-            if (shouldStartSettings == true) {
-                if (verbose) {
-                    YLog.debug("$TAG: start-settings flag detected in onResume intent, showing settings dialog")
-                }
-                activity.intent?.removeExtra("douyinenhancer_start_settings")
-                SettingsDialog.show(activity)
-                removeSelf {
-                    if (verbose) {
-                        YLog.debug("$TAG: settings dialog shown, unregistering onResume hook to prevent re-show")
-                    }
-                }
-            }
-
-            proceed()
-        }?.apply {
-            onCallbackFailure { _, throwable ->
-                YLog.error("$TAG: failed to show settings dialog on resume", throwable)
-            }
-        }
-    }
-
-    private fun installIncomingStartSettingsIntentHook(): YukiHookCreator.MemberHooker<*>.Handle? {
-        return packageInstance.mainActivity.selfClass?.resolveMethodOrNull(
-            packageInstance.mainActivity.onNewIntent()
-        )?.intercept {
-            val activity = instanceOrNull<Activity>() ?: run {
-                YLog.error("$TAG: ${instance::class.qualifiedName} is not an Activity")
-                return@intercept proceed()
-            }
-            val intent = args.firstNotNullOfOrNull {
-                it as? Intent
-            } ?: run {
-                YLog.error("$TAG: intent not found in argument list")
-                return@intercept proceed()
-            }
-
-            val shouldStartSettings = intent.getBooleanExtra(
-                "douyinenhancer_start_settings",
-                false
-            )
-            if (shouldStartSettings) {
-                if (verbose) {
-                    YLog.debug("$TAG: start-settings flag detected in onNewIntent, showing settings dialog")
-                }
-                intent.removeExtra("douyinenhancer_start_settings")
-                SettingsDialog.show(activity)
-            }
-
-            proceed()
-        }?.apply {
-            onCallbackFailure { _, throwable ->
-                YLog.error("$TAG: failed to show settings dialog on new intent", throwable)
             }
         }
     }

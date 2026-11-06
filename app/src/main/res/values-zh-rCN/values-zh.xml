@@ -167,6 +167,14 @@
     <string name="config_export_chooser">保存配置</string>
     <string name="config_import_chooser">选择配置</string>
 
+    <string name="legacy_config_deprecation_dialog_title">宿主端设置页已废弃</string>
+    <string name="legacy_config_deprecation_warning">模块默认不再读取宿主端保存的配置，请前往模块端设置页配置功能。跳转前，你可在下方导出宿主端的模块配置，导出文件使用新版配置格式。</string>
+    <string name="legacy_config_deprecation_go_to_new_settings">模块端设置页</string>
+    <string name="legacy_config_deprecation_go_to_new_settings_summary">点击前往模块端设置页</string>
+    <string name="legacy_config_deprecation_export">导出设置</string>
+    <string name="legacy_config_deprecation_open_legacy_settings_title">旧版设置页</string>
+    <string name="legacy_config_deprecation_open_legacy_settings_summary">该页面内所有配置已不再被模块读取，仅供查看</string>
+
     <string name="pref_category_misc">杂项</string>
     <string name="pref_category_ui">界面</string>
     <string name="pref_misc_enable_hidden_features_title">✦ 启用隐藏功能</string>

@@ -167,6 +167,14 @@
     <string name="config_export_chooser">Save configuration</string>
     <string name="config_import_chooser">Select configuration</string>
 
+    <string name="legacy_config_deprecation_dialog_title">Host-side Settings Page Deprecated</string>
+    <string name="legacy_config_deprecation_warning">The module no longer reads configurations stored on the host by default. Please go to the module-side settings page to configure features. Before redirecting, you may export the module configurations stored on the host below; the exported file uses the new configuration format.</string>
+    <string name="legacy_config_deprecation_go_to_new_settings">Module-side Settings Page</string>
+    <string name="legacy_config_deprecation_go_to_new_settings_summary">Tap to open module-side settings</string>
+    <string name="legacy_config_deprecation_export">Export Settings</string>
+    <string name="legacy_config_deprecation_open_legacy_settings_title">Legacy Settings Page</string>
+    <string name="legacy_config_deprecation_open_legacy_settings_summary">All configurations on this page are no longer read by the module and are for viewing only.</string>
+
     <string name="pref_category_misc">Misc</string>
     <string name="pref_category_ui">UI</string>
     <string name="pref_misc_enable_hidden_features_title">✦ Enable hidden features</string>

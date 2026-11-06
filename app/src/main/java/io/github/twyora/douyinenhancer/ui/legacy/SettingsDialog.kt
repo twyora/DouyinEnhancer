@@ -16,6 +16,7 @@ import android.preference.SwitchPreference
 import android.view.ContextThemeWrapper
 import com.highcapable.yukihookapi.hook.factory.injectModuleAppResources
 import com.highcapable.yukihookapi.hook.log.YLog
+import io.fastkv.FastKV
 import io.github.twyora.douyinenhancer.BuildConfig
 import io.github.twyora.douyinenhancer.R
 import io.github.twyora.douyinenhancer.bridge.ModuleApp
@@ -25,6 +26,7 @@ import io.github.twyora.douyinenhancer.config.kvstorage.decodeAsKVMap
 import io.github.twyora.douyinenhancer.config.kvstorage.encodeToKVBytes
 import io.github.twyora.douyinenhancer.config.provider.ModuleConfigProvider
 import io.github.twyora.douyinenhancer.constant.HookInfoFiles
+import io.github.twyora.douyinenhancer.constant.IKVStorages
 import io.github.twyora.douyinenhancer.constant.SignatureKeys
 import io.github.twyora.douyinenhancer.utils.android.toast
 import io.github.twyora.douyinenhancer.utils.crypto.sha256Hex
@@ -58,6 +60,10 @@ import org.json.JSONObject
  *
  * Referenced from [BiliRoaming](https://github.com/yujincheng08/BiliRoaming/blob/master/app/src/main/java/me/iacn/biliroaming/SettingDialog.kt)
  */
+@Deprecated(
+    "V1 config dialogs are no longer maintained in the host;" +
+        " use the Compose-based settings in the module environment instead."
+)
 class SettingsDialog(context: Context) :
     AlertDialog.Builder(
         ContextThemeWrapper(
@@ -69,6 +75,7 @@ class SettingsDialog(context: Context) :
         PreferenceFragment(),
         Preference.OnPreferenceClickListener,
         Preference.OnPreferenceChangeListener {
+        private var fastkv: FastKV? = null
         private var hiddenFeatureClickCount = 0
         private val scope = MainScope()
 
@@ -76,10 +83,11 @@ class SettingsDialog(context: Context) :
         override fun onCreate(savedInstanceState: Bundle?) {
             super.onCreate(savedInstanceState)
 
+            fastkv = FastKVStorage.open(context, IKVStorages.SETTINGS_STORAGE_NAME).fastKV
             preferenceManager.setFieldOrNull(
                 Field("mSharedPreferences"),
                 // TODO: Urgent refactor required. This relies on internal implementation details
-                ((ConfigManager.settingsStorage as FastKVStorage).fastKV) as SharedPreferences
+                fastkv as SharedPreferences
             )
             preferenceManager.setFieldOrNull(Field("mEditor"), null)
             addPreferencesFromResource(R.xml.prefs_setting)
@@ -101,6 +109,17 @@ class SettingsDialog(context: Context) :
             findPreference("bottom_tab_block")?.onPreferenceClickListener = this
             findPreference("export_config")?.onPreferenceClickListener = this
             findPreference("import_config")?.onPreferenceClickListener = this
+            (findPreference("pref_category_backup") as? PreferenceCategory)?.let { category ->
+                findPreference("export_config")?.let {
+                    category.removePreference(it)
+                }
+                findPreference("import_config")?.let {
+                    category.removePreference(it)
+                }
+                if (category.preferenceCount == 0) {
+                    category.parent?.removePreference(category)
+                }
+            }
             (findPreference("disable_verbose_logs") as? SwitchPreference)?.apply {
                 isChecked = ConfigManager.module.verboseDisabled.value
                 onPreferenceChangeListener = this@PrefsFragment
@@ -120,6 +139,7 @@ class SettingsDialog(context: Context) :
         override fun onDestroy() {
             super.onDestroy()
             scope.cancel()
+            fastkv?.close()
         }
 
         @Deprecated("Deprecated in Java")
@@ -548,6 +568,10 @@ class SettingsDialog(context: Context) :
         private const val IMPORT_CONFIG = 1
         private const val LOAD_CUSTOM_HOOK_INFO = 2
 
+        @Deprecated(
+            "V1 config dialogs are no longer maintained in the host;" +
+                " use the Compose-based settings in the module environment instead."
+        )
         fun show(context: Context) {
             if (VerifyDialog.shouldVerify(context)) {
                 YLog.info("$TAG: unverified version, redirecting to verify dialog")
