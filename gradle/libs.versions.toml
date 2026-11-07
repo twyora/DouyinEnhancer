@@ -1,83 +1,83 @@
 [versions]
-agp = "9.2.1"
-coreKtx = "1.18.0"
+activity-compose = "1.13.0"
+agp = "9.4.0"
+appcompat = "1.8.0"
+auto-service-annotations = "1.1.1"
+auto-service-ksp = "1.2.0"
+commonsCollections4 = "4.6.0"
+compose-bom = "2026.08.00"
+coreKtx = "1.19.0"
+dexkit = "2.3.0"
+espressoCore = "3.7.0"
+fastkv = "3.0.1"
+gifkt = "0.3.3"
+java-json-canonicalization = "1.1"
+jetbrainsKotlinJvm = "2.4.21"
+jgit = "7.8.0.202609011348-r"
 junit = "4.13.2"
 junitVersion = "1.3.0"
-espressoCore = "3.7.0"
-appcompat = "1.7.1"
-material = "1.14.0"
-ksp = "2.3.12"
-dexkit = "2.2.0"
-gifkt = "0.3.3"
-protobuf = "0.10.0"
-protobuf-lib = "4.35.1"
-spotless = "8.7.0"
-fastkv = "2.6.0"
-kotlinpoet = "2.4.0"
-auto-service-annotations = "1.1.0"
-auto-service-ksp = "1.2.0"
-jetbrainsKotlinJvm = "2.4.21"
-commonsCollections4 = "4.5.0"
-compose-bom = "2026.08.00"
-activity-compose = "1.13.0"
-navigation3 = "1.2.0"
-lifecycle-viewmodel-navigation3 = "2.11.0"
-lifecycle-runtime-compose = "2.11.0"
-java-json-canonicalization = "1.1"
-jgit = "7.8.0.202609011348-r"
-yukihook-bom = "1.5.0"
 kavaref-bom = "1.1.1"
+kotlinpoet = "2.4.0"
+ksp = "2.3.12"
 libxposed-api = "102.0.0"
+lifecycle-runtime-compose = "2.11.0"
+lifecycle-viewmodel-navigation3 = "2.11.0"
+material = "1.14.0"
+navigation3 = "1.2.0"
+protobuf = "0.10.1"
+protobuf-lib = "4.36.2"
+spotless = "8.11.0"
+yukihook-bom = "1.5.0"
 
 [libraries]
+androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activity-compose" }
+androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+androidx-compose-bom = { module = "androidx.compose:compose-bom", version.ref = "compose-bom" }
+androidx-compose-foundation = { module = "androidx.compose.foundation:foundation" }
+androidx-compose-material3 = { module = "androidx.compose.material3:material3" }
+androidx-compose-ui = { module = "androidx.compose.ui:ui" }
+androidx-compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
+androidx-compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
+androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
+androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
+androidx-lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycle-runtime-compose" }
+androidx-lifecycle-viewmodel-navigation3 = { module = "androidx.lifecycle:lifecycle-viewmodel-navigation3", version.ref = "lifecycle-viewmodel-navigation3" }
+androidx-navigation3-runtime = { module = "androidx.navigation3:navigation3-runtime", version.ref = "navigation3" }
+androidx-navigation3-ui = { module = "androidx.navigation3:navigation3-ui", version.ref = "navigation3" }
+auto-service-annotations = { module = "com.google.auto.service:auto-service-annotations", version.ref = "auto-service-annotations" }
+auto-service-ksp = { module = "dev.zacsweers.autoservice:auto-service-ksp", version.ref = "auto-service-ksp" }
+commons-collections4 = { group = "org.apache.commons", name = "commons-collections4", version.ref = "commonsCollections4" }
+fastkv = { module = "io.github.billywei01:fastkv", version.ref = "fastkv" }
+gifkt = { module = "com.shakster:gifkt", version.ref = "gifkt" }
+jgit = { module = "org.eclipse.jgit:org.eclipse.jgit", version.ref = "jgit" }
+json-canonicalization = { module = "io.github.erdtman:java-json-canonicalization", version.ref = "java-json-canonicalization" }
+junit = { group = "junit", name = "junit", version.ref = "junit" }
+kavaref-android = { module = "com.highcapable.kavaref:kavaref-android" }
 kavaref-bom = { module = "com.highcapable.kavaref:kavaref-bom", version.ref = "kavaref-bom" }
 kavaref-core = { module = "com.highcapable.kavaref:kavaref-core" }
-kavaref-android = { module = "com.highcapable.kavaref:kavaref-android" }
 kavaref-extension = { module = "com.highcapable.kavaref:kavaref-extension" }
-yukihook-bom = { module = "com.highcapable.yukihookapi:yukihook-bom", version.ref = "yukihook-bom" }
-yukihook-core = { module = "com.highcapable.yukihookapi:yukihook-core" }
-yukihook-compiler = { module = "com.highcapable.yukihookapi:yukihook-compiler" }
-yukihook-extension-kavaref = { module = "com.highcapable.yukihookapi:yukihook-extension-kavaref" }
-yukihook-runtime-libxposed = { module = "com.highcapable.yukihookapi:yukihook-runtime-libxposed" }
+kotlinpoet = { module = "com.squareup:kotlinpoet", version.ref = "kotlinpoet" }
+kotlinpoet-ksp = { module = "com.squareup:kotlinpoet-ksp", version.ref = "kotlinpoet" }
+ksp-symbol-processing-api = { module = "com.google.devtools.ksp:symbol-processing-api", version.ref = "ksp" }
 libxposed-api = { module = "io.github.libxposed:api", version.ref = "libxposed-api" }
-androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
-junit = { group = "junit", name = "junit", version.ref = "junit" }
-androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
-androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
-androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
-material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 luckypray-dexkit = { group = "org.luckypray", name = "dexkit", version.ref = "dexkit" }
-gifkt = { module = "com.shakster:gifkt", version.ref = "gifkt" }
+material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 protobuf-java = { module = "com.google.protobuf:protobuf-java", version.ref = "protobuf-lib" }
 protobuf-java-util = { module = "com.google.protobuf:protobuf-java-util", version.ref = "protobuf-lib" }
 protobuf-kotlin = { module = "com.google.protobuf:protobuf-kotlin", version.ref = "protobuf-lib" }
 protobuf-protoc = { module = "com.google.protobuf:protoc", version.ref = "protobuf-lib" }
-fastkv = { module = "io.github.billywei01:fastkv", version.ref = "fastkv" }
-kotlinpoet = { module = "com.squareup:kotlinpoet", version.ref = "kotlinpoet" }
-kotlinpoet-ksp = { module = "com.squareup:kotlinpoet-ksp", version.ref = "kotlinpoet" }
-auto-service-annotations = { module = "com.google.auto.service:auto-service-annotations", version.ref = "auto-service-annotations" }
-auto-service-ksp = { module = "dev.zacsweers.autoservice:auto-service-ksp", version.ref = "auto-service-ksp" }
-ksp-symbol-processing-api = { module = "com.google.devtools.ksp:symbol-processing-api", version.ref = "ksp" }
-commons-collections4 = { group = "org.apache.commons", name = "commons-collections4", version.ref = "commonsCollections4" }
-androidx-compose-bom = { module = "androidx.compose:compose-bom", version.ref = "compose-bom" }
-androidx-compose-ui = { module = "androidx.compose.ui:ui" }
-androidx-compose-foundation = { module = "androidx.compose.foundation:foundation" }
-androidx-compose-material3 = { module = "androidx.compose.material3:material3" }
-androidx-compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
-androidx-compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
-androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activity-compose" }
-androidx-navigation3-runtime = { module = "androidx.navigation3:navigation3-runtime", version.ref = "navigation3" }
-androidx-navigation3-ui = { module = "androidx.navigation3:navigation3-ui", version.ref = "navigation3" }
-androidx-lifecycle-viewmodel-navigation3 = { module = "androidx.lifecycle:lifecycle-viewmodel-navigation3", version.ref = "lifecycle-viewmodel-navigation3" }
-androidx-lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycle-runtime-compose" }
-json-canonicalization = { module = "io.github.erdtman:java-json-canonicalization", version.ref = "java-json-canonicalization" }
-jgit = { module = "org.eclipse.jgit:org.eclipse.jgit", version.ref = "jgit" }
+yukihook-bom = { module = "com.highcapable.yukihookapi:yukihook-bom", version.ref = "yukihook-bom" }
+yukihook-compiler = { module = "com.highcapable.yukihookapi:yukihook-compiler" }
+yukihook-core = { module = "com.highcapable.yukihookapi:yukihook-core" }
+yukihook-extension-kavaref = { module = "com.highcapable.yukihookapi:yukihook-extension-kavaref" }
+yukihook-runtime-libxposed = { module = "com.highcapable.yukihookapi:yukihook-runtime-libxposed" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
+compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "jetbrainsKotlinJvm" }
+jetbrains-kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "jetbrainsKotlinJvm" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "jetbrainsKotlinJvm" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 protobuf = { id = "com.google.protobuf", version.ref = "protobuf" }
 spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
-jetbrains-kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "jetbrainsKotlinJvm" }
-compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "jetbrainsKotlinJvm" }
-kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "jetbrainsKotlinJvm" }

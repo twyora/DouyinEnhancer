@@ -141,7 +141,7 @@ protobuf {
 
     generateProtoTasks {
         all().forEach { task ->
-            task.plugins {
+            task.builtins {
                 id("java")
                 id("kotlin")
             }
@@ -156,19 +156,16 @@ buildscript {
 }
 
 dependencies {
-    // TODO: Reorganize this
-
+    // local modules
     implementation(project(":annotation"))
     ksp(project(":processor"))
 
-    implementation(libs.androidx.appcompat)
+    // androidX core
     implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.appcompat)
     implementation(libs.material)
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(libs.androidx.junit)
 
-    // ---------------------- HOOK ----------------------
+    // hooking
     platform(libs.yukihook.bom).apply {
         implementation(this)
         ksp(this)
@@ -184,15 +181,21 @@ dependencies {
     implementation(libs.kavaref.android)
     implementation(libs.kavaref.extension)
 
-    // ------------------ 底层与工具库 ------------------
+    // dex tooling
     implementation(libs.luckypray.dexkit)
-    implementation(libs.gifkt)
-    implementation(libs.fastkv)
+
+    // serialization
     implementation(libs.protobuf.java)
     implementation(libs.protobuf.java.util)
     implementation(libs.protobuf.kotlin)
-    implementation(libs.commons.collections4)
     implementation(libs.json.canonicalization)
+
+    // storage
+    implementation(libs.fastkv)
+
+    // media & utilities
+    implementation(libs.gifkt)
+    implementation(libs.commons.collections4)
 
     // compose
     implementation(platform(libs.androidx.compose.bom))
@@ -203,11 +206,16 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     debugImplementation(libs.androidx.compose.ui.tooling)
 
-    // navigation3
+    // navigation & lifecycle
     implementation(libs.androidx.navigation3.runtime)
     implementation(libs.androidx.navigation3.ui)
     implementation(libs.androidx.lifecycle.viewmodel.navigation3)
     implementation(libs.androidx.lifecycle.runtime.compose)
+
+    // testing
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
 }
 
 fun resolveGitCommitSuffix(project: Project) = runCatching {
