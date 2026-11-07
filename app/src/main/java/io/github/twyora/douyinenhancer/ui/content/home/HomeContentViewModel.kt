@@ -9,6 +9,7 @@ import com.highcapable.yukihookapi.YukiHook
 import com.highcapable.yukihookapi.hook.log.YLog
 import io.github.twyora.douyinenhancer.BuildConfig
 import io.github.twyora.douyinenhancer.R
+import io.github.twyora.douyinenhancer.config.ConfigManager
 import androidx.annotation.StringRes
 import androidx.navigation3.runtime.NavKey
 import io.github.twyora.douyinenhancer.ui.event.SnackEvent
@@ -19,6 +20,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -53,6 +56,16 @@ class HomeContentViewModel(application: Application) : AndroidViewModel(applicat
 
     val triggerNavigation: SharedFlow<NavKey>
         field = MutableSharedFlow<NavKey>(extraBufferCapacity = 1)
+
+    val versionClickCount: StateFlow<Int>
+        field = MutableStateFlow(0)
+
+    private val hiddenFeatureEnabled: StateFlow<Boolean> =
+        ConfigManager.misc.hiddenFeatureEnabled.observe().stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.Eagerly,
+            initialValue = ConfigManager.misc.hiddenFeatureEnabled.defValue
+        )
 
     init {
         viewModelScope.launch {
@@ -124,11 +137,37 @@ class HomeContentViewModel(application: Application) : AndroidViewModel(applicat
         triggerNavigation.tryEmit(navKey)
     }
 
+    fun onVersionClick() {
+        if (hiddenFeatureEnabled.value) {
+            sendSnack(SnackEvent(R.string.pref_misc_enable_hidden_features_already_enabled))
+            return
+        }
+        val count = ++versionClickCount.value
+        if (count == HIDDEN_FEATURE_TRIGGER_CLICK_COUNT) {
+            setHiddenFeatureState(true)
+            sendSnack(SnackEvent(R.string.pref_misc_enable_hidden_features_restart_required))
+        } else if (count >= HIDDEN_FEATURE_HINT_FROM_CLICK_COUNT) {
+            sendSnack(
+                SnackEvent(
+                    R.string.pref_misc_enable_hidden_features_steps_remaining,
+                    listOf(HIDDEN_FEATURE_TRIGGER_CLICK_COUNT - count)
+                )
+            )
+        }
+    }
+
+    fun setHiddenFeatureState(enabled: Boolean) {
+        ConfigManager.misc.hiddenFeatureEnabled.value = enabled
+    }
+
     fun sendSnack(event: SnackEvent) {
         snackFlow.tryEmit(event)
     }
 
     companion object {
         private val TAG = this::class.simpleName
+
+        private const val HIDDEN_FEATURE_TRIGGER_CLICK_COUNT = 20
+        private const val HIDDEN_FEATURE_HINT_FROM_CLICK_COUNT = 17
     }
 }

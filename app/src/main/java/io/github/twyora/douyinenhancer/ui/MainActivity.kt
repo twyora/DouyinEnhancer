@@ -403,6 +403,9 @@ class MainActivity : ComponentActivity() {
                 onViewRelease = {
                     mainVm.requestOpenUrl(R.string.latest_release_page_url)
                 },
+                onVersionClick = {
+                    mainVm.onVersionClick()
+                },
                 onJoinTelegramGroup = {
                     mainVm.requestOpenUrl(R.string.telegram_url)
                 },

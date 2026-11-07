@@ -54,7 +54,9 @@ fun HomeContent(uiState: HomeContentUiState, modifier: Modifier = Modifier, uiAc
                 } else {
                     ""
                 }
-            )
+            ) {
+                uiActions.onVersionClick()
+            }
         }
         item {
             PreferenceItem(

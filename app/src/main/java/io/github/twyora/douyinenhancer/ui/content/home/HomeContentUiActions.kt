@@ -9,6 +9,7 @@ class HomeContentUiActions(
     val onOpenAuthor: () -> Unit = {},
     val onOpenRepository: () -> Unit = {},
     val onViewRelease: () -> Unit = {},
+    val onVersionClick: () -> Unit = {},
     val onJoinTelegramGroup: () -> Unit = {},
     val onNavigateToSettings: () -> Unit = {}
 )
