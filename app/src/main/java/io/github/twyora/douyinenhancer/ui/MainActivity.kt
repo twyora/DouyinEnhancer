@@ -101,9 +101,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.conflate
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.serializer
@@ -116,12 +114,6 @@ class MainActivity : ComponentActivity() {
     )
 
     private var pendingNavKey: NavKey? = null
-
-    private val lastVerifiedVersionFlow = ConfigManager.module.lastVerifiedVersion.observe().stateIn(
-        scope = lifecycleScope,
-        started = SharingStarted.Eagerly,
-        initialValue = 0
-    )
 
     private val uriDeepLinkMatchers = listOf(
         UriDeepLinkMatcher(
@@ -204,7 +196,7 @@ class MainActivity : ComponentActivity() {
                         val shouldVerify = !(
                             BuildConfig.DEBUG ||
                                 (langCode != Locale.CHINESE.language) ||
-                                lastVerifiedVersionFlow.value == BuildConfig.VERSION_CODE
+                                ConfigManager.module.lastVerifiedVersion.value == BuildConfig.VERSION_CODE
                             )
 
                         val target = if (navKey is AppRoutes.Settings && shouldVerify) {
