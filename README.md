@@ -44,7 +44,7 @@ See more about future development: [PM.md](PM.md)
 
 ## Usage
 
-1. Activate the module in your Xposed manager (e.g. LSPosed)
+1. Activate the module in your LSPosed manager
 2. Set the scope to Douyin (`com.ss.android.ugc.aweme`)
 3. Restart Douyin
 
@@ -52,8 +52,7 @@ See more about future development: [PM.md](PM.md)
 
 - This project is for personal learning and technical exchange only. Please do not use it for
   commercial purposes.
-- Any consequences arising from the use of this module are at
-  the user's own risk.
+- Any consequences arising from the use of this module are at the user's own risk.
 
 ## Credits
 

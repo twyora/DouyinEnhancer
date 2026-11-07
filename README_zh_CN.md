@@ -41,7 +41,7 @@
 
 ## 使用方法
 
-1. 在 Xposed 管理器（如 LSPosed）中激活模块
+1. 在 LSPosed 管理器中激活模块
 2. 作用域勾选抖音（`com.ss.android.ugc.aweme`）
 3. 重启抖音
 
