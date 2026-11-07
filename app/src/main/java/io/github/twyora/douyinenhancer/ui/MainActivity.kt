@@ -38,7 +38,6 @@ import io.github.twyora.douyinenhancer.ui.content.attest.VerifyDialogViewModel
 import io.github.twyora.douyinenhancer.ui.content.attest.VerifyDialogViewModelFactory
 import io.github.twyora.douyinenhancer.ui.content.home.HomeContent
 import io.github.twyora.douyinenhancer.ui.content.home.HomeContentUiActions
-import io.github.twyora.douyinenhancer.ui.content.home.HomeContentUiState
 import io.github.twyora.douyinenhancer.ui.content.home.HomeContentViewModel
 import io.github.twyora.douyinenhancer.ui.content.settings.filter.recommended_feed.RecommendedFeedFilterActions
 import io.github.twyora.douyinenhancer.ui.content.settings.filter.recommended_feed.RecommendedFeedFilterContent
@@ -421,11 +420,7 @@ class MainActivity : ComponentActivity() {
             )
         }
         HomeContent(
-            uiState = HomeContentUiState(
-                launcherIconHidden = mainUiState.launcherIconHidden,
-                moduleActivationState = mainUiState.moduleActivationState,
-                updateState = mainUiState.updateState
-            ),
+            uiState = mainUiState,
             modifier = modifier
                 .fillMaxSize()
                 .padding(innerPadding),
