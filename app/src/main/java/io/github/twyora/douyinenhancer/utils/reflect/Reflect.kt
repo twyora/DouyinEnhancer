@@ -154,6 +154,26 @@ fun KClass<*>.invokeStaticMethodOrNull(method: Method, vararg args: Any?): Any? 
     YLog.error("failed to invoke static method: ${this.java.name}.${method.name}(${method.parameters})", it)
 }.getOrNull()
 
+fun Class<*>.invokeStaticMethodOnly(method: Method, vararg args: Any?) {
+    this.invokeStaticMethod(method, *args)
+}
+
+fun Class<*>.invokeStaticMethodOnlyQuietly(method: Method, vararg args: Any?) {
+    runCatching {
+        this.invokeStaticMethodOnly(method, *args)
+    }
+}
+
+fun KClass<*>.invokeStaticMethodOnly(method: Method, vararg args: Any?) {
+    this.java.invokeStaticMethodOnly(method, *args)
+}
+
+fun KClass<*>.invokeStaticMethodOnlyQuietly(method: Method, vararg args: Any?) {
+    runCatching {
+        this.invokeStaticMethodOnly(method, *args)
+    }
+}
+
 @JvmName("getStaticFieldTyped")
 inline fun <reified T> Class<*>.getStaticField(field: Field): T? = getStaticField(field) as T?
 
