@@ -1,5 +1,6 @@
 package io.github.twyora.douyinenhancer.ui.content.home
 
+import android.annotation.SuppressLint
 import android.app.Application
 import android.content.ComponentName
 import android.content.pm.PackageManager
@@ -12,6 +13,7 @@ import io.github.twyora.douyinenhancer.R
 import io.github.twyora.douyinenhancer.config.ConfigManager
 import androidx.annotation.StringRes
 import androidx.navigation3.runtime.NavKey
+import com.highcapable.yukihookapi.runtime.bridge.FrameworkServiceBridge
 import io.github.twyora.douyinenhancer.ui.event.SnackEvent
 import java.net.URL
 import kotlinx.coroutines.Dispatchers
@@ -60,6 +62,9 @@ class HomeContentViewModel(application: Application) : AndroidViewModel(applicat
     val versionClickCount: StateFlow<Int>
         field = MutableStateFlow(0)
 
+    private var frameworkSrvSubscription: FrameworkServiceBridge? = null
+    private val moduleActivationState = MutableStateFlow(false)
+
     private val hiddenFeatureEnabled: StateFlow<Boolean> =
         ConfigManager.misc.hiddenFeatureEnabled.observe().stateIn(
             scope = viewModelScope,
@@ -68,14 +73,22 @@ class HomeContentViewModel(application: Application) : AndroidViewModel(applicat
         )
 
     init {
+        frameworkSrvSubscription = YukiHook.Status.observeFrameworkService { available ->
+            moduleActivationState.value = available
+        }
+
         viewModelScope.launch {
             uiState.update {
                 it.copy(
                     launcherIconHidden = getApplication<Application>().packageManager.getComponentEnabledSetting(
                         launcherAlias
                     ) == PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
-                    moduleActivationState = YukiHook.Status.isModuleActive
                 )
+            }
+            moduleActivationState.collect { active ->
+                uiState.update {
+                    it.copy(moduleActivationState = active)
+                }
             }
             fetchUpdateInfo()?.let { updateInfo ->
                 uiState.update {
@@ -87,6 +100,13 @@ class HomeContentViewModel(application: Application) : AndroidViewModel(applicat
                 }
             }
         }
+    }
+
+    @SuppressLint("EmptySuperCall")
+    override fun onCleared() {
+        super.onCleared()
+        frameworkSrvSubscription?.unregister()
+        frameworkSrvSubscription = null
     }
 
     fun setLauncherIconHidden(hidden: Boolean) {
