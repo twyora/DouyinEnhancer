@@ -138,7 +138,10 @@ class HomeContentViewModel(application: Application) : AndroidViewModel(applicat
             )
         }
 
-        val latestVersionName = latestReleaseJson.optString("name").removePrefix("v").removePrefix("V")
+        val latestVersionName = latestReleaseJson.optString("name").removePrefix("v").removePrefix("V").ifBlank {
+            YLog.warn("$TAG: version name fetched from remote is blank!")
+            return@runCatching null
+        }
         val releaseBody = latestReleaseJson.optString("body")
 
         HomeContentUpdateState(
