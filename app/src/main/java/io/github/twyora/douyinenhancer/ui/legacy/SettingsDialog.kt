@@ -573,16 +573,11 @@ class SettingsDialog(context: Context) :
                 " use the Compose-based settings in the module environment instead."
         )
         fun show(context: Context) {
-            if (VerifyDialog.shouldVerify(context)) {
-                YLog.info("$TAG: unverified version, redirecting to verify dialog")
-                VerifyDialog.show(context)
-            } else {
-                runCatching {
-                    context.injectModuleAppResources()
-                    SettingsDialog(context).show()
-                }.onFailure {
-                    YLog.error("$TAG: failed to show settings dialog", it)
-                }
+            runCatching {
+                context.injectModuleAppResources()
+                SettingsDialog(context).show()
+            }.onFailure {
+                YLog.error("$TAG: failed to show settings dialog", it)
             }
         }
 
