@@ -271,13 +271,15 @@ fun SettingsContentModuleSection(
         }
 
         PreferenceItem(
-            title = stringResource(R.string.pref_module_load_custom_hook_info_title)
+            title = stringResource(R.string.pref_module_load_custom_hook_info_title),
+            summary = stringResource(R.string.pref_module_load_custom_hook_info_summary)
         ) {
             moduleActions.onLoadCustomMapping()
         }
 
         PreferenceItem(
-            title = stringResource(R.string.pref_module_reset_custom_hook_info_title)
+            title = stringResource(R.string.pref_module_reset_custom_hook_info_title),
+            summary = stringResource(R.string.pref_module_reset_custom_hook_info_summary)
         ) {
             moduleActions.onClearCustomMapping()
         }

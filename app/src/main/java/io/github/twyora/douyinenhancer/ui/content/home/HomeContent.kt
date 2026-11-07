@@ -20,8 +20,7 @@ fun HomeContent(uiState: HomeContentUiState, modifier: Modifier = Modifier, uiAc
         }
         item {
             PreferenceItem(
-                title = stringResource(R.string.pref_settings_open_module_settings_title),
-                summary = stringResource(R.string.pref_settings_open_module_settings_summary)
+                title = stringResource(R.string.pref_settings_open_module_settings_title)
             ) {
                 uiActions.onNavigateToSettings()
             }
