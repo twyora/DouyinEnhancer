@@ -32,7 +32,7 @@ import io.github.twyora.douyinenhancer.utils.android.toast
 import io.github.twyora.douyinenhancer.utils.crypto.sha256Hex
 import io.github.twyora.douyinenhancer.utils.crypto.verifySha256RsaSignature
 import io.github.twyora.douyinenhancer.utils.reflect.Field
-import io.github.twyora.douyinenhancer.utils.reflect.setFieldOrNull
+import io.github.twyora.douyinenhancer.utils.reflect.setFieldQuietly
 import java.io.ByteArrayInputStream
 import java.io.File
 import java.net.URL
@@ -84,12 +84,12 @@ class SettingsDialog(context: Context) :
             super.onCreate(savedInstanceState)
 
             fastkv = FastKVStorage.open(context, IKVStorages.SETTINGS_STORAGE_NAME).fastKV
-            preferenceManager.setFieldOrNull(
+            preferenceManager.setFieldQuietly(
                 Field("mSharedPreferences"),
                 // TODO: Urgent refactor required. This relies on internal implementation details
                 fastkv as SharedPreferences
             )
-            preferenceManager.setFieldOrNull(Field("mEditor"), null)
+            preferenceManager.setFieldQuietly(Field("mEditor"), null)
             addPreferencesFromResource(R.xml.prefs_setting)
 
             if (!ConfigManager.misc.hiddenFeatureEnabled.value) {

@@ -18,7 +18,7 @@ import io.github.twyora.douyinenhancer.hook.DouyinPackage
 import io.github.twyora.douyinenhancer.hook.HookOnMainProcess
 import io.github.twyora.douyinenhancer.ui.legacy.LegacyConfigDeprecationDialog
 import io.github.twyora.douyinenhancer.utils.reflect.getFieldOrNull
-import io.github.twyora.douyinenhancer.utils.reflect.invokeMethodOnly
+import io.github.twyora.douyinenhancer.utils.reflect.invokeMethodOnlyQuietly
 import io.github.twyora.douyinenhancer.utils.reflect.resolveMethodOrNull
 
 @HookOnMainProcess
@@ -73,15 +73,15 @@ object SettingsEntryHooker : YukiBaseHooker() {
             }
             // ensure the host app can find the module settings icon
             activity.injectModuleResources()
-            moduleSettingsCommonItemView.invokeMethodOnly(
+            moduleSettingsCommonItemView.invokeMethodOnlyQuietly(
                 packageInstance.commonItemView.setLeftText(),
                 module.resources.getString(R.string.app_name)
             )
-            moduleSettingsCommonItemView.invokeMethodOnly(
+            moduleSettingsCommonItemView.invokeMethodOnlyQuietly(
                 packageInstance.commonItemView.setLeftIcon(),
                 R.drawable.ic_module_settings
             )
-            moduleSettingsCommonItemView.invokeMethodOnly(
+            moduleSettingsCommonItemView.invokeMethodOnlyQuietly(
                 packageInstance.commonItemView.setRightUIMode(),
                 0 // arrow mode for the right UI element
             )

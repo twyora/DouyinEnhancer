@@ -14,7 +14,7 @@ import io.github.twyora.douyinenhancer.utils.reflect.getStaticFieldOrNull
 import io.github.twyora.douyinenhancer.utils.reflect.invokeMethodOrNull
 import io.github.twyora.douyinenhancer.utils.reflect.invokeStaticMethodOrNull
 import io.github.twyora.douyinenhancer.utils.reflect.resolveMethodOrNull
-import io.github.twyora.douyinenhancer.utils.reflect.setFieldOrNull
+import io.github.twyora.douyinenhancer.utils.reflect.setFieldQuietly
 
 @HookOnMainProcess
 object FeedDownloadHooker : YukiBaseHooker() {
@@ -71,7 +71,7 @@ object FeedDownloadHooker : YukiBaseHooker() {
                 if (verbose) {
                     YLog.debug("$TAG: forcing action status from $actionStatus to $normalStatus to allow download")
                 }
-                actionCheckResult.setFieldOrNull(
+                actionCheckResult.setFieldQuietly(
                     packageInstance.actionCheckResult.actionStatus(),
                     normalStatus
                 )
@@ -108,7 +108,7 @@ object FeedDownloadHooker : YukiBaseHooker() {
                 }
                 aweme.getFieldOrNull(
                     packageInstance.aweme.status()
-                )?.setFieldOrNull(
+                )?.setFieldQuietly(
                     packageInstance.awemeStatus.downloadStatus(),
                     0
                 )
@@ -133,11 +133,11 @@ object FeedDownloadHooker : YukiBaseHooker() {
             }
 
             val response = packageInstance.sharePrivacyVideoApi.privacyVideoResponse.selfClass?.createInstance()?.apply {
-                setFieldOrNull(
+                setFieldQuietly(
                     packageInstance.sharePrivacyVideoApi.privacyVideoResponse.msg(),
                     ""
                 )
-                setFieldOrNull(
+                setFieldQuietly(
                     packageInstance.sharePrivacyVideoApi.privacyVideoResponse.status(),
                     0
                 )

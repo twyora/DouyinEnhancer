@@ -7,7 +7,7 @@ import io.github.twyora.douyinenhancer.config.ConfigManager
 import io.github.twyora.douyinenhancer.hook.DouyinPackage
 import io.github.twyora.douyinenhancer.hook.HookOnMainProcess
 import io.github.twyora.douyinenhancer.utils.reflect.getFieldOrNull
-import io.github.twyora.douyinenhancer.utils.reflect.invokeMethodOnly
+import io.github.twyora.douyinenhancer.utils.reflect.invokeMethodOnlyQuietly
 import io.github.twyora.douyinenhancer.utils.reflect.resolveMethodOrNull
 
 @HookOnMainProcess
@@ -52,7 +52,7 @@ object FeedReplayHooker : YukiBaseHooker() {
             } else if (verbose) {
                 YLog.debug("$TAG: pause when feed playback completes")
             }
-            instance.invokeMethodOnly(
+            instance.invokeMethodOnlyQuietly(
                 packageInstance.baseListFragmentPanel.handlePause(),
                 true
             )

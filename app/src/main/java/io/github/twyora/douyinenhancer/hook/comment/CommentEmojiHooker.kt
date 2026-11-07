@@ -18,11 +18,11 @@ import io.github.twyora.douyinenhancer.utils.file.FileTypeDetector
 import io.github.twyora.douyinenhancer.utils.hook.HookTransaction
 import io.github.twyora.douyinenhancer.utils.reflect.getFieldOrNull
 import io.github.twyora.douyinenhancer.utils.reflect.getStaticFieldOrNull
-import io.github.twyora.douyinenhancer.utils.reflect.invokeMethodOnly
+import io.github.twyora.douyinenhancer.utils.reflect.invokeMethodOnlyQuietly
 import io.github.twyora.douyinenhancer.utils.reflect.invokeMethodOrNull
 import io.github.twyora.douyinenhancer.utils.reflect.invokeStaticMethodOrNull
 import io.github.twyora.douyinenhancer.utils.reflect.resolveMethodOrNull
-import io.github.twyora.douyinenhancer.utils.reflect.setFieldOrNull
+import io.github.twyora.douyinenhancer.utils.reflect.setFieldQuietly
 import java.io.File
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.io.buffered
@@ -264,7 +264,7 @@ object CommentEmojiHooker : YukiBaseHooker() {
                 return@intercept proceed()
             }
 
-            instance.invokeMethodOnly(
+            instance.invokeMethodOnlyQuietly(
                 packageInstance.commentImageSaveDownloadListener.notifyResult(),
                 context,
                 cpRet
@@ -363,7 +363,7 @@ object CommentEmojiHooker : YukiBaseHooker() {
         if (imageList.isNullOrEmpty()) {
             val newStruct = packageInstance.commentImageStruct.selfClass?.createInstance()
             imageList = listOf(newStruct)
-            comment.setFieldOrNull(
+            comment.setFieldQuietly(
                 packageInstance.comment.imageList(),
                 imageList
             )
@@ -375,12 +375,12 @@ object CommentEmojiHooker : YukiBaseHooker() {
         )
         if (urlModel == null) {
             urlModel = packageInstance.urlModel.selfClass?.createInstance()
-            targetStruct?.setFieldOrNull(
+            targetStruct?.setFieldQuietly(
                 packageInstance.commentImageStruct.downloadUrl(),
                 urlModel
             )
         }
-        urlModel?.setFieldOrNull(packageInstance.urlModel.urlList(), emojiUrls)
+        urlModel?.setFieldQuietly(packageInstance.urlModel.urlList(), emojiUrls)
     }
 
     private fun convertMedia2Gif(mediaPath: String, gifPath: String): Boolean {
@@ -434,7 +434,7 @@ object CommentEmojiHooker : YukiBaseHooker() {
 
                     val frameBitmap = createBitmap(frameWidth, frameHeight)
                     try {
-                        heifFrame.invokeMethodOnly(
+                        heifFrame.invokeMethodOnlyQuietly(
                             packageInstance.heifFrame.renderFrame(),
                             frameWidth,
                             frameHeight,
@@ -444,7 +444,7 @@ object CommentEmojiHooker : YukiBaseHooker() {
                     } catch (e: Exception) {
                         YLog.error("$TAG: failed to render or write frame $i", e)
                     } finally {
-                        heifFrame.invokeMethodOnly(
+                        heifFrame.invokeMethodOnlyQuietly(
                             packageInstance.heifFrame.dispose()
                         )
                         frameBitmap.recycle()
@@ -456,7 +456,7 @@ object CommentEmojiHooker : YukiBaseHooker() {
             YLog.error("$TAG: convert media to gif failed", e)
             return false
         } finally {
-            heifImage.invokeMethodOnly(
+            heifImage.invokeMethodOnlyQuietly(
                 packageInstance.heifImage.dispose()
             )
         }

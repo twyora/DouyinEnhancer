@@ -13,7 +13,7 @@ import io.github.twyora.douyinenhancer.utils.reflect.getFieldOrNull
 import io.github.twyora.douyinenhancer.utils.reflect.invokeMethodOrNull
 import io.github.twyora.douyinenhancer.utils.reflect.invokeStaticMethodOrNull
 import io.github.twyora.douyinenhancer.utils.reflect.resolveMethodOrNull
-import io.github.twyora.douyinenhancer.utils.reflect.setFieldOrNull
+import io.github.twyora.douyinenhancer.utils.reflect.setFieldQuietly
 import java.io.File
 import java.io.FileInputStream
 import org.apache.commons.collections4.queue.CircularFifoQueue
@@ -95,7 +95,7 @@ object FeedMultiImageHooker : YukiBaseHooker() {
                 ).takeIf {
                     !it.isNullOrEmpty()
                 }?.let {
-                    imageStruct.setFieldOrNull(
+                    imageStruct.setFieldQuietly(
                         packageInstance.imageUrlStruct.downloadUrlList(),
                         it
                     )
@@ -110,7 +110,7 @@ object FeedMultiImageHooker : YukiBaseHooker() {
                     video.invokeMethodOrNull(
                         packageInstance.video.getPlayAddr()
                     )?.let { playAddr ->
-                        video.setFieldOrNull(
+                        video.setFieldQuietly(
                             packageInstance.video.downloadAddr(),
                             playAddr
                         )
@@ -118,11 +118,11 @@ object FeedMultiImageHooker : YukiBaseHooker() {
                             YLog.debug("$TAG: play URL used as video download address")
                         }
                     }?.also {
-                        video.setFieldOrNull(
+                        video.setFieldQuietly(
                             packageInstance.video.hasWaterMark(),
                             false
                         )
-                        video.setFieldOrNull(
+                        video.setFieldQuietly(
                             packageInstance.video.hasSuffixWaterMark(),
                             false
                         )
