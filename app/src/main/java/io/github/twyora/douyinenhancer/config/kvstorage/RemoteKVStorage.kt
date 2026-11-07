@@ -8,6 +8,9 @@ import java.util.concurrent.ConcurrentHashMap
 import kotlin.collections.all
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 
 class RemoteKVStorage(override val name: String, val preference: YukiHookPreferences) : IKVStorage {
@@ -115,8 +118,13 @@ class RemoteKVStorage(override val name: String, val preference: YukiHookPrefere
     }
 
     @Suppress("UNCHECKED_CAST")
-    override fun <T : Any> observe(key: String, defValue: T): Flow<T> = flowFor(key, defValue).map {
-        (it as T?) ?: defValue
+    override fun <T : Any> observe(key: String, defValue: T): Flow<T> = flow {
+        emit(get(key, defValue))
+        emitAll(
+            flowFor(key, defValue).drop(1).map {
+                (it as T?) ?: defValue
+            }
+        )
     }
 
     override fun clear() {
