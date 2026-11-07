@@ -167,6 +167,14 @@
     <string name="config_export_chooser">保存配置</string>
     <string name="config_import_chooser">选择配置</string>
 
+    <string name="legacy_config_deprecation_dialog_title">宿主端设置页已废弃</string>
+    <string name="legacy_config_deprecation_warning">模块默认不再读取宿主端保存的配置，请前往模块端设置页配置功能。跳转前，你可在下方导出宿主端的模块配置，导出文件使用新版配置格式。</string>
+    <string name="legacy_config_deprecation_go_to_new_settings">模块端设置页</string>
+    <string name="legacy_config_deprecation_go_to_new_settings_summary">点击前往模块端设置页</string>
+    <string name="legacy_config_deprecation_export">导出设置</string>
+    <string name="legacy_config_deprecation_open_legacy_settings_title">旧版设置页</string>
+    <string name="legacy_config_deprecation_open_legacy_settings_summary">该页面内所有配置已不再被模块读取，仅供查看</string>
+
     <string name="pref_category_misc">杂项</string>
     <string name="pref_category_ui">界面</string>
     <string name="pref_misc_enable_hidden_features_title">✦ 启用隐藏功能</string>
@@ -182,7 +190,9 @@
     <string name="pref_module_invalid_hook_info_title">重置混淆映射表</string>
     <string name="pref_module_invalid_hook_info_summary">这将迫使模块重新搜索方法以重建混淆映射表</string>
     <string name="pref_module_load_custom_hook_info_title">加载自定义混淆映射表</string>
+    <string name="pref_module_load_custom_hook_info_summary">加载正确的混淆映射表可以解决大部分版本兼容性问题</string>
     <string name="pref_module_reset_custom_hook_info_title">清除自定义混淆映射表</string>
+    <string name="pref_module_reset_custom_hook_info_summary">清除自定义混淆映射表配置并重置混淆映射表</string>
     <string name="load_custom_hook_info_chooser">选择自定义的混淆映射表</string>
     <string name="untrusted_obfuscation_map">不可信的混淆映射表</string>
 
@@ -224,7 +234,6 @@
 
     <string name="pref_category_settings">设置</string>
     <string name="pref_settings_open_module_settings_title">打开模块设置</string>
-    <string name="pref_settings_open_module_settings_summary">启动客户端并打开模块设置</string>
     <string name="pref_settings_hide_launcher_icon_title">隐藏桌面图标</string>
     <string name="pref_settings_hide_launcher_icon_summary">不显示本应用在启动器中的图标</string>
     <string name="pref_about_activation_status_deactivated_title">未启用</string>

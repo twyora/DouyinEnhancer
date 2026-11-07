@@ -1,8 +1,8 @@
 package io.github.twyora.douyinenhancer.config
 
 import android.content.Context
-import io.github.twyora.douyinenhancer.config.kvstorage.FastKVStorage
 import io.github.twyora.douyinenhancer.config.kvstorage.IKVStorage
+import io.github.twyora.douyinenhancer.config.kvstorage.TransientKVStorage
 import io.github.twyora.douyinenhancer.config.provider.FeedConfigProvider
 import io.github.twyora.douyinenhancer.config.provider.HomeTabBlockConfigProvider
 import io.github.twyora.douyinenhancer.config.provider.MiscConfigProvider
@@ -12,6 +12,7 @@ import io.github.twyora.douyinenhancer.config.provider.RecommendedFeedFilterConf
 import io.github.twyora.douyinenhancer.config.provider.SaveConfigProvider
 import io.github.twyora.douyinenhancer.config.provider.UiConfigProvider
 import io.github.twyora.douyinenhancer.config.rule.IRule
+import io.github.twyora.douyinenhancer.constant.IKVStorages
 
 object ConfigManager {
     lateinit var settingsStorage: IKVStorage
@@ -68,14 +69,14 @@ object ConfigManager {
         HomeTabBlockConfigProvider(settingsStorage)
     }
 
-    fun init(context: Context) {
-        settingsStorage = FastKVStorage.open(
+    fun init(context: Context, ikvFactory: IKVStorage.IKVFactory = TransientKVStorage.Companion) {
+        settingsStorage = ikvFactory.open(
             context,
-            "douyinenhancer_prefs"
+            IKVStorages.SETTINGS_STORAGE_NAME
         )
-        moduleStorage = FastKVStorage.open(
+        moduleStorage = ikvFactory.open(
             context,
-            "douyinenhancer_module"
+            IKVStorages.MODULE_STORAGE_NAME
         )
     }
 }

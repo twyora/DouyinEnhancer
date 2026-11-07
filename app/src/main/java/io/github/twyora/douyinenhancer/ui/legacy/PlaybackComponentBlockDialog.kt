@@ -19,6 +19,10 @@ import io.github.twyora.douyinenhancer.config.kvstorage.FastKVStorage
 import io.github.twyora.douyinenhancer.utils.reflect.Field
 import io.github.twyora.douyinenhancer.utils.reflect.setFieldOrNull
 
+@Deprecated(
+    "V1 config dialogs are no longer maintained in the host;" +
+        " use the Compose-based settings in the module environment instead."
+)
 class PlaybackComponentBlockDialog(context: Context) : AlertDialog.Builder(ContextThemeWrapper(context, R.style.MainTheme)) {
     class PrefsFragment : PreferenceFragment() {
         @Deprecated("Deprecated in Java")
@@ -62,6 +66,10 @@ class PlaybackComponentBlockDialog(context: Context) : AlertDialog.Builder(Conte
     companion object {
         private val TAG = this::class.simpleName
 
+        @Deprecated(
+            "V1 config dialogs are no longer maintained in the host;" +
+                " use the Compose-based settings in the module environment instead."
+        )
         fun show(context: Context) {
             runCatching {
                 context.injectModuleResources()

@@ -5,12 +5,14 @@
 package io.github.twyora.douyinenhancer.hook
 
 import android.content.Context
+import android.os.Build
 import com.google.protobuf.Descriptors
 import com.google.protobuf.Message
 import com.google.protobuf.util.JsonFormat
 import com.highcapable.kavaref.KavaRef.Companion.resolve
 import com.highcapable.kavaref.condition.type.Modifiers
 import com.highcapable.kavaref.extension.asParameterizedTypeOrNull
+import com.highcapable.yukihookapi.YukiHook
 import com.highcapable.yukihookapi.hook.log.YLog
 import io.github.twyora.douyinenhancer.BuildConfig
 import io.github.twyora.douyinenhancer.config.ConfigManager
@@ -1205,7 +1207,12 @@ class DouyinPackage(classLoader: ClassLoader, context: Context) {
                     context.packageName,
                     0
                 )
-                val hostAppVersionCode = hostAppPackageInfo.longVersionCode.toInt()
+                val hostAppVersionCode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                    hostAppPackageInfo.longVersionCode.toInt()
+                } else {
+                    @Suppress("DEPRECATION")
+                    hostAppPackageInfo.versionCode
+                }
 
                 val lastUpdateTime = maxOf(
                     hostAppPackageInfo.lastUpdateTime,
@@ -1244,23 +1251,38 @@ class DouyinPackage(classLoader: ClassLoader, context: Context) {
                 YLog.error("$TAG: failed to read hookInfo: ", it)
             }
 
-            ConfigManager.module.hookInfoSource.value = ModuleConfigProvider.HOOK_INFO_SOURCE_BUILTIN
             // HookInfo rebuild is required at this stage
             val generatedHookInfo = initHookInfo(context)
             runCatching {
-                val hookInfoPresetFile = File(context.cacheDir, HookInfoFiles.HOOK_INFO_PRESET_FILE_NAME)
-                if (!hookInfoPresetFile.exists()) {
+                if (ConfigManager.module.hookInfoSource.value == ModuleConfigProvider.HOOK_INFO_SOURCE_BUILTIN) {
+                    // skip custom preset loading when not required (source BUILTIN) or not accepted;
+                    // an untrusted preset may be rejected on import in the future, leaving its overlay unapplied.
+                    YLog.info("$TAG: no custom preset to import, or import not accepted")
+                    return@runCatching
+                } else if (HookInfoFiles.HOOK_INFO_PRESET_FILE_NAME !in YukiHook.Module.sharedFiles.list()) {
                     YLog.info("$TAG: no custom hook info present, skipping loading")
                     return@runCatching
-                } else if (!(hookInfoPresetFile.isFile && hookInfoPresetFile.canRead())) {
-                    YLog.warn("$TAG: custom hookInfoFile is not a file or can not be read")
-                    return@runCatching
-                } else if (hookInfoPresetFile.length() == 0L) {
+                } else if (ConfigManager.module.hookInfoSource.value == ModuleConfigProvider.HOOK_INFO_SOURCE_UNTRUSTED_OVERLAY) {
+                    YLog.warn(
+                        "$TAG: Loading custom HookInfo from UNTRUSTED SOURCES may cause malfunctions." +
+                            " You will LOSE the right to submit bug reports to maintainers until you clear custom HookInfo!"
+                    )
+                    // optional early return here for strict mode
+                }
+
+                val presetJsonFd = YukiHook.Module.sharedFiles.open(
+                    HookInfoFiles.HOOK_INFO_PRESET_FILE_NAME
+                )
+                if (presetJsonFd.statSize == 0L) {
                     YLog.warn("$TAG: custom hook info preset file is empty")
                     return@runCatching
                 }
 
-                val hookInfoPresetJson = JSONObject(hookInfoPresetFile.readText(Charsets.UTF_8))
+                val presetJsonText = YukiHook.Module.sharedFiles.readText(
+                    HookInfoFiles.HOOK_INFO_PRESET_FILE_NAME,
+                    Charsets.UTF_8
+                )
+                val hookInfoPresetJson = JSONObject(presetJsonText)
                 val customHookInfoJson = hookInfoPresetJson.optJSONObject("hookInfo") ?: run {
                     YLog.warn("$TAG: custom hook info preset missing 'hookInfo' object")
                     return@runCatching
@@ -1292,33 +1314,29 @@ class DouyinPackage(classLoader: ClassLoader, context: Context) {
                     return@runCatching
                 }
 
-                val expectedSignature = hookInfoPresetJson.optString("signature")
-                YLog.info("$TAG: custom hook info preset signature: $expectedSignature")
+                val declaredSignature = hookInfoPresetJson.optString("signature")
+                YLog.info("$TAG: custom hook info preset signature: $declaredSignature")
                 // "signature" not included for signature checking
                 hookInfoPresetJson.remove("signature")
-                val hookInfoPresetBytes = JsonCanonicalizer(
+                val canonicalPresetBytes = JsonCanonicalizer(
                     hookInfoPresetJson.toString()
                 ).encodedString.toByteArray(Charsets.UTF_8)
 
-                val verifyOk = expectedSignature.isNotBlank() && ByteArrayInputStream(hookInfoPresetBytes).use { stream ->
+                val signatureVerified = declaredSignature.isNotBlank() && ByteArrayInputStream(canonicalPresetBytes).use { stream ->
                     verifySha256RsaSignature(
                         stream,
-                        Base64.decode(expectedSignature),
+                        Base64.decode(declaredSignature),
                         Base64.decode(SignatureKeys.HOOK_INFO_PRESET_PUBLIC_KEY_B64)
                     )
                 }
-                if (verifyOk) {
+                if (signatureVerified) {
                     YLog.info("$TAG: custom hook info signature verified")
                 } else {
-                    if (expectedSignature.isBlank()) {
+                    if (declaredSignature.isBlank()) {
                         YLog.warn("$TAG: custom hook info has no signature")
                     } else {
-                        YLog.warn("$TAG: custom hook info signature verification failed, expected: $expectedSignature")
+                        YLog.warn("$TAG: custom hook info signature verification failed, expected: $declaredSignature")
                     }
-                    YLog.warn(
-                        "$TAG: Loading custom HookInfo from UNTRUSTED SOURCES may cause malfunctions." +
-                            " You will LOSE the right to submit bug reports to maintainers until you clear custom HookInfo!"
-                    )
                 }
 
                 // do not overlay lastUpdateTime and generation fields from auto-generated HookInfo
@@ -1326,13 +1344,10 @@ class DouyinPackage(classLoader: ClassLoader, context: Context) {
                 val snapshotGeneration = generatedHookInfo.generation
 
                 YLog.warn("$TAG: merging custom hook info into hookInfo")
-                generatedHookInfo.applyFrom(customHookInfoJson)
-                generatedHookInfo.lastUpdateTime = snapshotLastUpdateTime
-                generatedHookInfo.generation = snapshotGeneration
-                ConfigManager.module.hookInfoSource.value = if (verifyOk) {
-                    ModuleConfigProvider.HOOK_INFO_SOURCE_TRUSTED_OVERLAY
-                } else {
-                    ModuleConfigProvider.HOOK_INFO_SOURCE_UNTRUSTED_OVERLAY
+                generatedHookInfo.apply {
+                    applyFrom(customHookInfoJson)
+                    lastUpdateTime = snapshotLastUpdateTime
+                    generation = snapshotGeneration
                 }
             }.onFailure {
                 YLog.error("$TAG: failed to merge custom hook info", it)
@@ -1394,7 +1409,12 @@ class DouyinPackage(classLoader: ClassLoader, context: Context) {
             )
             moduleVersionCode = BuildConfig.VERSION_CODE
             moduleVersionName = BuildConfig.VERSION_NAME
-            hostVersionCode = hostAppPackageInfo.longVersionCode.toInt()
+            hostVersionCode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                hostAppPackageInfo.longVersionCode.toInt()
+            } else {
+                @Suppress("DEPRECATION")
+                hostAppPackageInfo.versionCode
+            }
             generation = ConfigManager.module.hookInfoGeneration.value
 
             runCatching {

@@ -10,6 +10,7 @@
     </queries>
 
     <application
+        android:name=".DouyinEnhancerApplication"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -21,10 +22,12 @@
 
         <activity
             android:name=".ui.MainActivity"
+            android:enableOnBackInvokedCallback="true"
             android:exported="true"
             android:showForAllUsers="true"
-            android:launchMode="singleInstance"
-            android:theme="@style/MainTheme">
+            android:launchMode="singleTask"
+            android:theme="@style/MainTheme"
+            tools:targetApi="33">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="de.robv.android.xposed.category.MODULE_SETTINGS" />
@@ -38,6 +41,17 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:scheme="douyinenhancer"
+                    android:host="io.github.twyora.douyinenhancer" />
             </intent-filter>
         </activity-alias>
 

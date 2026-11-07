@@ -7,8 +7,21 @@ object AppRoutes {
     @Serializable
     data object Home : NavKey
 
-    object Settings {
+    @Serializable
+    data object Verification : NavKey
+
+    @Serializable
+    sealed interface Settings : NavKey {
         @Serializable
-        data object Main : NavKey
+        data object Main : Settings
+
+        @Serializable
+        data object RecommendedFeedFilter : Settings
+
+        @Serializable
+        data object PlaybackComponent : Settings
+
+        @Serializable
+        data object HomeTab : Settings
     }
 }
