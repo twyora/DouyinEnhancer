@@ -14,11 +14,11 @@ import io.github.twyora.douyinenhancer.utils.crypto.md5Hex
 import io.github.twyora.douyinenhancer.utils.file.FileTypeDetector
 import io.github.twyora.douyinenhancer.utils.hook.HookTransaction
 import io.github.twyora.douyinenhancer.utils.reflect.getFieldOrNull
-import io.github.twyora.douyinenhancer.utils.reflect.invokeMethodOnly
+import io.github.twyora.douyinenhancer.utils.reflect.invokeMethodOnlyQuietly
 import io.github.twyora.douyinenhancer.utils.reflect.invokeMethodOrNull
 import io.github.twyora.douyinenhancer.utils.reflect.invokeStaticMethodOrNull
 import io.github.twyora.douyinenhancer.utils.reflect.resolveMethodOrNull
-import io.github.twyora.douyinenhancer.utils.reflect.setFieldOrNull
+import io.github.twyora.douyinenhancer.utils.reflect.setFieldQuietly
 import java.io.FileInputStream
 import org.json.JSONObject
 
@@ -263,7 +263,7 @@ object CommentAudioHooker : YukiBaseHooker() {
                 return@intercept proceed()
             }
 
-            instance.invokeMethodOnly(
+            instance.invokeMethodOnlyQuietly(
                 packageInstance.commentImageSaveDownloadListener.notifyResult(),
                 context,
                 copyRet
@@ -286,7 +286,7 @@ object CommentAudioHooker : YukiBaseHooker() {
             val newImageUrlList = listOf(
                 packageInstance.commentImageStruct.selfClass?.createInstance()
             )
-            comment.setFieldOrNull(
+            comment.setFieldQuietly(
                 packageInstance.comment.imageList(),
                 newImageUrlList
             )
@@ -300,7 +300,7 @@ object CommentAudioHooker : YukiBaseHooker() {
         )
         val imageUrlModel = if (existingImageUrlModel == null) {
             val newImageUrlModel = packageInstance.urlModel.selfClass?.createInstance()
-            imageUrlList.first()?.setFieldOrNull(
+            imageUrlList.first()?.setFieldQuietly(
                 packageInstance.commentImageStruct.downloadUrl(),
                 newImageUrlModel
             )
@@ -309,7 +309,7 @@ object CommentAudioHooker : YukiBaseHooker() {
             existingImageUrlList
         } ?: return false
 
-        imageUrlModel.setFieldOrNull(
+        imageUrlModel.setFieldQuietly(
             packageInstance.urlModel.urlList(),
             audioUrls
         )

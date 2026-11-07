@@ -8,7 +8,7 @@ import io.github.twyora.douyinenhancer.config.ConfigManager
 import io.github.twyora.douyinenhancer.hook.DouyinPackage
 import io.github.twyora.douyinenhancer.hook.HookOnMainProcess
 import io.github.twyora.douyinenhancer.utils.reflect.getFieldOrNull
-import io.github.twyora.douyinenhancer.utils.reflect.invokeMethodOnly
+import io.github.twyora.douyinenhancer.utils.reflect.invokeMethodOnlyQuietly
 import io.github.twyora.douyinenhancer.utils.reflect.invokeMethodOrNull
 import io.github.twyora.douyinenhancer.utils.reflect.resolveMethodOrNull
 
@@ -48,7 +48,7 @@ object FeedDoubleTapOpenCommentHooker : YukiBaseHooker() {
                 return@intercept result
             }
 
-            instance.invokeMethodOnly(
+            instance.invokeMethodOnlyQuietly(
                 packageInstance.baseListFragmentPanel.handleVideoEvent(),
                 openCommentPanelEvent
             ).also {

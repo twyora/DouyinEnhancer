@@ -154,6 +154,26 @@ fun KClass<*>.invokeStaticMethodOrNull(method: Method, vararg args: Any?): Any? 
     YLog.error("failed to invoke static method: ${this.java.name}.${method.name}(${method.parameters})", it)
 }.getOrNull()
 
+fun Class<*>.invokeStaticMethodOnly(method: Method, vararg args: Any?) {
+    this.invokeStaticMethod(method, *args)
+}
+
+fun Class<*>.invokeStaticMethodOnlyQuietly(method: Method, vararg args: Any?) {
+    runCatching {
+        this.invokeStaticMethodOnly(method, *args)
+    }
+}
+
+fun KClass<*>.invokeStaticMethodOnly(method: Method, vararg args: Any?) {
+    this.java.invokeStaticMethodOnly(method, *args)
+}
+
+fun KClass<*>.invokeStaticMethodOnlyQuietly(method: Method, vararg args: Any?) {
+    runCatching {
+        this.invokeStaticMethodOnly(method, *args)
+    }
+}
+
 @JvmName("getStaticFieldTyped")
 inline fun <reified T> Class<*>.getStaticField(field: Field): T? = getStaticField(field) as T?
 
@@ -184,7 +204,7 @@ fun KClass<*>.getStaticFieldOrNull(field: Field): Any? = runCatching {
 
 fun Class<*>.setStaticField(field: Field, value: Any?) = this.resolveField(field).set(value)
 
-fun Class<*>.setStaticFieldOrNull(field: Field, value: Any?) = runCatching {
+fun Class<*>.setStaticFieldQuietly(field: Field, value: Any?) = runCatching {
     setStaticField(field, value)
 }.onFailure {
     YLog.error("failed to set static field: ${this.name}.${field.name}", it)
@@ -192,7 +212,7 @@ fun Class<*>.setStaticFieldOrNull(field: Field, value: Any?) = runCatching {
 
 fun KClass<*>.setStaticField(field: Field, value: Any?) = this.java.setStaticField(field, value)
 
-fun KClass<*>.setStaticFieldOrNull(field: Field, value: Any?) = runCatching {
+fun KClass<*>.setStaticFieldQuietly(field: Field, value: Any?) = runCatching {
     setStaticField(field, value)
 }.onFailure {
     YLog.error("failed to set static field: ${this.java.name}.${field.name}", it)
@@ -237,7 +257,13 @@ fun Any.invokeMethodOrNull(method: Method, vararg args: Any?): Any? = runCatchin
 }.getOrNull()
 
 fun Any.invokeMethodOnly(method: Method, vararg args: Any?) {
-    this.invokeMethodOrNull(method, *args)
+    this.invokeMethod(method, *args)
+}
+
+fun Any.invokeMethodOnlyQuietly(method: Method, vararg args: Any?) {
+    runCatching {
+        this.invokeMethodOnly(method, *args)
+    }
 }
 
 @JvmName("getFieldTyped")
@@ -256,7 +282,7 @@ fun Any.getFieldOrNull(field: Field): Any? = runCatching {
 
 fun Any.setField(field: Field, value: Any?) = this.resolveField(field).set(value)
 
-fun Any.setFieldOrNull(field: Field, value: Any?) = runCatching {
+fun Any.setFieldQuietly(field: Field, value: Any?) = runCatching {
     setField(field, value)
 }.onFailure {
     YLog.error("failed to set field: ${this.javaClass.name}.${field.name}", it)

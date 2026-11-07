@@ -17,7 +17,7 @@ import io.github.twyora.douyinenhancer.config.ConfigManager
 import io.github.twyora.douyinenhancer.config.gate.ConfigStateMode
 import io.github.twyora.douyinenhancer.config.kvstorage.FastKVStorage
 import io.github.twyora.douyinenhancer.utils.reflect.Field
-import io.github.twyora.douyinenhancer.utils.reflect.setFieldOrNull
+import io.github.twyora.douyinenhancer.utils.reflect.setFieldQuietly
 
 @Deprecated(
     "V1 config dialogs are no longer maintained in the host;" +
@@ -35,12 +35,12 @@ class HomeTabBlockDialog(context: Context) :
         override fun onCreate(savedInstanceState: Bundle?) {
             super.onCreate(savedInstanceState)
 
-            preferenceManager.setFieldOrNull(
+            preferenceManager.setFieldQuietly(
                 Field("mSharedPreferences"),
                 // TODO: Urgent refactor required. This relies on internal implementation details
                 ((ConfigManager.homeTab.kvConfig as FastKVStorage).fastKV) as SharedPreferences
             )
-            preferenceManager.setFieldOrNull(Field("mEditor"), null)
+            preferenceManager.setFieldQuietly(Field("mEditor"), null)
             addPreferencesFromResource(R.xml.pref_home_tab_block)
 
             ConfigManager.homeTab.allConfigItems.filter { configItem ->
