@@ -2,8 +2,8 @@
 
 ## In Progress
 
-- Improve module export configuration function
-- Rework the module UI
+- Keep Clean Mode active
+- Bypass download limits on time-limited moments
 
 ## TODO
 
@@ -33,3 +33,5 @@
 - [x] Verify repository links after version update
 - [x] Hide specific overlays on video during playback (e.g. like button, caption)
 - [x] Hide the "Post" button in the center of the tab bar
+- [x] Improve module export configuration function
+- [x] Rework the module UI
