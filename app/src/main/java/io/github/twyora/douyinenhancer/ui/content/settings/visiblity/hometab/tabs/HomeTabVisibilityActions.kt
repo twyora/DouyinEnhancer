@@ -3,7 +3,4 @@ package io.github.twyora.douyinenhancer.ui.content.settings.visiblity.hometab.ta
 import androidx.compose.runtime.Stable
 
 @Stable
-class HomeTabVisibilityActions(
-    val top: HomeTopTabVisibilityActions,
-    val bottom: HomeBottomTabVisibilityActions
-)
+class HomeTabVisibilityActions(val top: HomeTopTabVisibilityActions, val bottom: HomeBottomTabVisibilityActions)

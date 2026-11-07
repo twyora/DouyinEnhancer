@@ -2,7 +2,11 @@ package io.github.twyora.douyinenhancer.ui.content.attest
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.highcapable.kavaref.extension.classOf
+import com.highcapable.kavaref.extension.isSubclassOf
+import io.github.twyora.douyinenhancer.BuildConfig
 import io.github.twyora.douyinenhancer.R
+import io.github.twyora.douyinenhancer.config.ConfigManager
 import io.github.twyora.douyinenhancer.ui.event.SnackEvent
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -10,14 +14,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
-import com.highcapable.kavaref.extension.classOf
-import com.highcapable.kavaref.extension.isSubclassOf
-import io.github.twyora.douyinenhancer.BuildConfig
-import io.github.twyora.douyinenhancer.config.ConfigManager
 
-class VerifyDialogViewModel(
-    private val validUrls: Array<String>
-) : ViewModel() {
+class VerifyDialogViewModel(private val validUrls: Array<String>) : ViewModel() {
     val uiState: StateFlow<VerifyDialogUiState>
         field = MutableStateFlow(VerifyDialogUiState(inputUrl = ""))
 
@@ -58,9 +56,7 @@ class VerifyDialogViewModel(
     }
 }
 
-class VerifyDialogViewModelFactory(
-    private val validUrls: Array<String>
-) : ViewModelProvider.Factory {
+class VerifyDialogViewModelFactory(private val validUrls: Array<String>) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         require(classOf<VerifyDialogViewModel>() isSubclassOf modelClass) {
             "Unknown ViewModel class: ${modelClass.name}"

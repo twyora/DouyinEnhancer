@@ -6,9 +6,9 @@ import io.github.twyora.douyinenhancer.R
 import io.github.twyora.douyinenhancer.config.ConfigManager
 import io.github.twyora.douyinenhancer.config.gate.ConfigStateMode
 import io.github.twyora.douyinenhancer.config.provider.ConfigItem
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 
@@ -24,7 +24,7 @@ class HomeTabVisibilityViewModel : ViewModel() {
             hideHomepagePadHot to R.string.top_tab_hide_homepage_pad_hot,
             hideHomepageNearby to R.string.top_tab_hide_homepage_nearby,
             hideHomepageHangout to R.string.top_tab_hide_homepage_hangout,
-            hideHomepageMediumvideo to R.string.top_tab_hide_homepage_mediumvideo,
+            hideHomepageMediumvideo to R.string.top_tab_hide_homepage_mediumvideo
         )
     }
 
@@ -32,9 +32,11 @@ class HomeTabVisibilityViewModel : ViewModel() {
         ConfigManager.misc.hiddenFeatureEnabled.observe()
 
     private val topTabVisibilityItems: Flow<List<HomeTabVisibilityItem>> = combine(
-        combine(topTabCatalog.map { (item, _) ->
-            item.observe()
-        }) { values ->
+        combine(
+            topTabCatalog.map { (item, _) ->
+                item.observe()
+            }
+        ) { values ->
             values
         },
         hiddenFeatureEnabled
@@ -57,14 +59,16 @@ class HomeTabVisibilityViewModel : ViewModel() {
             hideHomepageFamiliarBottom to R.string.bottom_tab_hide_homepage_familiar,
             hideHomepagePublish to R.string.bottom_tab_hide_homepage_publish,
             hideHomepageNotification to R.string.bottom_tab_hide_homepage_notification,
-            hideHomepageProfile to R.string.bottom_tab_hide_homepage_profile,
+            hideHomepageProfile to R.string.bottom_tab_hide_homepage_profile
         )
     }
 
     private val bottomTabVisibilityItems: Flow<List<HomeTabVisibilityItem>> = combine(
-        combine(bottomCatalog.map { (item, _) ->
-            item.observe()
-        }) { values ->
+        combine(
+            bottomCatalog.map { (item, _) ->
+                item.observe()
+            }
+        ) { values ->
             values
         },
         hiddenFeatureEnabled
@@ -104,7 +108,7 @@ class HomeTabVisibilityViewModel : ViewModel() {
     ) { topTabConfig, bottomTabConfig ->
         HomeTabVisibilityConfig(
             top = topTabConfig,
-            bottom = bottomTabConfig,
+            bottom = bottomTabConfig
         )
     }.stateIn(
         viewModelScope,
@@ -118,7 +122,7 @@ class HomeTabVisibilityViewModel : ViewModel() {
                     } else {
                         null
                     }
-                },
+                }
             ),
             bottom = HomeBottomTabVisibilityConfig(
                 ConfigManager.homeTab.bottomMainSwitch.value,
@@ -128,8 +132,8 @@ class HomeTabVisibilityViewModel : ViewModel() {
                     } else {
                         null
                     }
-                },
-            ),
+                }
+            )
         )
     )
 

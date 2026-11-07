@@ -10,11 +10,7 @@ import androidx.compose.ui.unit.dp
 import io.github.twyora.douyinenhancer.R
 
 @Composable
-fun HomeTabVisibilityContent(
-    config: HomeTabVisibilityConfig,
-    actions: HomeTabVisibilityActions,
-    modifier: Modifier = Modifier
-) {
+fun HomeTabVisibilityContent(config: HomeTabVisibilityConfig, actions: HomeTabVisibilityActions, modifier: Modifier = Modifier) {
     LazyColumn(modifier = modifier) {
         item {
             HomeTopTabVisibilityContent(

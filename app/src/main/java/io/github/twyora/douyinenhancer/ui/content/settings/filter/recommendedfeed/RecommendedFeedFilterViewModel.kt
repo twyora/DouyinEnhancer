@@ -1,4 +1,4 @@
-package io.github.twyora.douyinenhancer.ui.content.settings.filter.recommended_feed
+package io.github.twyora.douyinenhancer.ui.content.settings.filter.recommendedfeed
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -7,16 +7,16 @@ import io.github.twyora.douyinenhancer.R
 import io.github.twyora.douyinenhancer.config.ConfigManager
 import io.github.twyora.douyinenhancer.config.gate.ConfigStateMode
 import io.github.twyora.douyinenhancer.ui.event.SnackEvent
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class RecommendedFeedFilterViewModel : ViewModel() {
@@ -41,7 +41,7 @@ class RecommendedFeedFilterViewModel : ViewModel() {
             blockGrouponLargeCard.observe(),
             blockLive.observe(),
             blockMultiImage.observe(),
-            hiddenFeatureEnabled,
+            hiddenFeatureEnabled
         ) { values ->
             RecommendedFeedFilterSwitchConfig(
                 mainSwitch = values[0],
@@ -56,7 +56,7 @@ class RecommendedFeedFilterViewModel : ViewModel() {
                 blockLive = values[5],
                 blockLiveVisible = blockLive.status == ConfigStateMode.NORMAL,
                 blockMultiImage = values[6],
-                blockMultiImageVisible = blockMultiImage.status == ConfigStateMode.NORMAL,
+                blockMultiImageVisible = blockMultiImage.status == ConfigStateMode.NORMAL
             )
         }
     }
@@ -82,7 +82,7 @@ class RecommendedFeedFilterViewModel : ViewModel() {
         diggCountMin,
         diggCountMax,
         shareCountMin,
-        shareCountMax,
+        shareCountMax
     ) {
         RecommendedFeedFilterCountConfig(
             shortDuration = it[0],
@@ -94,7 +94,7 @@ class RecommendedFeedFilterViewModel : ViewModel() {
             diggCountMin = it[6],
             diggCountMax = it[7],
             shareCountMin = it[8],
-            shareCountMax = it[9],
+            shareCountMax = it[9]
         )
     }
 
@@ -240,7 +240,7 @@ class RecommendedFeedFilterViewModel : ViewModel() {
             title = t,
             uid = u,
             nickname = n,
-            desc = k,
+            desc = k
         )
     }
 
@@ -272,7 +272,7 @@ class RecommendedFeedFilterViewModel : ViewModel() {
                     blockLive = blockLive.defValue,
                     blockLiveVisible = blockLive.status == ConfigStateMode.NORMAL,
                     blockMultiImage = blockMultiImage.defValue,
-                    blockMultiImageVisible = blockMultiImage.status == ConfigStateMode.NORMAL,
+                    blockMultiImageVisible = blockMultiImage.status == ConfigStateMode.NORMAL
                 )
             },
             count = with(ConfigManager.recommendedFeedFilter) {

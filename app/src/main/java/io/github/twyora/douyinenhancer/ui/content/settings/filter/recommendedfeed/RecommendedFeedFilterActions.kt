@@ -1,4 +1,4 @@
-package io.github.twyora.douyinenhancer.ui.content.settings.filter.recommended_feed
+package io.github.twyora.douyinenhancer.ui.content.settings.filter.recommendedfeed
 
 import androidx.compose.runtime.Stable
 
@@ -7,14 +7,14 @@ class RecommendedFeedFilterTitleKeywordActions(
     val onAdd: () -> Unit,
     val onTextChange: (index: Int, text: String) -> Unit,
     val onRemove: (index: Int) -> Unit,
-    val onRegexChange: (Boolean) -> Unit,
+    val onRegexChange: (Boolean) -> Unit
 )
 
 @Stable
 class RecommendedFeedFilterUidKeywordActions(
     val onAdd: () -> Unit,
     val onTextChange: (index: Int, text: String) -> Unit,
-    val onRemove: (index: Int) -> Unit,
+    val onRemove: (index: Int) -> Unit
 )
 
 @Stable
@@ -22,7 +22,7 @@ class RecommendedFeedFilterNicknameKeywordActions(
     val onAdd: () -> Unit,
     val onTextChange: (index: Int, text: String) -> Unit,
     val onRemove: (index: Int) -> Unit,
-    val onRegexChange: (Boolean) -> Unit,
+    val onRegexChange: (Boolean) -> Unit
 )
 
 @Stable
@@ -30,7 +30,7 @@ class RecommendedFeedFilterDescKeywordActions(
     val onAdd: () -> Unit,
     val onTextChange: (index: Int, text: String) -> Unit,
     val onRemove: (index: Int) -> Unit,
-    val onRegexChange: (Boolean) -> Unit,
+    val onRegexChange: (Boolean) -> Unit
 )
 
 @Stable
@@ -41,7 +41,7 @@ class RecommendedFeedFilterSwitchActions(
     val onBlockEcomChange: (Boolean) -> Unit,
     val onBlockGrouponChange: (Boolean) -> Unit,
     val onBlockLiveChange: (Boolean) -> Unit,
-    val onBlockMultiImageChange: (Boolean) -> Unit,
+    val onBlockMultiImageChange: (Boolean) -> Unit
 )
 
 @Stable
@@ -55,7 +55,7 @@ class RecommendedFeedFilterCountActions(
     val onDiggCountMinChange: (Int?) -> Unit,
     val onDiggCountMaxChange: (Int?) -> Unit,
     val onShareCountMinChange: (Int?) -> Unit,
-    val onShareCountMaxChange: (Int?) -> Unit,
+    val onShareCountMaxChange: (Int?) -> Unit
 )
 
 @Stable
@@ -63,12 +63,12 @@ class RecommendedFeedFilterKeywordActions(
     val title: RecommendedFeedFilterTitleKeywordActions,
     val uid: RecommendedFeedFilterUidKeywordActions,
     val nickname: RecommendedFeedFilterNicknameKeywordActions,
-    val desc: RecommendedFeedFilterDescKeywordActions,
+    val desc: RecommendedFeedFilterDescKeywordActions
 )
 
 @Stable
 class RecommendedFeedFilterActions(
     val switch: RecommendedFeedFilterSwitchActions,
     val count: RecommendedFeedFilterCountActions,
-    val keyword: RecommendedFeedFilterKeywordActions,
+    val keyword: RecommendedFeedFilterKeywordActions
 )

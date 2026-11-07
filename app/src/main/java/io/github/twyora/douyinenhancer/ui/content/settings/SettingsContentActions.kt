@@ -31,10 +31,7 @@ class SettingsContentUiActions(
 )
 
 @Stable
-class SettingsContentConfigActions(
-    val onExportConfig: () -> Unit = {},
-    val onImportConfig: () -> Unit = {}
-)
+class SettingsContentConfigActions(val onExportConfig: () -> Unit = {}, val onImportConfig: () -> Unit = {})
 
 @Stable
 class SettingsContentModuleActions(

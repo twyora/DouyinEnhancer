@@ -1,5 +1,4 @@
-package io.github.twyora.douyinenhancer.ui.content.settings.filter.recommended_feed
-
+package io.github.twyora.douyinenhancer.ui.content.settings.filter.recommendedfeed
 
 data class RecommendedFeedFilterSwitchConfig(
     val mainSwitch: Boolean,
@@ -14,7 +13,7 @@ data class RecommendedFeedFilterSwitchConfig(
     val blockLive: Boolean,
     val blockLiveVisible: Boolean,
     val blockMultiImage: Boolean,
-    val blockMultiImageVisible: Boolean,
+    val blockMultiImageVisible: Boolean
 )
 
 data class RecommendedFeedFilterCountConfig(
@@ -27,7 +26,7 @@ data class RecommendedFeedFilterCountConfig(
     val diggCountMin: Int,
     val diggCountMax: Int,
     val shareCountMin: Int,
-    val shareCountMax: Int,
+    val shareCountMax: Int
 )
 
 data class RecommendedFeedFilterTitleKeywordsConfig(val keywords: List<String>, val regexMode: Boolean)
@@ -42,11 +41,11 @@ data class RecommendedFeedFilterKeywordConfig(
     val title: RecommendedFeedFilterTitleKeywordsConfig,
     val uid: RecommendedFeedFilterUidKeywordsConfig,
     val nickname: RecommendedFeedFilterNicknameKeywordsConfig,
-    val desc: RecommendedFeedFilterDescKeywordsConfig,
+    val desc: RecommendedFeedFilterDescKeywordsConfig
 )
 
 data class RecommendedFeedFilterConfig(
     val switch: RecommendedFeedFilterSwitchConfig,
     val count: RecommendedFeedFilterCountConfig,
-    val keyword: RecommendedFeedFilterKeywordConfig,
+    val keyword: RecommendedFeedFilterKeywordConfig
 )

@@ -1,5 +1,6 @@
-package io.github.twyora.douyinenhancer.ui.content.settings.filter.recommended_feed
+package io.github.twyora.douyinenhancer.ui.content.settings.filter.recommendedfeed
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -7,10 +8,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
@@ -24,10 +24,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.github.twyora.douyinenhancer.R
@@ -35,11 +35,7 @@ import io.github.twyora.douyinenhancer.ui.components.PreferenceCategory
 import io.github.twyora.douyinenhancer.ui.components.SwitchPreferenceItem
 
 @Composable
-fun RecommendedFeedFilterContent(
-    state: RecommendedFeedFilterConfig,
-    actions: RecommendedFeedFilterActions,
-    modifier: Modifier = Modifier,
-) {
+fun RecommendedFeedFilterContent(state: RecommendedFeedFilterConfig, actions: RecommendedFeedFilterActions, modifier: Modifier = Modifier) {
     LazyColumn(
         modifier
             .fillMaxSize()
@@ -67,7 +63,7 @@ fun RecommendedFeedFilterContent(
 private fun RecommendedFeedFilterSwitchSection(
     state: RecommendedFeedFilterSwitchConfig,
     actions: RecommendedFeedFilterSwitchActions,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     Column(
         modifier = modifier
@@ -141,7 +137,7 @@ private fun RecommendedFeedFilterSwitchSection(
 private fun RecommendedFeedFilterCountSection(
     state: RecommendedFeedFilterCountConfig,
     actions: RecommendedFeedFilterCountActions,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     Column(
         modifier = modifier
@@ -234,7 +230,7 @@ private fun RecommendedFeedFilterCountSection(
 private fun RecommendedFeedFilterKeywordSection(
     state: RecommendedFeedFilterKeywordConfig,
     actions: RecommendedFeedFilterKeywordActions,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     Column(
         modifier = modifier
@@ -253,12 +249,12 @@ private fun RecommendedFeedFilterKeywordSection(
 private fun RecommendedFeedFilterTitleKeywordGroup(
     state: RecommendedFeedFilterTitleKeywordsConfig,
     actions: RecommendedFeedFilterTitleKeywordActions,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
                 text = stringResource(R.string.recommended_feed_filter_group_title),
@@ -286,14 +282,14 @@ private fun RecommendedFeedFilterTitleKeywordGroup(
         state.keywords.forEachIndexed { index, text ->
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 KeywordInputRow(
                     text = text,
                     onTextChange = {
                         actions.onTextChange(index, it)
                     },
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.weight(1f)
                 )
                 TextButton(
                     onClick = {
@@ -311,12 +307,12 @@ private fun RecommendedFeedFilterTitleKeywordGroup(
 private fun RecommendedFeedFilterUidKeywordGroup(
     state: RecommendedFeedFilterUidKeywordsConfig,
     actions: RecommendedFeedFilterUidKeywordActions,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
                 text = stringResource(R.string.recommended_feed_filter_group_uid),
@@ -330,7 +326,7 @@ private fun RecommendedFeedFilterUidKeywordGroup(
         state.keywords.forEachIndexed { index, text ->
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 KeywordInputRow(
                     text = text,
@@ -338,7 +334,7 @@ private fun RecommendedFeedFilterUidKeywordGroup(
                         actions.onTextChange(index, it)
                     },
                     modifier = Modifier.weight(1f),
-                    keyboardType = KeyboardType.Number,
+                    keyboardType = KeyboardType.Number
                 )
                 TextButton(
                     onClick = {
@@ -356,12 +352,12 @@ private fun RecommendedFeedFilterUidKeywordGroup(
 private fun RecommendedFeedFilterNicknameKeywordGroup(
     state: RecommendedFeedFilterNicknameKeywordsConfig,
     actions: RecommendedFeedFilterNicknameKeywordActions,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
                 text = stringResource(R.string.recommended_feed_filter_group_author_nickname),
@@ -389,14 +385,14 @@ private fun RecommendedFeedFilterNicknameKeywordGroup(
         state.keywords.forEachIndexed { index, text ->
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 KeywordInputRow(
                     text = text,
                     onTextChange = {
                         actions.onTextChange(index, it)
                     },
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.weight(1f)
                 )
                 TextButton(
                     onClick = {
@@ -414,12 +410,12 @@ private fun RecommendedFeedFilterNicknameKeywordGroup(
 private fun RecommendedFeedFilterDescKeywordGroup(
     state: RecommendedFeedFilterDescKeywordsConfig,
     actions: RecommendedFeedFilterDescKeywordActions,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
                 text = stringResource(R.string.recommended_feed_filter_group_desc),
@@ -447,14 +443,14 @@ private fun RecommendedFeedFilterDescKeywordGroup(
         state.keywords.forEachIndexed { index, text ->
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 KeywordInputRow(
                     text = text,
                     onTextChange = {
                         actions.onTextChange(index, it)
                     },
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.weight(1f)
                 )
                 TextButton(
                     onClick = {
@@ -469,12 +465,7 @@ private fun RecommendedFeedFilterDescKeywordGroup(
 }
 
 @Composable
-private fun NumberInputRow(
-    label: String,
-    value: Int?,
-    onValueChange: (Int?) -> Unit,
-    modifier: Modifier = Modifier,
-) {
+private fun NumberInputRow(label: String, value: Int?, onValueChange: (Int?) -> Unit, modifier: Modifier = Modifier) {
     var text by remember(value) {
         mutableStateOf(value?.toString() ?: "")
     }
@@ -483,7 +474,7 @@ private fun NumberInputRow(
     }
     Row(
         modifier = modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Text(text = label, modifier = Modifier.weight(2f))
         OutlinedTextField(
@@ -493,12 +484,12 @@ private fun NumberInputRow(
             },
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Number,
-                imeAction = ImeAction.Done,
+                imeAction = ImeAction.Done
             ),
             keyboardActions = KeyboardActions(
                 onDone = {
                     onValueChange(text.toIntOrNull())
-                },
+                }
             ),
             modifier = Modifier
                 .weight(3f)
@@ -517,7 +508,7 @@ private fun KeywordInputRow(
     text: String,
     onTextChange: (String) -> Unit,
     modifier: Modifier = Modifier,
-    keyboardType: KeyboardType = KeyboardType.Text,
+    keyboardType: KeyboardType = KeyboardType.Text
 ) {
     var localText by remember {
         mutableStateOf(text)
@@ -535,12 +526,12 @@ private fun KeywordInputRow(
         },
         keyboardOptions = KeyboardOptions(
             keyboardType = keyboardType,
-            imeAction = ImeAction.Done,
+            imeAction = ImeAction.Done
         ),
         keyboardActions = KeyboardActions(
             onDone = {
                 onTextChange(localText)
-            },
+            }
         ),
         modifier = modifier.onFocusChanged { state ->
             if (hadFocus && !state.isFocused) {
@@ -548,7 +539,7 @@ private fun KeywordInputRow(
             }
             hadFocus = state.isFocused
         },
-        singleLine = true,
+        singleLine = true
     )
 }
 
@@ -570,7 +561,7 @@ private fun RecommendedFeedFilterContentPreview() {
                 blockLive = false,
                 blockLiveVisible = true,
                 blockMultiImage = false,
-                blockMultiImageVisible = true,
+                blockMultiImageVisible = true
             ),
             count = RecommendedFeedFilterCountConfig(
                 shortDuration = 0,
@@ -582,14 +573,14 @@ private fun RecommendedFeedFilterContentPreview() {
                 diggCountMin = 0,
                 diggCountMax = Int.MAX_VALUE,
                 shareCountMin = 0,
-                shareCountMax = Int.MAX_VALUE,
+                shareCountMax = Int.MAX_VALUE
             ),
             keyword = RecommendedFeedFilterKeywordConfig(
                 title = RecommendedFeedFilterTitleKeywordsConfig(emptyList(), regexMode = false),
                 uid = RecommendedFeedFilterUidKeywordsConfig(emptyList()),
                 nickname = RecommendedFeedFilterNicknameKeywordsConfig(emptyList(), regexMode = false),
-                desc = RecommendedFeedFilterDescKeywordsConfig(emptyList(), regexMode = false),
-            ),
+                desc = RecommendedFeedFilterDescKeywordsConfig(emptyList(), regexMode = false)
+            )
         ),
         actions = RecommendedFeedFilterActions(
             switch = RecommendedFeedFilterSwitchActions(
@@ -638,6 +629,6 @@ private fun RecommendedFeedFilterContentPreview() {
                     onRegexChange = {}
                 )
             )
-        ),
+        )
     )
 }

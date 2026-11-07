@@ -1,6 +1,5 @@
 package io.github.twyora.douyinenhancer.ui.content.settings
 
-import io.github.twyora.douyinenhancer.R
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -10,6 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import io.github.twyora.douyinenhancer.R
 import io.github.twyora.douyinenhancer.ui.components.PreferenceCategory
 import io.github.twyora.douyinenhancer.ui.components.PreferenceItem
 import io.github.twyora.douyinenhancer.ui.components.SwitchPreferenceItem
@@ -160,11 +160,7 @@ fun SettingsContentFeedSection(
 }
 
 @Composable
-fun SettingsContentUiSection(
-    uiState: SettingsContentUiConfig,
-    uiActions: SettingsContentUiActions,
-    modifier: Modifier = Modifier
-) {
+fun SettingsContentUiSection(uiState: SettingsContentUiConfig, uiActions: SettingsContentUiActions, modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -205,10 +201,7 @@ fun SettingsContentUiSection(
 }
 
 @Composable
-fun SettingsContentConfigSection(
-    configActions: SettingsContentConfigActions,
-    modifier: Modifier = Modifier
-) {
+fun SettingsContentConfigSection(configActions: SettingsContentConfigActions, modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
             .fillMaxWidth()

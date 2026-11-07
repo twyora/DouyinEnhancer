@@ -4,8 +4,20 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -25,13 +37,24 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.runtime.NavEntry
+import androidx.navigation3.runtime.NavKey
+import androidx.navigation3.runtime.deeplink.DeepLinkRequest
+import androidx.navigation3.runtime.deeplink.DeepLinkUri
+import androidx.navigation3.runtime.deeplink.UriDeepLinkMatcher
 import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.scene.DialogSceneStrategy
 import androidx.navigation3.ui.NavDisplay
+import com.highcapable.yukihookapi.hook.log.YLog
+import io.github.twyora.douyinenhancer.BuildConfig
 import io.github.twyora.douyinenhancer.R
+import io.github.twyora.douyinenhancer.config.ConfigManager
 import io.github.twyora.douyinenhancer.ui.content.attest.VerifyDialogContent
 import io.github.twyora.douyinenhancer.ui.content.attest.VerifyDialogUiActions
 import io.github.twyora.douyinenhancer.ui.content.attest.VerifyDialogViewModel
@@ -39,16 +62,24 @@ import io.github.twyora.douyinenhancer.ui.content.attest.VerifyDialogViewModelFa
 import io.github.twyora.douyinenhancer.ui.content.home.HomeContent
 import io.github.twyora.douyinenhancer.ui.content.home.HomeContentUiActions
 import io.github.twyora.douyinenhancer.ui.content.home.HomeContentViewModel
-import io.github.twyora.douyinenhancer.ui.content.settings.filter.recommended_feed.RecommendedFeedFilterActions
-import io.github.twyora.douyinenhancer.ui.content.settings.filter.recommended_feed.RecommendedFeedFilterContent
-import io.github.twyora.douyinenhancer.ui.content.settings.filter.recommended_feed.RecommendedFeedFilterCountActions
-import io.github.twyora.douyinenhancer.ui.content.settings.filter.recommended_feed.RecommendedFeedFilterDescKeywordActions
-import io.github.twyora.douyinenhancer.ui.content.settings.filter.recommended_feed.RecommendedFeedFilterKeywordActions
-import io.github.twyora.douyinenhancer.ui.content.settings.filter.recommended_feed.RecommendedFeedFilterNicknameKeywordActions
-import io.github.twyora.douyinenhancer.ui.content.settings.filter.recommended_feed.RecommendedFeedFilterSwitchActions
-import io.github.twyora.douyinenhancer.ui.content.settings.filter.recommended_feed.RecommendedFeedFilterTitleKeywordActions
-import io.github.twyora.douyinenhancer.ui.content.settings.filter.recommended_feed.RecommendedFeedFilterUidKeywordActions
-import io.github.twyora.douyinenhancer.ui.content.settings.filter.recommended_feed.RecommendedFeedFilterViewModel
+import io.github.twyora.douyinenhancer.ui.content.settings.SettingsContent
+import io.github.twyora.douyinenhancer.ui.content.settings.SettingsContentActions
+import io.github.twyora.douyinenhancer.ui.content.settings.SettingsContentConfigActions
+import io.github.twyora.douyinenhancer.ui.content.settings.SettingsContentFeedActions
+import io.github.twyora.douyinenhancer.ui.content.settings.SettingsContentModuleActions
+import io.github.twyora.douyinenhancer.ui.content.settings.SettingsContentSaveActions
+import io.github.twyora.douyinenhancer.ui.content.settings.SettingsContentUiActions
+import io.github.twyora.douyinenhancer.ui.content.settings.SettingsContentViewModel
+import io.github.twyora.douyinenhancer.ui.content.settings.filter.recommendedfeed.RecommendedFeedFilterActions
+import io.github.twyora.douyinenhancer.ui.content.settings.filter.recommendedfeed.RecommendedFeedFilterContent
+import io.github.twyora.douyinenhancer.ui.content.settings.filter.recommendedfeed.RecommendedFeedFilterCountActions
+import io.github.twyora.douyinenhancer.ui.content.settings.filter.recommendedfeed.RecommendedFeedFilterDescKeywordActions
+import io.github.twyora.douyinenhancer.ui.content.settings.filter.recommendedfeed.RecommendedFeedFilterKeywordActions
+import io.github.twyora.douyinenhancer.ui.content.settings.filter.recommendedfeed.RecommendedFeedFilterNicknameKeywordActions
+import io.github.twyora.douyinenhancer.ui.content.settings.filter.recommendedfeed.RecommendedFeedFilterSwitchActions
+import io.github.twyora.douyinenhancer.ui.content.settings.filter.recommendedfeed.RecommendedFeedFilterTitleKeywordActions
+import io.github.twyora.douyinenhancer.ui.content.settings.filter.recommendedfeed.RecommendedFeedFilterUidKeywordActions
+import io.github.twyora.douyinenhancer.ui.content.settings.filter.recommendedfeed.RecommendedFeedFilterViewModel
 import io.github.twyora.douyinenhancer.ui.content.settings.visiblity.hometab.tabs.HomeBottomTabVisibilityActions
 import io.github.twyora.douyinenhancer.ui.content.settings.visiblity.hometab.tabs.HomeTabVisibilityActions
 import io.github.twyora.douyinenhancer.ui.content.settings.visiblity.hometab.tabs.HomeTabVisibilityContent
@@ -57,47 +88,15 @@ import io.github.twyora.douyinenhancer.ui.content.settings.visiblity.hometab.tab
 import io.github.twyora.douyinenhancer.ui.content.settings.visiblity.playback.components.PlaybackComponentVisibilityActions
 import io.github.twyora.douyinenhancer.ui.content.settings.visiblity.playback.components.PlaybackComponentVisibilityContext
 import io.github.twyora.douyinenhancer.ui.content.settings.visiblity.playback.components.PlaybackComponentVisibilityViewModel
+import io.github.twyora.douyinenhancer.ui.event.SnackEvent
 import io.github.twyora.douyinenhancer.ui.navigation.AppRoutes
 import io.github.twyora.douyinenhancer.utils.android.openUrl
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.animation.togetherWith
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
-import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalResources
-import androidx.lifecycle.lifecycleScope
-import io.github.twyora.douyinenhancer.ui.event.SnackEvent
-import io.github.twyora.douyinenhancer.ui.content.settings.SettingsContent
-import io.github.twyora.douyinenhancer.ui.content.settings.SettingsContentActions
-import io.github.twyora.douyinenhancer.ui.content.settings.SettingsContentViewModel
 import java.io.File
 import java.nio.file.Files
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import java.util.zip.ZipInputStream
-import kotlinx.coroutines.launch
-import androidx.navigation3.runtime.NavKey
-import androidx.navigation3.runtime.deeplink.DeepLinkRequest
-import androidx.navigation3.runtime.deeplink.DeepLinkUri
-import androidx.navigation3.runtime.deeplink.UriDeepLinkMatcher
-import androidx.navigation3.scene.DialogSceneStrategy
-import com.highcapable.yukihookapi.hook.log.YLog
-import io.github.twyora.douyinenhancer.BuildConfig
-import io.github.twyora.douyinenhancer.config.ConfigManager
-import io.github.twyora.douyinenhancer.ui.content.settings.SettingsContentConfigActions
-import io.github.twyora.douyinenhancer.ui.content.settings.SettingsContentFeedActions
-import io.github.twyora.douyinenhancer.ui.content.settings.SettingsContentModuleActions
-import io.github.twyora.douyinenhancer.ui.content.settings.SettingsContentSaveActions
-import io.github.twyora.douyinenhancer.ui.content.settings.SettingsContentUiActions
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.BufferOverflow
@@ -105,6 +104,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.serializer
 
@@ -735,7 +735,7 @@ class MainActivity : ComponentActivity() {
                 },
                 onBlockMultiImageChange = {
                     vm.setBlockMultiImage(it)
-                },
+                }
             )
         }
         val countActions = remember {
@@ -769,7 +769,7 @@ class MainActivity : ComponentActivity() {
                 },
                 onShareCountMaxChange = {
                     vm.setShareCountMax(it)
-                },
+                }
             )
         }
         val keywordActions = remember {
@@ -786,7 +786,7 @@ class MainActivity : ComponentActivity() {
                     },
                     onRegexChange = {
                         vm.setTitleRegex(it)
-                    },
+                    }
                 ),
                 uid = RecommendedFeedFilterUidKeywordActions(
                     onAdd = {
@@ -797,7 +797,7 @@ class MainActivity : ComponentActivity() {
                     },
                     onRemove = { index ->
                         vm.removeUidKeyword(index)
-                    },
+                    }
                 ),
                 nickname = RecommendedFeedFilterNicknameKeywordActions(
                     onAdd = {
@@ -811,7 +811,7 @@ class MainActivity : ComponentActivity() {
                     },
                     onRegexChange = {
                         vm.setNicknameRegex(it)
-                    },
+                    }
                 ),
                 desc = RecommendedFeedFilterDescKeywordActions(
                     onAdd = {
@@ -825,8 +825,8 @@ class MainActivity : ComponentActivity() {
                     },
                     onRegexChange = {
                         vm.setDescRegex(it)
-                    },
-                ),
+                    }
+                )
             )
         }
 
@@ -838,7 +838,7 @@ class MainActivity : ComponentActivity() {
                 RecommendedFeedFilterActions(
                     switch = switchActions,
                     count = countActions,
-                    keyword = keywordActions,
+                    keyword = keywordActions
                 )
             },
             modifier = modifier.padding(innerPadding)
@@ -846,10 +846,7 @@ class MainActivity : ComponentActivity() {
     }
 
     @Composable
-    private fun HomeTabVisibilityScreen(
-        modifier: Modifier = Modifier,
-        innerPadding: PaddingValues
-    ) {
+    private fun HomeTabVisibilityScreen(modifier: Modifier = Modifier, innerPadding: PaddingValues) {
         val vm: HomeTabVisibilityViewModel = viewModel()
         val tabConfig by vm.tabConfig.collectAsStateWithLifecycle()
         val actions = remember {
@@ -860,7 +857,7 @@ class MainActivity : ComponentActivity() {
                     },
                     onSwitchChange = { key, checked ->
                         vm.onSwitchChange(key, checked)
-                    },
+                    }
                 ),
                 bottom = HomeBottomTabVisibilityActions(
                     onMainSwitchChange = {
@@ -868,8 +865,8 @@ class MainActivity : ComponentActivity() {
                     },
                     onSwitchChange = { key, checked ->
                         vm.onSwitchChange(key, checked)
-                    },
-                ),
+                    }
+                )
             )
         }
 
@@ -881,10 +878,7 @@ class MainActivity : ComponentActivity() {
     }
 
     @Composable
-    private fun PlaybackComponentVisibilityScreen(
-        modifier: Modifier = Modifier,
-        innerPadding: PaddingValues
-    ) {
+    private fun PlaybackComponentVisibilityScreen(modifier: Modifier = Modifier, innerPadding: PaddingValues) {
         val vm: PlaybackComponentVisibilityViewModel = viewModel()
         val configs by vm.playbackComponentConfig.collectAsStateWithLifecycle()
         val actions = remember {
@@ -963,4 +957,3 @@ class MainActivity : ComponentActivity() {
         val TAG = this::class.simpleName
     }
 }
-

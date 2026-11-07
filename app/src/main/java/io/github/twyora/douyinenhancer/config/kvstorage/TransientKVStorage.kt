@@ -32,10 +32,9 @@ class TransientKVStorage(override val name: String) : IKVStorage {
     }
 
     @Suppress("UNCHECKED_CAST")
-    override fun <T : Any> observe(key: String, defValue: T): Flow<T> =
-        flowFor(key).map {
-            (it as? T) ?: defValue
-        }
+    override fun <T : Any> observe(key: String, defValue: T): Flow<T> = flowFor(key).map {
+        (it as? T) ?: defValue
+    }
 
     override fun clear() {
         data.clear()

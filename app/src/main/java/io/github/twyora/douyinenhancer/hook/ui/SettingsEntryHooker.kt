@@ -5,6 +5,7 @@ import android.content.Intent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
+import androidx.core.net.toUri
 import com.highcapable.kavaref.extension.createInstance
 import com.highcapable.yukihookapi.extension.kavaref.intercept
 import com.highcapable.yukihookapi.hook.core.YukiHookCreator
@@ -15,11 +16,10 @@ import io.github.twyora.douyinenhancer.R
 import io.github.twyora.douyinenhancer.config.ConfigManager
 import io.github.twyora.douyinenhancer.hook.DouyinPackage
 import io.github.twyora.douyinenhancer.hook.HookOnMainProcess
+import io.github.twyora.douyinenhancer.ui.legacy.LegacyConfigDeprecationDialog
 import io.github.twyora.douyinenhancer.utils.reflect.getFieldOrNull
 import io.github.twyora.douyinenhancer.utils.reflect.invokeMethodOnly
 import io.github.twyora.douyinenhancer.utils.reflect.resolveMethodOrNull
-import androidx.core.net.toUri
-import io.github.twyora.douyinenhancer.ui.legacy.LegacyConfigDeprecationDialog
 
 @HookOnMainProcess
 object SettingsEntryHooker : YukiBaseHooker() {

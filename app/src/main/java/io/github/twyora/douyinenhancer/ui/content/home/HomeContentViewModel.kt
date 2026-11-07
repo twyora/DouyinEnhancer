@@ -4,25 +4,25 @@ import android.annotation.SuppressLint
 import android.app.Application
 import android.content.ComponentName
 import android.content.pm.PackageManager
+import androidx.annotation.StringRes
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation3.runtime.NavKey
 import com.highcapable.yukihookapi.YukiHook
 import com.highcapable.yukihookapi.hook.log.YLog
+import com.highcapable.yukihookapi.runtime.bridge.FrameworkServiceBridge
 import io.github.twyora.douyinenhancer.BuildConfig
 import io.github.twyora.douyinenhancer.R
 import io.github.twyora.douyinenhancer.config.ConfigManager
-import androidx.annotation.StringRes
-import androidx.navigation3.runtime.NavKey
-import com.highcapable.yukihookapi.runtime.bridge.FrameworkServiceBridge
 import io.github.twyora.douyinenhancer.ui.event.SnackEvent
 import java.net.URL
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.channels.BufferOverflow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -82,7 +82,7 @@ class HomeContentViewModel(application: Application) : AndroidViewModel(applicat
                 it.copy(
                     launcherIconHidden = getApplication<Application>().packageManager.getComponentEnabledSetting(
                         launcherAlias
-                    ) == PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+                    ) == PackageManager.COMPONENT_ENABLED_STATE_DISABLED
                 )
             }
             moduleActivationState.collect { active ->

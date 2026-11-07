@@ -13,29 +13,28 @@ import android.view.ContextThemeWrapper
 import androidx.core.net.toUri
 import com.highcapable.yukihookapi.hook.factory.injectModuleResources
 import com.highcapable.yukihookapi.hook.log.YLog
-import io.github.twyora.douyinenhancer.R
 import io.github.twyora.douyinenhancer.BuildConfig
+import io.github.twyora.douyinenhancer.R
 import io.github.twyora.douyinenhancer.config.kvstorage.FastKVStorage
 import io.github.twyora.douyinenhancer.config.kvstorage.encodeToKVBytes
 import io.github.twyora.douyinenhancer.constant.IKVStorages
 import io.github.twyora.douyinenhancer.utils.android.toast
 import io.github.twyora.douyinenhancer.utils.crypto.sha256Hex
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import java.util.zip.ZipEntry
+import java.util.zip.ZipOutputStream
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.io.IOException
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
-import java.util.zip.ZipEntry
-import java.util.zip.ZipOutputStream
 import org.json.JSONArray
 import org.json.JSONObject
 
-class LegacyConfigDeprecationDialog(context: Context) :
-    AlertDialog.Builder(ContextThemeWrapper(context, R.style.MainTheme)) {
+class LegacyConfigDeprecationDialog(context: Context) : AlertDialog.Builder(ContextThemeWrapper(context, R.style.MainTheme)) {
 
     private val fragment = PrefsFragment()
 

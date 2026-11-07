@@ -11,11 +11,7 @@ import io.github.twyora.douyinenhancer.R
 import io.github.twyora.douyinenhancer.ui.components.SwitchPreferenceItem
 
 @Composable
-fun HomeTopTabVisibilityContent(
-    state: HomeTopTabVisibilityConfig,
-    actions: HomeTopTabVisibilityActions,
-    modifier: Modifier = Modifier
-) {
+fun HomeTopTabVisibilityContent(state: HomeTopTabVisibilityConfig, actions: HomeTopTabVisibilityActions, modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
             .fillMaxWidth()

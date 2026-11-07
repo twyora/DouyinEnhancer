@@ -8,33 +8,33 @@ import io.github.twyora.douyinenhancer.BuildConfig
 import io.github.twyora.douyinenhancer.R
 import io.github.twyora.douyinenhancer.config.ConfigManager
 import io.github.twyora.douyinenhancer.config.kvstorage.FastKVStorage
+import io.github.twyora.douyinenhancer.config.kvstorage.IKVStorage
 import io.github.twyora.douyinenhancer.config.kvstorage.decodeAsKVMap
 import io.github.twyora.douyinenhancer.config.kvstorage.encodeToKVBytes
-import io.github.twyora.douyinenhancer.config.kvstorage.IKVStorage
 import io.github.twyora.douyinenhancer.config.provider.ModuleConfigProvider
 import io.github.twyora.douyinenhancer.constant.HookInfoFiles
-import io.github.twyora.douyinenhancer.utils.crypto.sha256Hex
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.stateIn
-import java.io.File
-import java.io.OutputStream
-import org.json.JSONArray
-import org.json.JSONObject
-import java.util.zip.ZipEntry
-import java.util.zip.ZipOutputStream
-import java.io.ByteArrayInputStream
-import java.io.InputStream
 import io.github.twyora.douyinenhancer.constant.SignatureKeys
 import io.github.twyora.douyinenhancer.ui.event.SnackEvent
+import io.github.twyora.douyinenhancer.utils.crypto.sha256Hex
 import io.github.twyora.douyinenhancer.utils.crypto.verifySha256RsaSignature
+import java.io.ByteArrayInputStream
+import java.io.File
+import java.io.InputStream
+import java.io.OutputStream
 import java.security.MessageDigest
+import java.util.zip.ZipEntry
+import java.util.zip.ZipOutputStream
+import kotlin.io.encoding.Base64
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlin.io.encoding.Base64
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import org.erdtman.jcs.JsonCanonicalizer
+import org.json.JSONArray
+import org.json.JSONObject
 
 class SettingsContentViewModel : ViewModel() {
     val snackFlow: SharedFlow<SnackEvent>
@@ -365,7 +365,6 @@ class SettingsContentViewModel : ViewModel() {
         ConfigManager.module.hookInfoGeneration.value++
         sendSnack(SnackEvent(R.string.success))
     }
-
 
     fun clearCustomMapping() {
         YukiHook.Module.sharedFiles.delete(
