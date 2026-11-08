@@ -92,6 +92,9 @@ class HomeContentViewModel(application: Application) : AndroidViewModel(applicat
                     ) == PackageManager.COMPONENT_ENABLED_STATE_DISABLED
                 )
             }
+        }
+
+        viewModelScope.launch {
             fetchUpdateInfo()?.let { updateInfo ->
                 uiState.update {
                     it.copy(updateState = updateInfo)
