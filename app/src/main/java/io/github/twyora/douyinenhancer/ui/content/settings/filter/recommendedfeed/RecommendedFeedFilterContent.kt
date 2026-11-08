@@ -1,23 +1,23 @@
 package io.github.twyora.douyinenhancer.ui.content.settings.filter.recommendedfeed
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -32,6 +32,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.github.twyora.douyinenhancer.R
 import io.github.twyora.douyinenhancer.ui.components.PreferenceCategory
+import io.github.twyora.douyinenhancer.ui.components.PreferenceItem
 import io.github.twyora.douyinenhancer.ui.components.SwitchPreferenceItem
 
 @Composable
@@ -251,55 +252,64 @@ private fun RecommendedFeedFilterTitleKeywordGroup(
     actions: RecommendedFeedFilterTitleKeywordActions,
     modifier: Modifier = Modifier
 ) {
-    Column(modifier = modifier.fillMaxWidth()) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = stringResource(R.string.recommended_feed_filter_group_title),
-                modifier = Modifier.weight(1f)
-            )
-            TextButton(onClick = actions.onAdd) {
-                Text(text = stringResource(R.string.add))
-            }
-            Row(
-                modifier = Modifier.weight(1f),
-                horizontalArrangement = Arrangement.End,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = stringResource(R.string.regex_mode)
-                )
-                Switch(
-                    checked = state.regexMode,
-                    onCheckedChange = {
-                        actions.onRegexChange(it)
-                    }
-                )
-            }
+    var showEditorDialog by remember {
+        mutableStateOf(false)
+    }
+
+    PreferenceItem(
+        title = stringResource(R.string.recommended_feed_filter_group_title),
+        modifier = modifier,
+        onClick = {
+            showEditorDialog = true
         }
-        state.keywords.forEachIndexed { index, text ->
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                KeywordInputRow(
-                    text = text,
-                    onTextChange = {
-                        actions.onTextChange(index, it)
-                    },
-                    modifier = Modifier.weight(1f)
-                )
+    )
+
+    if (showEditorDialog) {
+        AlertDialog(
+            onDismissRequest = {
+                showEditorDialog = false
+            },
+            title = {
+                Text(text = stringResource(R.string.recommended_feed_filter_group_title))
+            },
+            text = {
+                Column {
+                    SwitchPreferenceItem(
+                        title = stringResource(R.string.regex_mode),
+                        checked = state.regexMode,
+                        onCheckedChange = {
+                            actions.onRegexChange(it)
+                        }
+                    )
+                    KeywordEditorContent(
+                        keywords = state.keywords,
+                        onAddKeyword = actions.onAddKeyword,
+                        onKeywordTextChange = actions.onKeywordTextChange,
+                        onRemoveKeyword = actions.onRemoveKeyword
+                    )
+                }
+            },
+            confirmButton = {
                 TextButton(
                     onClick = {
-                        actions.onRemove(index)
+                        if (actions.onSave()) {
+                            showEditorDialog = false
+                        }
                     }
                 ) {
-                    Text(text = stringResource(R.string.delete))
+                    Text(text = stringResource(android.R.string.ok))
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        showEditorDialog = false
+                    }
+                ) {
+                    Text(text = stringResource(android.R.string.cancel))
                 }
             }
-        }
+        )
     }
 }
 
@@ -309,42 +319,55 @@ private fun RecommendedFeedFilterUidKeywordGroup(
     actions: RecommendedFeedFilterUidKeywordActions,
     modifier: Modifier = Modifier
 ) {
-    Column(modifier = modifier.fillMaxWidth()) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = stringResource(R.string.recommended_feed_filter_group_uid),
-                modifier = Modifier.weight(1f)
-            )
-            TextButton(onClick = actions.onAdd) {
-                Text(text = stringResource(R.string.add))
-            }
-            Spacer(modifier = Modifier.weight(1f))
+    var showEditorDialog by remember {
+        mutableStateOf(false)
+    }
+
+    PreferenceItem(
+        title = stringResource(R.string.recommended_feed_filter_group_uid),
+        modifier = modifier,
+        onClick = {
+            showEditorDialog = true
         }
-        state.keywords.forEachIndexed { index, text ->
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                KeywordInputRow(
-                    text = text,
-                    onTextChange = {
-                        actions.onTextChange(index, it)
-                    },
-                    modifier = Modifier.weight(1f),
-                    keyboardType = KeyboardType.Number
+    )
+
+    if (showEditorDialog) {
+        AlertDialog(
+            onDismissRequest = {
+                showEditorDialog = false
+            },
+            title = {
+                Text(text = stringResource(R.string.recommended_feed_filter_group_uid))
+            },
+            text = {
+                KeywordEditorContent(
+                    keywords = state.keywords,
+                    onAddKeyword = actions.onAddKeyword,
+                    onKeywordTextChange = actions.onKeywordTextChange,
+                    onRemoveKeyword = actions.onRemoveKeyword
                 )
+            },
+            confirmButton = {
                 TextButton(
                     onClick = {
-                        actions.onRemove(index)
+                        if (actions.onSave()) {
+                            showEditorDialog = false
+                        }
                     }
                 ) {
-                    Text(text = stringResource(R.string.delete))
+                    Text(text = stringResource(android.R.string.ok))
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        showEditorDialog = false
+                    }
+                ) {
+                    Text(text = stringResource(android.R.string.cancel))
                 }
             }
-        }
+        )
     }
 }
 
@@ -354,55 +377,64 @@ private fun RecommendedFeedFilterNicknameKeywordGroup(
     actions: RecommendedFeedFilterNicknameKeywordActions,
     modifier: Modifier = Modifier
 ) {
-    Column(modifier = modifier.fillMaxWidth()) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = stringResource(R.string.recommended_feed_filter_group_author_nickname),
-                modifier = Modifier.weight(1f)
-            )
-            TextButton(onClick = actions.onAdd) {
-                Text(text = stringResource(R.string.add))
-            }
-            Row(
-                modifier = Modifier.weight(1f),
-                horizontalArrangement = Arrangement.End,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = stringResource(R.string.regex_mode)
-                )
-                Switch(
-                    checked = state.regexMode,
-                    onCheckedChange = {
-                        actions.onRegexChange(it)
-                    }
-                )
-            }
+    var showEditorDialog by remember {
+        mutableStateOf(false)
+    }
+
+    PreferenceItem(
+        title = stringResource(R.string.recommended_feed_filter_group_author_nickname),
+        modifier = modifier,
+        onClick = {
+            showEditorDialog = true
         }
-        state.keywords.forEachIndexed { index, text ->
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                KeywordInputRow(
-                    text = text,
-                    onTextChange = {
-                        actions.onTextChange(index, it)
-                    },
-                    modifier = Modifier.weight(1f)
-                )
+    )
+
+    if (showEditorDialog) {
+        AlertDialog(
+            onDismissRequest = {
+                showEditorDialog = false
+            },
+            title = {
+                Text(text = stringResource(R.string.recommended_feed_filter_group_author_nickname))
+            },
+            text = {
+                Column {
+                    SwitchPreferenceItem(
+                        title = stringResource(R.string.regex_mode),
+                        checked = state.regexMode,
+                        onCheckedChange = {
+                            actions.onRegexChange(it)
+                        }
+                    )
+                    KeywordEditorContent(
+                        keywords = state.keywords,
+                        onAddKeyword = actions.onAddKeyword,
+                        onKeywordTextChange = actions.onKeywordTextChange,
+                        onRemoveKeyword = actions.onRemoveKeyword
+                    )
+                }
+            },
+            confirmButton = {
                 TextButton(
                     onClick = {
-                        actions.onRemove(index)
+                        if (actions.onSave()) {
+                            showEditorDialog = false
+                        }
                     }
                 ) {
-                    Text(text = stringResource(R.string.delete))
+                    Text(text = stringResource(android.R.string.ok))
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        showEditorDialog = false
+                    }
+                ) {
+                    Text(text = stringResource(android.R.string.cancel))
                 }
             }
-        }
+        )
     }
 }
 
@@ -412,49 +444,130 @@ private fun RecommendedFeedFilterDescKeywordGroup(
     actions: RecommendedFeedFilterDescKeywordActions,
     modifier: Modifier = Modifier
 ) {
-    Column(modifier = modifier.fillMaxWidth()) {
+    var showEditorDialog by remember {
+        mutableStateOf(false)
+    }
+
+    PreferenceItem(
+        title = stringResource(R.string.recommended_feed_filter_group_desc),
+        modifier = modifier,
+        onClick = {
+            showEditorDialog = true
+        }
+    )
+
+    if (showEditorDialog) {
+        AlertDialog(
+            onDismissRequest = {
+                showEditorDialog = false
+            },
+            title = {
+                Text(text = stringResource(R.string.recommended_feed_filter_group_desc))
+            },
+            text = {
+                Column {
+                    SwitchPreferenceItem(
+                        title = stringResource(R.string.regex_mode),
+                        checked = state.regexMode,
+                        onCheckedChange = {
+                            actions.onRegexChange(it)
+                        }
+                    )
+                    KeywordEditorContent(
+                        keywords = state.keywords,
+                        onAddKeyword = actions.onAddKeyword,
+                        onKeywordTextChange = actions.onKeywordTextChange,
+                        onRemoveKeyword = actions.onRemoveKeyword
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        if (actions.onSave()) {
+                            showEditorDialog = false
+                        }
+                    }
+                ) {
+                    Text(text = stringResource(android.R.string.ok))
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        showEditorDialog = false
+                    }
+                ) {
+                    Text(text = stringResource(android.R.string.cancel))
+                }
+            }
+        )
+    }
+}
+
+@Composable
+private fun KeywordEditorContent(
+    modifier: Modifier = Modifier,
+    keywords: List<String>,
+    onAddKeyword: () -> Unit,
+    onKeywordTextChange: (index: Int, text: String) -> Unit,
+    onRemoveKeyword: (index: Int) -> Unit
+) {
+    var newKeyword by remember {
+        mutableStateOf("")
+    }
+
+    Column(
+        modifier = modifier
+            .heightIn(max = 320.dp)
+            .verticalScroll(rememberScrollState())
+    ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = stringResource(R.string.recommended_feed_filter_group_desc),
-                modifier = Modifier.weight(1f)
+            OutlinedTextField(
+                value = newKeyword,
+                onValueChange = {
+                    newKeyword = it
+                },
+                modifier = Modifier.weight(1f),
+                singleLine = true
             )
-            TextButton(onClick = actions.onAdd) {
+            TextButton(
+                enabled = newKeyword.isNotBlank(),
+                onClick = {
+                    onAddKeyword()
+                    if (newKeyword.isNotBlank()) {
+                        onKeywordTextChange(keywords.size, newKeyword)
+                    }
+                    newKeyword = ""
+                }
+            ) {
                 Text(text = stringResource(R.string.add))
             }
-            Row(
-                modifier = Modifier.weight(1f),
-                horizontalArrangement = Arrangement.End,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = stringResource(R.string.regex_mode)
-                )
-                Switch(
-                    checked = state.regexMode,
-                    onCheckedChange = {
-                        actions.onRegexChange(it)
-                    }
-                )
-            }
         }
-        state.keywords.forEachIndexed { index, text ->
+        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+        keywords.forEachIndexed { index, text ->
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                KeywordInputRow(
-                    text = text,
-                    onTextChange = {
-                        actions.onTextChange(index, it)
+                OutlinedTextField(
+                    value = text,
+                    onValueChange = {
+                        onKeywordTextChange(index, it)
                     },
-                    modifier = Modifier.weight(1f)
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Text,
+                        imeAction = ImeAction.Done
+                    ),
+                    modifier = Modifier.weight(1f),
+                    singleLine = true
                 )
                 TextButton(
                     onClick = {
-                        actions.onRemove(index)
+                        onRemoveKeyword(index)
                     }
                 ) {
                     Text(text = stringResource(R.string.delete))
@@ -501,46 +614,6 @@ private fun NumberInputRow(label: String, value: Int?, onValueChange: (Int?) -> 
                 }
         )
     }
-}
-
-@Composable
-private fun KeywordInputRow(
-    text: String,
-    onTextChange: (String) -> Unit,
-    modifier: Modifier = Modifier,
-    keyboardType: KeyboardType = KeyboardType.Text
-) {
-    var localText by remember {
-        mutableStateOf(text)
-    }
-    LaunchedEffect(text) {
-        localText = text
-    }
-    var hadFocus by remember {
-        mutableStateOf(false)
-    }
-    OutlinedTextField(
-        value = localText,
-        onValueChange = {
-            localText = it
-        },
-        keyboardOptions = KeyboardOptions(
-            keyboardType = keyboardType,
-            imeAction = ImeAction.Done
-        ),
-        keyboardActions = KeyboardActions(
-            onDone = {
-                onTextChange(localText)
-            }
-        ),
-        modifier = modifier.onFocusChanged { state ->
-            if (hadFocus && !state.isFocused) {
-                onTextChange(localText)
-            }
-            hadFocus = state.isFocused
-        },
-        singleLine = true
-    )
 }
 
 @Preview
@@ -606,26 +679,30 @@ private fun RecommendedFeedFilterContentPreview() {
             ),
             keyword = RecommendedFeedFilterKeywordActions(
                 title = RecommendedFeedFilterTitleKeywordActions(
-                    onAdd = {},
-                    onTextChange = { _, _ -> },
-                    onRemove = {},
+                    onAddKeyword = {},
+                    onKeywordTextChange = { _, _ -> },
+                    onRemoveKeyword = {},
+                    onSave = { true },
                     onRegexChange = {}
                 ),
                 uid = RecommendedFeedFilterUidKeywordActions(
-                    onAdd = {},
-                    onTextChange = { _, _ -> },
-                    onRemove = {}
+                    onAddKeyword = {},
+                    onKeywordTextChange = { _, _ -> },
+                    onRemoveKeyword = {},
+                    onSave = { true }
                 ),
                 nickname = RecommendedFeedFilterNicknameKeywordActions(
-                    onAdd = {},
-                    onTextChange = { _, _ -> },
-                    onRemove = { _ -> },
+                    onAddKeyword = {},
+                    onKeywordTextChange = { _, _ -> },
+                    onRemoveKeyword = { _ -> },
+                    onSave = { true },
                     onRegexChange = { _ -> }
                 ),
                 desc = RecommendedFeedFilterDescKeywordActions(
-                    onAdd = {},
-                    onTextChange = { _, _ -> },
-                    onRemove = {},
+                    onAddKeyword = {},
+                    onKeywordTextChange = { _, _ -> },
+                    onRemoveKeyword = {},
+                    onSave = { true },
                     onRegexChange = {}
                 )
             )
