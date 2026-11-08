@@ -78,7 +78,7 @@ class RemoteKVStorage(override val name: String, val preference: YukiHookPrefere
                 ) {
                     "Set elements must all be String"
                 }
-                editor.putStringSet(key, value as Set<String>)
+                editor.putStringSet(key, (java.util.HashSet(value)) as Set<String>)
             }
 
             else -> throw IllegalArgumentException("unsupported type: ${value::class.qualifiedName}")
