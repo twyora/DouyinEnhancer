@@ -4,32 +4,36 @@ import androidx.compose.runtime.Stable
 
 @Stable
 class RecommendedFeedFilterTitleKeywordActions(
-    val onAdd: () -> Unit,
-    val onTextChange: (index: Int, text: String) -> Unit,
-    val onRemove: (index: Int) -> Unit,
+    val onAddKeyword: () -> Unit,
+    val onKeywordTextChange: (index: Int, text: String) -> Unit,
+    val onRemoveKeyword: (index: Int) -> Unit,
+    val onSave: () -> Boolean,
     val onRegexChange: (Boolean) -> Unit
 )
 
 @Stable
 class RecommendedFeedFilterUidKeywordActions(
-    val onAdd: () -> Unit,
-    val onTextChange: (index: Int, text: String) -> Unit,
-    val onRemove: (index: Int) -> Unit
+    val onAddKeyword: () -> Unit,
+    val onKeywordTextChange: (index: Int, text: String) -> Unit,
+    val onRemoveKeyword: (index: Int) -> Unit,
+    val onSave: () -> Boolean
 )
 
 @Stable
 class RecommendedFeedFilterNicknameKeywordActions(
-    val onAdd: () -> Unit,
-    val onTextChange: (index: Int, text: String) -> Unit,
-    val onRemove: (index: Int) -> Unit,
+    val onAddKeyword: () -> Unit,
+    val onKeywordTextChange: (index: Int, text: String) -> Unit,
+    val onRemoveKeyword: (index: Int) -> Unit,
+    val onSave: () -> Boolean,
     val onRegexChange: (Boolean) -> Unit
 )
 
 @Stable
 class RecommendedFeedFilterDescKeywordActions(
-    val onAdd: () -> Unit,
-    val onTextChange: (index: Int, text: String) -> Unit,
-    val onRemove: (index: Int) -> Unit,
+    val onAddKeyword: () -> Unit,
+    val onKeywordTextChange: (index: Int, text: String) -> Unit,
+    val onRemoveKeyword: (index: Int) -> Unit,
+    val onSave: () -> Boolean,
     val onRegexChange: (Boolean) -> Unit
 )
 

@@ -767,53 +767,65 @@ class MainActivity : ComponentActivity() {
         val keywordActions = remember {
             RecommendedFeedFilterKeywordActions(
                 title = RecommendedFeedFilterTitleKeywordActions(
-                    onAdd = {
+                    onAddKeyword = {
                         vm.addTitleKeyword()
                     },
-                    onTextChange = { index, text ->
+                    onKeywordTextChange = { index, text ->
                         vm.setTitleKeywordText(index, text)
                     },
-                    onRemove = { index ->
+                    onRemoveKeyword = { index ->
                         vm.removeTitleKeyword(index)
+                    },
+                    onSave = {
+                        vm.saveTitleKeywords()
                     },
                     onRegexChange = {
                         vm.setTitleRegex(it)
                     }
                 ),
                 uid = RecommendedFeedFilterUidKeywordActions(
-                    onAdd = {
+                    onAddKeyword = {
                         vm.addUidKeyword()
                     },
-                    onTextChange = { index, text ->
+                    onKeywordTextChange = { index, text ->
                         vm.setUidKeywordText(index, text)
                     },
-                    onRemove = { index ->
+                    onRemoveKeyword = { index ->
                         vm.removeUidKeyword(index)
+                    },
+                    onSave = {
+                        vm.saveUidKeywords()
                     }
                 ),
                 nickname = RecommendedFeedFilterNicknameKeywordActions(
-                    onAdd = {
+                    onAddKeyword = {
                         vm.addNicknameKeyword()
                     },
-                    onTextChange = { index, text ->
+                    onKeywordTextChange = { index, text ->
                         vm.setNicknameKeywordText(index, text)
                     },
-                    onRemove = { index ->
+                    onRemoveKeyword = { index ->
                         vm.removeNicknameKeyword(index)
+                    },
+                    onSave = {
+                        vm.saveNicknameKeywords()
                     },
                     onRegexChange = {
                         vm.setNicknameRegex(it)
                     }
                 ),
                 desc = RecommendedFeedFilterDescKeywordActions(
-                    onAdd = {
+                    onAddKeyword = {
                         vm.addDescKeyword()
                     },
-                    onTextChange = { index, text ->
+                    onKeywordTextChange = { index, text ->
                         vm.setDescKeywordText(index, text)
                     },
-                    onRemove = { index ->
+                    onRemoveKeyword = { index ->
                         vm.removeDescKeyword(index)
+                    },
+                    onSave = {
+                        vm.saveDescKeywords()
                     },
                     onRegexChange = {
                         vm.setDescRegex(it)
