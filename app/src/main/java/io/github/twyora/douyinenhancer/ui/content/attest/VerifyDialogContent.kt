@@ -4,11 +4,16 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -34,30 +39,38 @@ fun VerifyDialogContent(state: VerifyDialogUiState, actions: VerifyDialogUiActio
             tonalElevation = 6.dp,
             modifier = Modifier
                 .widthIn(max = 560.dp)
+                .heightIn(max = 560.dp)
                 .padding(horizontal = 16.dp)
         ) {
             Column(
-                modifier = Modifier.padding(24.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                modifier = Modifier.padding(24.dp)
             ) {
-                Text(
-                    text = stringResource(R.string.verify_dialog_title),
-                    style = MaterialTheme.typography.headlineSmall
-                )
-                Text(
-                    text = stringResource(R.string.verify_dialog_description),
-                    style = MaterialTheme.typography.bodyMedium
-                )
-                TextField(
-                    value = state.inputUrl,
-                    onValueChange = {
-                        actions.onInputUrlChange(it)
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    placeholder = {
-                        Text(stringResource(R.string.verify_dialog_input_hint))
-                    }
-                )
+                Column(
+                    modifier = Modifier
+                        .weight(1f, fill = false)
+                        .verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    Text(
+                        text = stringResource(R.string.verify_dialog_title),
+                        style = MaterialTheme.typography.headlineSmall
+                    )
+                    Text(
+                        text = stringResource(R.string.verify_dialog_description),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    TextField(
+                        value = state.inputUrl,
+                        onValueChange = {
+                            actions.onInputUrlChange(it)
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        placeholder = {
+                            Text(stringResource(R.string.verify_dialog_input_hint))
+                        }
+                    )
+                }
+                Spacer(modifier = Modifier.height(16.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.End

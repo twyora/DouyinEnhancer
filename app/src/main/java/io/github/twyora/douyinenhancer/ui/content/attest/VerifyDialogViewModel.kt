@@ -42,6 +42,7 @@ class VerifyDialogViewModel(private val validUrls: Array<String>) : ViewModel() 
             inputUrl.contains(it, ignoreCase = true)
         }
         if (!valid) {
+            snackFlow.tryEmit(SnackEvent(R.string.verify_toast_failure))
             triggerVerifyFailure.tryEmit(Unit)
             return
         }

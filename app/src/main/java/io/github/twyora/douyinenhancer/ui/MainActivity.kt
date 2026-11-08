@@ -926,7 +926,7 @@ class MainActivity : ComponentActivity() {
 
         LaunchedEffect(Unit) {
             vm.triggerVerifyFailure.collect {
-                onDismiss()
+                // do nothing
             }
         }
 
