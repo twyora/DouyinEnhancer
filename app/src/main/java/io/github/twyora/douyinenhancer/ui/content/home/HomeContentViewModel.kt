@@ -76,6 +76,13 @@ class HomeContentViewModel(application: Application) : AndroidViewModel(applicat
         frameworkSrvSubscription = YukiHook.Status.observeFrameworkService { available ->
             moduleActivationState.value = available
         }
+        viewModelScope.launch {
+            moduleActivationState.collect { active ->
+                uiState.update {
+                    it.copy(moduleActivationState = active)
+                }
+            }
+        }
 
         viewModelScope.launch {
             uiState.update {
@@ -85,11 +92,9 @@ class HomeContentViewModel(application: Application) : AndroidViewModel(applicat
                     ) == PackageManager.COMPONENT_ENABLED_STATE_DISABLED
                 )
             }
-            moduleActivationState.collect { active ->
-                uiState.update {
-                    it.copy(moduleActivationState = active)
-                }
-            }
+        }
+
+        viewModelScope.launch {
             fetchUpdateInfo()?.let { updateInfo ->
                 uiState.update {
                     it.copy(updateState = updateInfo)
