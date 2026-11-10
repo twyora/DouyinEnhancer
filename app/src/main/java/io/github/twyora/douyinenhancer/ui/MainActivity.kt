@@ -926,7 +926,7 @@ class MainActivity : ComponentActivity() {
 
         LaunchedEffect(Unit) {
             vm.triggerVerifyFailure.collect {
-                // do nothing
+                vm.setSupportingText(currLocalResources.getString(R.string.verify_toast_failure))
             }
         }
 

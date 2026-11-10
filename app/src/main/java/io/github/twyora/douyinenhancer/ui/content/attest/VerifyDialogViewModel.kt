@@ -36,7 +36,7 @@ class VerifyDialogViewModel(private val validUrls: Array<String>) : ViewModel() 
 
     fun onInputTextChanged(text: String) {
         uiState.update {
-            it.copy(inputUrl = text)
+            it.copy(inputUrl = text, supportingText = null)
         }
     }
 
@@ -57,6 +57,12 @@ class VerifyDialogViewModel(private val validUrls: Array<String>) : ViewModel() 
 
     fun onCancel() {
         triggerVerifyCancel.tryEmit(Unit)
+    }
+
+    fun setSupportingText(text: String?) {
+        uiState.update {
+            it.copy(supportingText = text)
+        }
     }
 }
 

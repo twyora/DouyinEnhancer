@@ -23,6 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.github.twyora.douyinenhancer.R
 
@@ -69,6 +70,13 @@ fun VerifyDialogContent(state: VerifyDialogUiState, actions: VerifyDialogUiActio
                             Text(stringResource(R.string.verify_dialog_input_hint))
                         }
                     )
+                    state.supportingText?.let {
+                        Text(
+                            text = it,
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
                 }
                 Spacer(modifier = Modifier.height(16.dp))
                 Row(
@@ -94,4 +102,20 @@ fun VerifyDialogContent(state: VerifyDialogUiState, actions: VerifyDialogUiActio
             }
         }
     }
+}
+
+@Preview
+@Composable
+fun VerifyDialogPreview() {
+    VerifyDialogContent(
+        state = VerifyDialogUiState(
+            inputUrl = "hello",
+            supportingText = "world"
+        ),
+        actions = VerifyDialogUiActions(
+            onInputUrlChange = {},
+            onConfirm = {},
+            onCancel = {}
+        )
+    )
 }
