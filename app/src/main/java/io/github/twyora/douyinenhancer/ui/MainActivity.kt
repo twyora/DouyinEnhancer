@@ -931,6 +931,12 @@ class MainActivity : ComponentActivity() {
         }
 
         LaunchedEffect(Unit) {
+            vm.triggerVerifyCancel.collect {
+                onDismiss()
+            }
+        }
+
+        LaunchedEffect(Unit) {
             vm.snackFlow.conflate().collect { event ->
                 onShowSnackbar(event)
             }

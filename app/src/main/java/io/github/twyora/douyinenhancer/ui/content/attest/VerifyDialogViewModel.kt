@@ -31,6 +31,9 @@ class VerifyDialogViewModel(private val validUrls: Array<String>) : ViewModel() 
     val triggerVerifyFailure: SharedFlow<Unit>
         field = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
 
+    val triggerVerifyCancel: SharedFlow<Unit>
+        field = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+
     fun onInputTextChanged(text: String) {
         uiState.update {
             it.copy(inputUrl = text)
@@ -53,7 +56,7 @@ class VerifyDialogViewModel(private val validUrls: Array<String>) : ViewModel() 
     }
 
     fun onCancel() {
-        triggerVerifyFailure.tryEmit(Unit)
+        triggerVerifyCancel.tryEmit(Unit)
     }
 }
 
