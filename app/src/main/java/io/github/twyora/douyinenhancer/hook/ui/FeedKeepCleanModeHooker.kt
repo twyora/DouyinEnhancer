@@ -4,6 +4,7 @@ import com.highcapable.yukihookapi.extension.kavaref.intercept
 import com.highcapable.yukihookapi.hook.core.YukiHookCreator
 import com.highcapable.yukihookapi.hook.entity.YukiBaseHooker
 import com.highcapable.yukihookapi.hook.log.YLog
+import io.github.twyora.douyinenhancer.config.ConfigManager
 import io.github.twyora.douyinenhancer.hook.DouyinPackage
 import io.github.twyora.douyinenhancer.hook.HookOnMainProcess
 import io.github.twyora.douyinenhancer.utils.reflect.getFieldOrNull
@@ -17,6 +18,11 @@ object FeedKeepCleanModeHooker : YukiBaseHooker() {
         get() = DouyinPackage.instance
 
     override fun onHook() {
+        if (!ConfigManager.ui.keepCleanMode.value) {
+            YLog.info("$TAG: keep clean mode disabled, skipping hook")
+            return
+        }
+
         installDismissWindowHook()
         installDismissWindowEventHook()
     }

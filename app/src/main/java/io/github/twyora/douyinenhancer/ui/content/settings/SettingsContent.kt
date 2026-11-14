@@ -197,6 +197,14 @@ fun SettingsContentUiSection(uiState: SettingsContentUiConfig, uiActions: Settin
         ) {
             uiActions.onHideFollowButtonChange(it)
         }
+
+        SwitchPreferenceItem(
+            title = stringResource(R.string.pref_ui_keep_clean_mode_title),
+            summary = stringResource(R.string.pref_ui_keep_clean_mode_summary),
+            checked = uiState.keepCleanMode
+        ) {
+            uiActions.onKeepCleanModeChange(it)
+        }
     }
 }
 
@@ -299,7 +307,7 @@ fun SettingsContentPreview() {
                 blockAutoReplay = false,
                 blockAutoResumePlayback = false
             ),
-            SettingsContentUiConfig(keepDanmakuVisible = false, hideFollowButton = false),
+            SettingsContentUiConfig(keepDanmakuVisible = false, hideFollowButton = false, keepCleanMode = false),
             SettingsContentModuleConfig(hiddenFeature = false, disableVerbose = false)
         ),
         actions = SettingsContentActions()

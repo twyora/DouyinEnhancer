@@ -35,6 +35,8 @@
     <string name="pref_ui_keep_danmaku_visible_summary">Keep danmaku visible when entering clean mode</string>
     <string name="pref_ui_hide_follow_button_title">Hide Follow Button</string>
     <string name="pref_ui_hide_follow_button_summary">Hide the follow button on the playback page</string>
+    <string name="pref_ui_keep_clean_mode_title">Keep Clean Mode</string>
+    <string name="pref_ui_keep_clean_mode_summary">Do not exit clean mode when switching feeds</string>
     <string name="recommended_feed_filter_main_switch_title">Main switch</string>
     <string name="recommended_feed_filter_main_switch_summary">Turn on to use recommended feed filtering features</string>
     <string name="recommended_feed_filter_block_followed_author_title">Hide content from followed creators</string>

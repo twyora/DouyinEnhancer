@@ -649,6 +649,9 @@ class MainActivity : ComponentActivity() {
                 },
                 onHideFollowButtonChange = {
                     vm.setHideFollowButton(it)
+                },
+                onKeepCleanModeChange = {
+                    vm.setKeepCleanMode(it)
                 }
             )
         }
