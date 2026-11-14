@@ -454,6 +454,18 @@ message DismissWindowEvent {
   optional Field enterMethod = 3;
 }
 
+message TopCornerEntranceData {
+  optional Class class = 1;
+  optional Field entrance_id = 2;
+}
+
+message TopCornerEntranceDataSource {
+  optional Class class = 1;
+  optional Field left_entrance_list = 2;
+  optional Method get_left_entrance_list = 3;
+  optional Method get_right_entrance_list = 4;
+}
+
 message HookInfo {
   uint64 last_update_time = 1;
   uint32 module_version_code = 2;
@@ -517,6 +529,8 @@ message HookInfo {
   optional HeifFrame heif_frame = 71;
   optional PinchViewModel pinch_view_model = 72;
   optional DismissWindowEvent dismiss_window_event = 73;
+  optional TopCornerEntranceDataSource top_corner_entrance_data_source = 74;
+  optional TopCornerEntranceData top_corner_entrance_data = 75;
 
   reserved 13, 18, 32, 35, 36, 38, 39, 40, 55, 64, 65;
 }

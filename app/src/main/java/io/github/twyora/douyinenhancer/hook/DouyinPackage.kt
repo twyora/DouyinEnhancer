@@ -40,6 +40,7 @@ import org.luckypray.dexkit.query.enums.StringMatchType
 import org.luckypray.dexkit.query.matchers.base.AccessFlagsMatcher
 import org.luckypray.dexkit.query.matchers.base.IntRange
 import org.luckypray.dexkit.query.matchers.base.OpCodesMatcher
+import org.luckypray.dexkit.result.FieldUsingType
 
 val Configs.Class.nameOrNull
     get() = if (hasName()) {
@@ -124,6 +125,8 @@ class DouyinPackage(classLoader: ClassLoader, context: Context) {
     val videoPlayerStatus = VideoPlayerStatusModule(hookInfo.videoPlayerStatus, classLoader)
     val videoEvent = VideoEventModule(hookInfo.videoEvent, classLoader)
     val cleanModePresenter = CleanModePresenterModule(hookInfo.cleanModePresenter, classLoader)
+    val topCornerEntranceDataSource = TopCornerEntranceDataSourceModule(hookInfo.topCornerEntranceDataSource, classLoader)
+    val topCornerEntranceData = TopCornerEntranceDataModule(hookInfo.topCornerEntranceData, classLoader)
     val danmakuView = DanmakuViewModule(hookInfo.danmakuView, classLoader)
     val fluxComponentId = FluxComponentIdModule(hookInfo.fluxComponentId, classLoader)
     val fluxComponentDataAction = FluxComponentDataActionModule(hookInfo.fluxComponentDataAction, classLoader)
@@ -974,6 +977,49 @@ class DouyinPackage(classLoader: ClassLoader, context: Context) {
             configs.manageViewVisibility.nameOrNull,
             configs.manageViewVisibility.parameters.valuesListOrNull
         )
+    }
+
+    class TopCornerEntranceDataSourceModule internal constructor(
+        private val configs: Configs.TopCornerEntranceDataSource,
+        private val classLoader: ClassLoader
+    ) {
+        val selfClass by weak {
+            configs.class_.nameOrNull?.toClass(classLoader)
+        }
+
+        fun leftEntranceList() = Field(
+            name = configs.leftEntranceList.nameOrNull
+        )
+
+        fun getLeftEntranceList() = Method(
+            configs.getLeftEntranceList.nameOrNull,
+            configs.getLeftEntranceList.parameters.valuesListOrNull
+        )
+
+        fun getRightEntranceList() = Method(
+            configs.getRightEntranceList.nameOrNull,
+            configs.getRightEntranceList.parameters.valuesListOrNull
+        )
+    }
+
+    class TopCornerEntranceDataModule internal constructor(
+        private val configs: Configs.TopCornerEntranceData,
+        private val classLoader: ClassLoader
+    ) {
+        val selfClass by weak {
+            configs.class_.nameOrNull?.toClass(classLoader)
+        }
+
+        fun entranceId() = Field(configs.entranceId.nameOrNull)
+
+        companion object {
+            const val HOMEPAGE_RIGHT_SEARCH = "homepage_right_search"
+            const val HOMEPAGE_LEFT_SCAN = "homepage_left_scan"
+            const val HOMEPAGE_LEFT_SIDEBAR = "homepage_left_sidebar"
+            const val HOMEPAGE_LEFT_SIDEBAR_JX = "homepage_left_sidebar_jx"
+            const val HOMEPAGE_LEFT_LOGIN = "homepage_left_login"
+            const val HOMEPAGE_LEFT_EXTENSION_COMPONENT = "homepage_left_extension_component"
+        }
     }
 
     class DanmakuViewModule internal constructor(private val configs: Configs.DanmakuView, private val classLoader: ClassLoader) {
@@ -4630,6 +4676,103 @@ class DouyinPackage(classLoader: ClassLoader, context: Context) {
                                 values.clear()
                                 values.addAll(setDismissWindowEventMethodData.paramTypeNames)
                             }
+                        }
+                    }.onFailure {
+                        YLog.error(populateFailedMsg.format(TAG), it)
+                    }
+                }
+
+                topCornerEntranceData = topCornerEntranceData {
+                    runCatching {
+                        val topCornerEntranceDataClassData = bridge.findClass {
+                            matcher {
+                                method {
+                                    name = "toString"
+                                    usingStrings {
+                                        add("TopCornerEntranceData", matchType = StringMatchType.StartsWith)
+                                    }
+                                }
+                            }
+                        }.singleOrNull()
+                        val entranceIdFieldData = topCornerEntranceDataClassData?.let {
+                            bridge.findField {
+                                searchClasses = listOf(it)
+                                matcher {
+                                    annotations {
+                                        add {
+                                            type = "com.google.gson.annotations.SerializedName"
+                                            addElement {
+                                                name = "value"
+                                                stringValue("entrance_id")
+                                            }
+                                        }
+                                    }
+                                }
+                            }.singleOrNull()
+                        }
+                        if (topCornerEntranceDataClassData == null ||
+                            entranceIdFieldData == null
+                        ) {
+                            YLog.error(symbolNotFoundMsg.format(TAG, this::class.java.enclosingClass?.simpleName))
+                            return@topCornerEntranceData
+                        }
+
+                        class_ = class_ {
+                            name = topCornerEntranceDataClassData.name
+                        }
+                        entranceId = field {
+                            name = entranceIdFieldData.name
+                        }
+                    }.onFailure {
+                        YLog.error(populateFailedMsg.format(TAG), it)
+                    }
+                }
+
+                topCornerEntranceDataSource = topCornerEntranceDataSource {
+                    runCatching {
+                        val getRightEntranceListMethodData = bridge.findMethod {
+                            matcher {
+                                modifiers = Modifier.PUBLIC or Modifier.SYNCHRONIZED
+                                paramCount = 0
+                                returnType = "java.util.List"
+                                usingStrings {
+                                    add("homepage_right_search")
+                                }
+                            }
+                        }.singleOrNull()
+                        val topCornerEntranceDataSourceClassData = getRightEntranceListMethodData?.declaredClass
+                        val getLeftEntranceListMethodData = topCornerEntranceDataSourceClassData?.methods?.singleOrNull { method ->
+                            method.returnType?.name == "java.util.List" && method.name != getRightEntranceListMethodData.name
+                        }
+                        val leftEntranceListFieldData = getLeftEntranceListMethodData?.let {
+                            it.usingFields.filter { usingFieldData ->
+                                usingFieldData.usingType == FieldUsingType.Write
+                            }.map { usingFieldData ->
+                                usingFieldData.field
+                            }.singleOrNull { field ->
+                                field.declaredClass == it.declaredClass && field.typeName == "java.util.List"
+                            }
+                        }
+                        if (getRightEntranceListMethodData == null ||
+                            topCornerEntranceDataSourceClassData == null ||
+                            getLeftEntranceListMethodData == null ||
+                            leftEntranceListFieldData == null
+                        ) {
+                            YLog.error(symbolNotFoundMsg.format(TAG, this::class.java.enclosingClass?.simpleName))
+                            return@topCornerEntranceDataSource
+                        }
+
+                        class_ = class_ {
+                            name = topCornerEntranceDataSourceClassData.name
+                        }
+                        leftEntranceList = field {
+                            name = leftEntranceListFieldData.name
+                        }
+                        getLeftEntranceList = method {
+                            name = getLeftEntranceListMethodData.methodName
+                        }
+                        getRightEntranceList = method {
+                            name = getRightEntranceListMethodData.methodName
                         }
                     }.onFailure {
                         YLog.error(populateFailedMsg.format(TAG), it)
