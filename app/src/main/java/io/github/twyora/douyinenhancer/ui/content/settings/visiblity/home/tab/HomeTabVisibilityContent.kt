@@ -1,4 +1,4 @@
-package io.github.twyora.douyinenhancer.ui.content.settings.visiblity.hometab.tabs
+package io.github.twyora.douyinenhancer.ui.content.settings.visiblity.home.tab
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
