@@ -80,6 +80,9 @@ import io.github.twyora.douyinenhancer.ui.content.settings.filter.recommendedfee
 import io.github.twyora.douyinenhancer.ui.content.settings.filter.recommendedfeed.RecommendedFeedFilterTitleKeywordActions
 import io.github.twyora.douyinenhancer.ui.content.settings.filter.recommendedfeed.RecommendedFeedFilterUidKeywordActions
 import io.github.twyora.douyinenhancer.ui.content.settings.filter.recommendedfeed.RecommendedFeedFilterViewModel
+import io.github.twyora.douyinenhancer.ui.content.settings.visiblity.home.entrance.corner.top.HomeTopCornerEntranceVisibilityActions
+import io.github.twyora.douyinenhancer.ui.content.settings.visiblity.home.entrance.corner.top.HomeTopCornerEntranceVisibilityContent
+import io.github.twyora.douyinenhancer.ui.content.settings.visiblity.home.entrance.corner.top.HomeTopCornerEntranceVisibilityViewModel
 import io.github.twyora.douyinenhancer.ui.content.settings.visiblity.hometab.tabs.HomeBottomTabVisibilityActions
 import io.github.twyora.douyinenhancer.ui.content.settings.visiblity.hometab.tabs.HomeTabVisibilityActions
 import io.github.twyora.douyinenhancer.ui.content.settings.visiblity.hometab.tabs.HomeTabVisibilityContent
@@ -135,6 +138,10 @@ class MainActivity : ComponentActivity() {
         UriDeepLinkMatcher(
             DeepLinkUri("douyinenhancer://io.github.twyora.douyinenhancer/settings/playback-component"),
             serializer = serializer<AppRoutes.Settings.PlaybackComponent>()
+        ),
+        UriDeepLinkMatcher(
+            DeepLinkUri("douyinenhancer://io.github.twyora.douyinenhancer/settings/home-top-corner-entrance"),
+            serializer = serializer<AppRoutes.Settings.HomeTopCornerEntrance>()
         )
     )
 
@@ -220,6 +227,7 @@ class MainActivity : ComponentActivity() {
                             AppRoutes.Settings.Main,
                             AppRoutes.Settings.RecommendedFeedFilter,
                             AppRoutes.Settings.PlaybackComponent,
+                            AppRoutes.Settings.HomeTopCornerEntrance,
                             AppRoutes.Settings.HomeTab -> NavEntry(key) {
                                 Scaffold(
                                     snackbarHost = {
@@ -249,6 +257,10 @@ class MainActivity : ComponentActivity() {
                                         )
 
                                         AppRoutes.Settings.PlaybackComponent -> PlaybackComponentVisibilityScreen(
+                                            innerPadding = innerPadding
+                                        )
+
+                                        AppRoutes.Settings.HomeTopCornerEntrance -> HomeTopCornerEntranceVisibilityScreen(
                                             innerPadding = innerPadding
                                         )
 
@@ -644,6 +656,9 @@ class MainActivity : ComponentActivity() {
                 onNavigateToHomeTab = {
                     vm.requestNavigation(AppRoutes.Settings.HomeTab)
                 },
+                onNavigateToHomeTopCornerEntrance = {
+                    vm.requestNavigation(AppRoutes.Settings.HomeTopCornerEntrance)
+                },
                 onKeepDanmakuVisibleChange = {
                     vm.setKeepDanmakuVisible(it)
                 },
@@ -901,6 +916,31 @@ class MainActivity : ComponentActivity() {
 
         PlaybackComponentVisibilityContext(
             config = configs,
+            actions = actions,
+            modifier = modifier.padding(innerPadding)
+        )
+    }
+
+    @Composable
+    private fun HomeTopCornerEntranceVisibilityScreen(modifier: Modifier = Modifier, innerPadding: PaddingValues) {
+        val vm: HomeTopCornerEntranceVisibilityViewModel = viewModel()
+        val config by vm.homeTopCornerEntranceConfig.collectAsStateWithLifecycle()
+        val actions = remember {
+            HomeTopCornerEntranceVisibilityActions(
+                onRightMainSwitchChange = { checked ->
+                    vm.onRightMainSwitchChange(checked)
+                },
+                onLeftMainSwitchChange = { checked ->
+                    vm.onLeftMainSwitchChange(checked)
+                },
+                onSwitchChange = { key, checked ->
+                    vm.onSwitchChange(key, checked)
+                }
+            )
+        }
+
+        HomeTopCornerEntranceVisibilityContent(
+            config = config,
             actions = actions,
             modifier = modifier.padding(innerPadding)
         )

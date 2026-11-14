@@ -158,6 +158,22 @@
 
     <string name="home_tab_block_summary">隐藏首页顶栏或底栏的导航项</string>
 
+    <string name="home_top_corner_entrance_dialog_title">隐藏角落入口</string>
+    <string name="home_top_corner_entrance_dialog_summary">隐藏首页顶部角落的指定入口</string>
+    <string name="home_top_corner_entrance_right_main_switch">隐藏右侧入口</string>
+    <string name="home_top_corner_entrance_right_main_switch_summary">开启后可隐藏右侧角落入口</string>
+    <string name="home_top_corner_entrance_left_main_switch">隐藏左侧入口</string>
+    <string name="home_top_corner_entrance_left_main_switch_summary">开启后可隐藏左侧角落入口</string>
+    <string name="home_top_corner_entrance_right_category">右侧</string>
+    <string name="home_top_corner_entrance_left_category">左侧</string>
+
+    <string name="home_top_corner_entrance_hide_right_search">搜索</string>
+    <string name="home_top_corner_entrance_hide_left_scan">扫一扫</string>
+    <string name="home_top_corner_entrance_hide_left_sidebar">侧边栏</string>
+    <string name="home_top_corner_entrance_hide_left_sidebar_jx">侧边栏_JX</string>
+    <string name="home_top_corner_entrance_hide_left_login">登录</string>
+    <string name="home_top_corner_entrance_hide_left_extension_component">扩展组件</string>
+
     <string name="pref_category_backup">备份和还原</string>
     <string name="pref_backup_export_title">导出配置</string>
     <string name="pref_backup_import_title">导入配置</string>

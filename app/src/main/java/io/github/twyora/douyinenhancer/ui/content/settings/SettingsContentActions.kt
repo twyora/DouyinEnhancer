@@ -26,6 +26,7 @@ class SettingsContentFeedActions(
 class SettingsContentUiActions(
     val onNavigateToPlaybackComponent: () -> Unit = {},
     val onNavigateToHomeTab: () -> Unit = {},
+    val onNavigateToHomeTopCornerEntrance: () -> Unit = {},
     val onKeepDanmakuVisibleChange: (Boolean) -> Unit = {},
     val onHideFollowButtonChange: (Boolean) -> Unit = {},
     val onKeepCleanModeChange: (Boolean) -> Unit = {}

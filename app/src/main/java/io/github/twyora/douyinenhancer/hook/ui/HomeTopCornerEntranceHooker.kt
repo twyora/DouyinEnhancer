@@ -4,6 +4,7 @@ import com.highcapable.yukihookapi.extension.kavaref.intercept
 import com.highcapable.yukihookapi.hook.core.YukiHookCreator
 import com.highcapable.yukihookapi.hook.entity.YukiBaseHooker
 import com.highcapable.yukihookapi.hook.log.YLog
+import io.github.twyora.douyinenhancer.config.ConfigManager
 import io.github.twyora.douyinenhancer.hook.DouyinPackage
 import io.github.twyora.douyinenhancer.hook.HookOnMainProcess
 import io.github.twyora.douyinenhancer.utils.reflect.getFieldOrNull
@@ -18,20 +19,56 @@ object HomeTopCornerEntranceHooker : YukiBaseHooker() {
         get() = DouyinPackage.instance
 
     private val blockRightEntranceList by lazy {
-        setOf(
-            DouyinPackage.TopCornerEntranceDataModule.HOMEPAGE_RIGHT_SEARCH
+        setOfNotNull(
+            if (ConfigManager.hideHomeTopCornerEntrance.hideRightSearch.value) {
+                DouyinPackage.TopCornerEntranceDataModule.HOMEPAGE_RIGHT_SEARCH
+            } else {
+                null
+            }
         )
     }
 
     private val blockLeftEntranceList by lazy {
-        setOf(
-            DouyinPackage.TopCornerEntranceDataModule.HOMEPAGE_LEFT_SIDEBAR
+        setOfNotNull(
+            if (ConfigManager.hideHomeTopCornerEntrance.hideLeftScan.value) {
+                DouyinPackage.TopCornerEntranceDataModule.HOMEPAGE_LEFT_SCAN
+            } else {
+                null
+            },
+            if (ConfigManager.hideHomeTopCornerEntrance.hideLeftSidebar.value) {
+                DouyinPackage.TopCornerEntranceDataModule.HOMEPAGE_LEFT_SIDEBAR
+            } else {
+                null
+            },
+            if (ConfigManager.hideHomeTopCornerEntrance.hideLeftSidebarJx.value) {
+                DouyinPackage.TopCornerEntranceDataModule.HOMEPAGE_LEFT_SIDEBAR_JX
+            } else {
+                null
+            },
+            if (ConfigManager.hideHomeTopCornerEntrance.hideLeftLogin.value) {
+                DouyinPackage.TopCornerEntranceDataModule.HOMEPAGE_LEFT_LOGIN
+            } else {
+                null
+            },
+            if (ConfigManager.hideHomeTopCornerEntrance.hideLeftExtensionComponent.value) {
+                DouyinPackage.TopCornerEntranceDataModule.HOMEPAGE_LEFT_EXTENSION_COMPONENT
+            } else {
+                null
+            }
         )
     }
 
     override fun onHook() {
-        installRightCornerEntranceHook()
-        installLeftCornerEntranceHook()
+        if (!ConfigManager.hideHomeTopCornerEntrance.rightMainSwitch.value) {
+            YLog.info("$TAG: right corner entrance hide is disabled, skipping hook")
+        } else {
+            installRightCornerEntranceHook()
+        }
+        if (!ConfigManager.hideHomeTopCornerEntrance.leftMainSwitch.value) {
+            YLog.info("$TAG: left corner entrance hide is disabled, skipping hook")
+        } else {
+            installLeftCornerEntranceHook()
+        }
     }
 
     private fun installRightCornerEntranceHook(): YukiHookCreator.MemberHooker<*>.Handle? {

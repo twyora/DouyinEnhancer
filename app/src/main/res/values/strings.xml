@@ -158,6 +158,22 @@
 
     <string name="home_tab_block_summary">Hide navigation entries on the top or bottom bar of the home page</string>
 
+    <string name="home_top_corner_entrance_dialog_title">Top Corner Entrance Hiding</string>
+    <string name="home_top_corner_entrance_dialog_summary">Hide specified entrances at the top corners of the home page</string>
+    <string name="home_top_corner_entrance_right_main_switch">Hide Right Entrances</string>
+    <string name="home_top_corner_entrance_right_main_switch_summary">Enable to hide entrances on the top-right corner</string>
+    <string name="home_top_corner_entrance_left_main_switch">Hide Left Entrances</string>
+    <string name="home_top_corner_entrance_left_main_switch_summary">Enable to hide entrances on the top-left corner</string>
+    <string name="home_top_corner_entrance_right_category">Right</string>
+    <string name="home_top_corner_entrance_left_category">Left</string>
+
+    <string name="home_top_corner_entrance_hide_right_search">Search</string>
+    <string name="home_top_corner_entrance_hide_left_scan">Scan</string>
+    <string name="home_top_corner_entrance_hide_left_sidebar">Sidebar</string>
+    <string name="home_top_corner_entrance_hide_left_sidebar_jx">Sidebar_JX</string>
+    <string name="home_top_corner_entrance_hide_left_login">Login</string>
+    <string name="home_top_corner_entrance_hide_left_extension_component">Extension Component</string>
+
     <string name="pref_category_backup">Backup &amp; Restore</string>
     <string name="pref_backup_export_title">Export Config</string>
     <string name="pref_backup_import_title">Import Config</string>
