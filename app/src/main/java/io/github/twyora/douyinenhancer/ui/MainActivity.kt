@@ -86,7 +86,7 @@ import io.github.twyora.douyinenhancer.ui.content.settings.visiblity.hometab.tab
 import io.github.twyora.douyinenhancer.ui.content.settings.visiblity.hometab.tabs.HomeTabVisibilityViewModel
 import io.github.twyora.douyinenhancer.ui.content.settings.visiblity.hometab.tabs.HomeTopTabVisibilityActions
 import io.github.twyora.douyinenhancer.ui.content.settings.visiblity.playback.components.PlaybackComponentVisibilityActions
-import io.github.twyora.douyinenhancer.ui.content.settings.visiblity.playback.components.PlaybackComponentVisibilityContext
+import io.github.twyora.douyinenhancer.ui.content.settings.visiblity.playback.components.PlaybackComponentVisibilityContent
 import io.github.twyora.douyinenhancer.ui.content.settings.visiblity.playback.components.PlaybackComponentVisibilityViewModel
 import io.github.twyora.douyinenhancer.ui.event.SnackEvent
 import io.github.twyora.douyinenhancer.ui.navigation.AppRoutes
@@ -899,7 +899,7 @@ class MainActivity : ComponentActivity() {
             )
         }
 
-        PlaybackComponentVisibilityContext(
+        PlaybackComponentVisibilityContent(
             config = configs,
             actions = actions,
             modifier = modifier.padding(innerPadding)
