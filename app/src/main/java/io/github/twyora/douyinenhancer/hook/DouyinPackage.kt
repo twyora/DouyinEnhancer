@@ -137,6 +137,8 @@ class DouyinPackage(classLoader: ClassLoader, context: Context) {
     val playStatusHelper = PlayStatusHelperModule(hookInfo.playStatusHelper, classLoader)
     val heifImage = HeifImageModule(hookInfo.heifImage, classLoader)
     val heifFrame = HeifFrameModule(hookInfo.heifFrame, classLoader)
+    val pinchViewModel = PinchViewModelModule(hookInfo.pinchViewModel, classLoader)
+    val dismissWindowEvent = DismissWindowEventModule(hookInfo.dismissWindowEvent, classLoader)
 
     class CommentImageStructModule internal constructor(
         private val configs: Configs.CommentImageStruct,
@@ -1179,6 +1181,40 @@ class DouyinPackage(classLoader: ClassLoader, context: Context) {
             configs.dispose.nameOrNull,
             configs.dispose.parameters.valuesListOrNull
         )
+    }
+
+    class PinchViewModelModule internal constructor(private val configs: Configs.PinchViewModel, private val classLoader: ClassLoader) {
+        val selfClass by weak {
+            configs.class_.nameOrNull?.toClass(classLoader)
+        }
+
+        fun dismissWindow() = Method(
+            configs.dismissWindow.nameOrNull,
+            configs.dismissWindow.parameters.valuesListOrNull
+        )
+
+        fun setDismissWindowEvent() = Method(
+            configs.setDismissWindowEvent.nameOrNull,
+            configs.setDismissWindowEvent.parameters.valuesListOrNull
+        )
+    }
+
+    class DismissWindowEventModule internal constructor(
+        private val configs: Configs.DismissWindowEvent,
+        private val classLoader: ClassLoader
+    ) {
+        val selfClass by weak {
+            configs.class_.nameOrNull?.toClass(classLoader)
+        }
+
+        fun dismissWithSurface() = Field(configs.dismissWithSurface.nameOrNull)
+
+        fun enterMethod() = Field(configs.enterMethod.nameOrNull)
+
+        companion object {
+            const val ENTER_METHOD_SLIDE_UP = "slide_up"
+            const val ENTER_METHOD_SLIDE_DOWN = "slide_down"
+        }
     }
 
     companion object {
@@ -4456,6 +4492,143 @@ class DouyinPackage(classLoader: ClassLoader, context: Context) {
                             parameters = MethodKt.parameters {
                                 values.clear()
                                 values.addAll(disposeMethodData.paramTypeNames)
+                            }
+                        }
+                    }.onFailure {
+                        YLog.error(populateFailedMsg.format(TAG), it)
+                    }
+                }
+
+                dismissWindowEvent = dismissWindowEvent {
+                    runCatching {
+                        val dismissWindowEventClassData = bridge.findClass {
+                            matcher {
+                                method {
+                                    name = "toString"
+                                    usingStrings {
+                                        add("DismissWindowEvent", matchType = StringMatchType.StartsWith)
+                                    }
+                                }
+                            }
+                        }.singleOrNull()
+                        val dismissWithSurfaceFieldData = dismissWindowEventClassData?.let {
+                            bridge.findField {
+                                searchClasses = listOf(it)
+                                matcher {
+                                    type = "java.lang.Boolean"
+                                }
+                            }.singleOrNull()
+                        }
+                        val enterMethodFieldData = dismissWindowEventClassData?.let {
+                            bridge.findField {
+                                searchClasses = listOf(it)
+                                matcher {
+                                    type = "java.lang.String"
+                                }
+                            }.singleOrNull()
+                        }
+                        if (dismissWindowEventClassData == null ||
+                            dismissWithSurfaceFieldData == null ||
+                            enterMethodFieldData == null
+                        ) {
+                            YLog.error(symbolNotFoundMsg.format(TAG, this::class.java.enclosingClass?.simpleName))
+                            return@dismissWindowEvent
+                        }
+
+                        class_ = class_ {
+                            name = dismissWindowEventClassData.name
+                        }
+                        dismissWithSurface = field {
+                            name = dismissWithSurfaceFieldData.name
+                        }
+                        enterMethod = field {
+                            name = enterMethodFieldData.name
+                        }
+                    }.onFailure {
+                        YLog.error(populateFailedMsg.format(TAG), it)
+                    }
+                }
+
+                pinchViewModel = pinchViewModel {
+                    runCatching {
+                        val pinchViewModelClassData = bridge.findClass {
+                            matcher {
+                                superClass = "androidx.lifecycle.ViewModel"
+                                usingStrings {
+                                    add("livesdk_co_play")
+                                }
+                            }
+                        }.singleOrNull()
+                        val dismissWindowMethodData = pinchViewModelClassData?.let {
+                            bridge.findMethod {
+                                searchClasses = listOf(it)
+                                matcher {
+                                    params {
+                                        add("java.lang.Boolean")
+                                    }
+                                    returnType = "void"
+                                    usingStrings {
+                                        add("", matchType = StringMatchType.Equals)
+                                    }
+                                    invokeMethods {
+                                        add {
+                                            descriptor = "Landroidx/lifecycle/LiveData;->setValue(Ljava/lang/Object;)V"
+                                        }
+                                    }
+                                }
+                            }.singleOrNull()
+                        }
+                        val setDismissWindowEventMethodData = pinchViewModelClassData?.let {
+                            bridge.findMethod {
+                                searchClasses = listOf(it)
+                                matcher {
+                                    params {
+                                        YLog.debug("$TAG: eventClassName: ${this@apply.dismissWindowEvent.class_.nameOrNull}")
+                                        this@apply.dismissWindowEvent.class_.nameOrNull?.let { eventClassName ->
+                                            add(eventClassName)
+                                        }
+                                    }
+                                    returnType = "void"
+                                    invokeMethods {
+                                        add {
+                                            descriptor = "Landroidx/lifecycle/LiveData;->setValue(Ljava/lang/Object;)V"
+                                        }
+                                    }
+                                }
+                            }.singleOrNull()
+                        }
+                        if (pinchViewModelClassData == null ||
+                            dismissWindowMethodData == null ||
+                            setDismissWindowEventMethodData == null
+                        ) {
+                            if (pinchViewModelClassData == null) {
+                                YLog.error("$TAG: pinchViewModelClassData is null")
+                            }
+                            if (dismissWindowMethodData == null) {
+                                YLog.error("$TAG: dismissWindowMethodData is null")
+                            }
+                            if (setDismissWindowEventMethodData == null) {
+                                YLog.error("$TAG: setDismissWindowEventMethodData is null")
+                            }
+                            YLog.error(symbolNotFoundMsg.format(TAG, this::class.java.enclosingClass?.simpleName))
+                            return@pinchViewModel
+                        }
+
+                        class_ = class_ {
+                            name = pinchViewModelClassData.name
+                        }
+                        dismissWindow = method {
+                            name = dismissWindowMethodData.methodName
+                            parameters = MethodKt.parameters {
+                                values.clear()
+                                values.addAll(dismissWindowMethodData.paramTypeNames)
+                            }
+                        }
+                        setDismissWindowEvent = method {
+                            name = setDismissWindowEventMethodData.methodName
+                            parameters = MethodKt.parameters {
+                                values.clear()
+                                values.addAll(setDismissWindowEventMethodData.paramTypeNames)
                             }
                         }
                     }.onFailure {

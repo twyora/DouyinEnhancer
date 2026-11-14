@@ -96,11 +96,13 @@ class SettingsContentViewModel : ViewModel() {
     private val uiState = with(ConfigManager.ui) {
         combine(
             keepDanmakuVisible.observe(),
-            hideFollowButton.observe()
-        ) { keepDanmakuVisible, hideFollowButton ->
+            hideFollowButton.observe(),
+            keepCleanMode.observe()
+        ) { keepDanmakuVisible, hideFollowButton, keepCleanMode ->
             SettingsContentUiConfig(
                 keepDanmakuVisible = keepDanmakuVisible,
-                hideFollowButton = hideFollowButton
+                hideFollowButton = hideFollowButton,
+                keepCleanMode = keepCleanMode
             )
         }
     }
@@ -153,7 +155,8 @@ class SettingsContentViewModel : ViewModel() {
             uiState = with(ConfigManager.ui) {
                 SettingsContentUiConfig(
                     keepDanmakuVisible = keepDanmakuVisible.defValue,
-                    hideFollowButton = hideFollowButton.defValue
+                    hideFollowButton = hideFollowButton.defValue,
+                    keepCleanMode = keepCleanMode.defValue
                 )
             },
             moduleState = SettingsContentModuleConfig(
@@ -351,6 +354,10 @@ class SettingsContentViewModel : ViewModel() {
 
     fun setHideFollowButton(enable: Boolean) {
         ConfigManager.ui.hideFollowButton.value = enable
+    }
+
+    fun setKeepCleanMode(enable: Boolean) {
+        ConfigManager.ui.keepCleanMode.value = enable
     }
 
     fun setHiddenFeature(enable: Boolean) {

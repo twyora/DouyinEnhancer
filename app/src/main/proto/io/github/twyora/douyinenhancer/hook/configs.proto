@@ -442,6 +442,18 @@ message HeifFrame {
   optional Method dispose = 3;
 }
 
+message PinchViewModel {
+  optional Class class = 1;
+  optional Method dismiss_window = 2;
+  optional Method set_dismiss_window_event = 3;
+}
+
+message DismissWindowEvent {
+  optional Class class = 1;
+  optional Field dismissWithSurface = 2;
+  optional Field enterMethod = 3;
+}
+
 message HookInfo {
   uint64 last_update_time = 1;
   uint32 module_version_code = 2;
@@ -503,6 +515,8 @@ message HookInfo {
   optional PlayStatusHelper play_status_helper = 69;
   optional HeifImage heif_image = 70;
   optional HeifFrame heif_frame = 71;
+  optional PinchViewModel pinch_view_model = 72;
+  optional DismissWindowEvent dismiss_window_event = 73;
 
   reserved 13, 18, 32, 35, 36, 38, 39, 40, 55, 64, 65;
 }

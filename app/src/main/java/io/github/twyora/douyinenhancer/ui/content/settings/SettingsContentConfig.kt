@@ -17,7 +17,7 @@ data class SettingsContentFeedConfig(
     val blockAutoResumePlayback: Boolean
 )
 
-data class SettingsContentUiConfig(val keepDanmakuVisible: Boolean, val hideFollowButton: Boolean)
+data class SettingsContentUiConfig(val keepDanmakuVisible: Boolean, val hideFollowButton: Boolean, val keepCleanMode: Boolean)
 
 data class SettingsContentModuleConfig(val hiddenFeature: Boolean, val disableVerbose: Boolean)
 
