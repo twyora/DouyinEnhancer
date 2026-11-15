@@ -2,7 +2,6 @@ package io.github.twyora.douyinenhancer.ui.content.settings.filter.recommendedfe
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.highcapable.yukihookapi.hook.log.YLog
 import io.github.twyora.douyinenhancer.R
 import io.github.twyora.douyinenhancer.config.ConfigManager
 import io.github.twyora.douyinenhancer.config.gate.ConfigStateMode
@@ -430,49 +429,8 @@ class RecommendedFeedFilterViewModel : ViewModel() {
         }
     }
 
-    fun addTitleKeyword() {
-        titleKeywords.value += ""
-    }
-
-    fun setTitleKeywordText(index: Int, text: String) {
-        if (index !in titleKeywords.value.indices) {
-            YLog.warn("$TAG title keyword index out of bounds: $index")
-            return
-        }
-        titleKeywords.value = titleKeywords.value.toMutableList().apply {
-            this[index] = text
-        }
-    }
-
-    fun removeTitleKeyword(index: Int) {
-        if (index !in titleKeywords.value.indices) {
-            YLog.warn("$TAG title keyword index out of bounds: $index")
-            return
-        }
-        titleKeywords.value = titleKeywords.value.toMutableList().apply {
-            removeAt(index)
-        }
-    }
-
-    fun setTitleRegex(enable: Boolean) {
-        if (enable &&
-            titleKeywords.value.any { kw ->
-                kw.isNotBlank() && runCatching {
-                    Regex(kw)
-                }.isFailure
-            }
-        ) {
-            sendSnack(SnackEvent(R.string.save_failed_invalid_regex))
-            return
-        }
-        ConfigManager.recommendedFeedFilter.titleRegexMode.value = enable
-    }
-
-    fun saveTitleKeywords(): Boolean {
-        val keywords = titleKeywords.value.filter {
-            it.isNotBlank()
-        }.toSet()
-        if (titleRegexMode.value &&
+    fun saveTitleFilter(keywords: Set<String>, regexMode: Boolean): Boolean {
+        if (regexMode &&
             keywords.any { kw ->
                 runCatching {
                     Regex(kw)
@@ -483,83 +441,17 @@ class RecommendedFeedFilterViewModel : ViewModel() {
             return false
         }
         ConfigManager.recommendedFeedFilter.titleKeywords.value = keywords
+        ConfigManager.recommendedFeedFilter.titleRegexMode.value = regexMode
         return true
     }
 
-    fun addUidKeyword() {
-        uidKeywords.value += ""
-    }
-
-    fun setUidKeywordText(index: Int, text: String) {
-        if (index !in uidKeywords.value.indices) {
-            YLog.warn("$TAG uid keyword index out of bounds: $index")
-            return
-        }
-        uidKeywords.value = uidKeywords.value.toMutableList().apply {
-            this[index] = text
-        }
-    }
-
-    fun removeUidKeyword(index: Int) {
-        if (index !in uidKeywords.value.indices) {
-            YLog.warn("$TAG uid keyword index out of bounds: $index")
-            return
-        }
-        uidKeywords.value = uidKeywords.value.toMutableList().apply {
-            removeAt(index)
-        }
-    }
-
-    fun saveUidKeywords(): Boolean {
-        ConfigManager.recommendedFeedFilter.authorUidKeywords.value = uidKeywords.value.filter {
-            it.isNotBlank()
-        }.toSet()
+    fun saveUidFilter(keywords: Set<String>): Boolean {
+        ConfigManager.recommendedFeedFilter.authorUidKeywords.value = keywords
         return true
     }
 
-    fun addNicknameKeyword() {
-        nicknameKeywords.value += ""
-    }
-
-    fun setNicknameKeywordText(index: Int, text: String) {
-        if (index !in nicknameKeywords.value.indices) {
-            YLog.warn("$TAG nickname keyword index out of bounds: $index")
-            return
-        }
-        nicknameKeywords.value = nicknameKeywords.value.toMutableList().apply {
-            this[index] = text
-        }
-    }
-
-    fun removeNicknameKeyword(index: Int) {
-        if (index !in nicknameKeywords.value.indices) {
-            YLog.warn("$TAG nickname keyword index out of bounds: $index")
-            return
-        }
-        nicknameKeywords.value = nicknameKeywords.value.toMutableList().apply {
-            removeAt(index)
-        }
-    }
-
-    fun setNicknameRegex(enable: Boolean) {
-        if (enable &&
-            nicknameKeywords.value.any { kw ->
-                kw.isNotBlank() && runCatching {
-                    Regex(kw)
-                }.isFailure
-            }
-        ) {
-            sendSnack(SnackEvent(R.string.save_failed_invalid_regex))
-            return
-        }
-        ConfigManager.recommendedFeedFilter.authorNicknameRegexMode.value = enable
-    }
-
-    fun saveNicknameKeywords(): Boolean {
-        val keywords = nicknameKeywords.value.filter {
-            it.isNotBlank()
-        }.toSet()
-        if (nicknameRegexMode.value &&
+    fun saveNicknameFilter(keywords: Set<String>, regexMode: Boolean): Boolean {
+        if (regexMode &&
             keywords.any { kw ->
                 runCatching {
                     Regex(kw)
@@ -570,51 +462,12 @@ class RecommendedFeedFilterViewModel : ViewModel() {
             return false
         }
         ConfigManager.recommendedFeedFilter.authorNicknameKeywords.value = keywords
+        ConfigManager.recommendedFeedFilter.authorNicknameRegexMode.value = regexMode
         return true
     }
 
-    fun addDescKeyword() {
-        descKeywords.value += ""
-    }
-
-    fun setDescKeywordText(index: Int, text: String) {
-        if (index !in descKeywords.value.indices) {
-            YLog.warn("$TAG desc keyword index out of bounds: $index")
-            return
-        }
-        descKeywords.value = descKeywords.value.toMutableList().apply {
-            this[index] = text
-        }
-    }
-
-    fun removeDescKeyword(index: Int) {
-        if (index !in descKeywords.value.indices) {
-            YLog.warn("$TAG desc keyword index out of bounds: $index")
-            return
-        }
-        descKeywords.value = descKeywords.value.toMutableList().apply {
-            removeAt(index)
-        }
-    }
-
-    fun setDescRegex(enable: Boolean) {
-        if (enable && descKeywords.value.any { kw ->
-                kw.isNotBlank() && runCatching {
-                    Regex(kw)
-                }.isFailure
-            }
-        ) {
-            sendSnack(SnackEvent(R.string.save_failed_invalid_regex))
-            return
-        }
-        ConfigManager.recommendedFeedFilter.descRegexMode.value = enable
-    }
-
-    fun saveDescKeywords(): Boolean {
-        val keywords = descKeywords.value.filter {
-            it.isNotBlank()
-        }.toSet()
-        if (descRegexMode.value &&
+    fun saveDescFilter(keywords: Set<String>, regexMode: Boolean): Boolean {
+        if (regexMode &&
             keywords.any { kw ->
                 runCatching {
                     Regex(kw)
@@ -625,10 +478,7 @@ class RecommendedFeedFilterViewModel : ViewModel() {
             return false
         }
         ConfigManager.recommendedFeedFilter.descKeywords.value = keywords
+        ConfigManager.recommendedFeedFilter.descRegexMode.value = regexMode
         return true
-    }
-
-    companion object {
-        private val TAG = this::class.java.enclosingClass?.simpleName ?: "RecommendedFeedFilterViewModel"
     }
 }
