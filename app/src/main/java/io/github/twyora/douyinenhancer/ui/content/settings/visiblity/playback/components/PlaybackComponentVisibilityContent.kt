@@ -13,7 +13,7 @@ import io.github.twyora.douyinenhancer.R
 import io.github.twyora.douyinenhancer.ui.components.SwitchPreferenceItem
 
 @Composable
-fun PlaybackComponentVisibilityContext(
+fun PlaybackComponentVisibilityContent(
     config: PlaybackComponentVisibilityConfig,
     actions: PlaybackComponentVisibilityActions,
     modifier: Modifier = Modifier
@@ -51,7 +51,7 @@ fun PlaybackComponentVisibilityContext(
 
 @Preview
 @Composable
-private fun PlaybackComponentVisibilityContextPreview() {
+private fun PlaybackComponentVisibilityContentPreview() {
     val playbackComponentVisibilityItems: List<PlaybackComponentVisibilityItem> = listOf(
         PlaybackComponentVisibilityItem("playback_component_block_avatar", R.string.playback_component_block_avatar, false),
         PlaybackComponentVisibilityItem("playback_component_block_nickname", R.string.playback_component_block_nickname, false),
@@ -236,7 +236,7 @@ private fun PlaybackComponentVisibilityContextPreview() {
         )
     )
 
-    PlaybackComponentVisibilityContext(
+    PlaybackComponentVisibilityContent(
         config = PlaybackComponentVisibilityConfig(
             mainSwitch = false,
             switches = playbackComponentVisibilityItems

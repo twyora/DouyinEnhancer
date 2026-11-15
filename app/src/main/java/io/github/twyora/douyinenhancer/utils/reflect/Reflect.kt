@@ -204,19 +204,23 @@ fun KClass<*>.getStaticFieldOrNull(field: Field): Any? = runCatching {
 
 fun Class<*>.setStaticField(field: Field, value: Any?) = this.resolveField(field).set(value)
 
-fun Class<*>.setStaticFieldQuietly(field: Field, value: Any?) = runCatching {
-    setStaticField(field, value)
-}.onFailure {
-    YLog.error("failed to set static field: ${this.name}.${field.name}", it)
-}.getOrNull()
+fun Class<*>.setStaticFieldQuietly(field: Field, value: Any?) {
+    runCatching {
+        setStaticField(field, value)
+    }.onFailure {
+        YLog.error("failed to set static field: ${this.name}.${field.name}", it)
+    }
+}
 
 fun KClass<*>.setStaticField(field: Field, value: Any?) = this.java.setStaticField(field, value)
 
-fun KClass<*>.setStaticFieldQuietly(field: Field, value: Any?) = runCatching {
-    setStaticField(field, value)
-}.onFailure {
-    YLog.error("failed to set static field: ${this.java.name}.${field.name}", it)
-}.getOrNull()
+fun KClass<*>.setStaticFieldQuietly(field: Field, value: Any?) {
+    runCatching {
+        setStaticField(field, value)
+    }.onFailure {
+        YLog.error("failed to set static field: ${this.java.name}.${field.name}", it)
+    }
+}
 
 fun <T : Any> T.resolveMethod(method: Method): MethodResolver<T> {
     @Suppress("UNCHECKED_CAST")
@@ -282,8 +286,10 @@ fun Any.getFieldOrNull(field: Field): Any? = runCatching {
 
 fun Any.setField(field: Field, value: Any?) = this.resolveField(field).set(value)
 
-fun Any.setFieldQuietly(field: Field, value: Any?) = runCatching {
-    setField(field, value)
-}.onFailure {
-    YLog.error("failed to set field: ${this.javaClass.name}.${field.name}", it)
-}.getOrNull()
+fun Any.setFieldQuietly(field: Field, value: Any?) {
+    runCatching {
+        setField(field, value)
+    }.onFailure {
+        YLog.error("failed to set field: ${this.javaClass.name}.${field.name}", it)
+    }
+}

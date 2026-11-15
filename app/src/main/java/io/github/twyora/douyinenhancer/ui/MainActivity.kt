@@ -83,13 +83,13 @@ import io.github.twyora.douyinenhancer.ui.content.settings.filter.recommendedfee
 import io.github.twyora.douyinenhancer.ui.content.settings.visiblity.home.entrance.corner.top.HomeTopCornerEntranceVisibilityActions
 import io.github.twyora.douyinenhancer.ui.content.settings.visiblity.home.entrance.corner.top.HomeTopCornerEntranceVisibilityContent
 import io.github.twyora.douyinenhancer.ui.content.settings.visiblity.home.entrance.corner.top.HomeTopCornerEntranceVisibilityViewModel
-import io.github.twyora.douyinenhancer.ui.content.settings.visiblity.hometab.tabs.HomeBottomTabVisibilityActions
-import io.github.twyora.douyinenhancer.ui.content.settings.visiblity.hometab.tabs.HomeTabVisibilityActions
-import io.github.twyora.douyinenhancer.ui.content.settings.visiblity.hometab.tabs.HomeTabVisibilityContent
-import io.github.twyora.douyinenhancer.ui.content.settings.visiblity.hometab.tabs.HomeTabVisibilityViewModel
-import io.github.twyora.douyinenhancer.ui.content.settings.visiblity.hometab.tabs.HomeTopTabVisibilityActions
+import io.github.twyora.douyinenhancer.ui.content.settings.visiblity.home.tab.HomeBottomTabVisibilityActions
+import io.github.twyora.douyinenhancer.ui.content.settings.visiblity.home.tab.HomeTabVisibilityActions
+import io.github.twyora.douyinenhancer.ui.content.settings.visiblity.home.tab.HomeTabVisibilityContent
+import io.github.twyora.douyinenhancer.ui.content.settings.visiblity.home.tab.HomeTabVisibilityViewModel
+import io.github.twyora.douyinenhancer.ui.content.settings.visiblity.home.tab.HomeTopTabVisibilityActions
 import io.github.twyora.douyinenhancer.ui.content.settings.visiblity.playback.components.PlaybackComponentVisibilityActions
-import io.github.twyora.douyinenhancer.ui.content.settings.visiblity.playback.components.PlaybackComponentVisibilityContext
+import io.github.twyora.douyinenhancer.ui.content.settings.visiblity.playback.components.PlaybackComponentVisibilityContent
 import io.github.twyora.douyinenhancer.ui.content.settings.visiblity.playback.components.PlaybackComponentVisibilityViewModel
 import io.github.twyora.douyinenhancer.ui.event.SnackEvent
 import io.github.twyora.douyinenhancer.ui.navigation.AppRoutes
@@ -914,7 +914,7 @@ class MainActivity : ComponentActivity() {
             )
         }
 
-        PlaybackComponentVisibilityContext(
+        PlaybackComponentVisibilityContent(
             config = configs,
             actions = actions,
             modifier = modifier.padding(innerPadding)
