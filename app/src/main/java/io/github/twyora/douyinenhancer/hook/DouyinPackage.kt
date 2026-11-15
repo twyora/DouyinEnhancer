@@ -4583,7 +4583,6 @@ class DouyinPackage(classLoader: ClassLoader, context: Context) {
                                 searchClasses = listOf(it)
                                 matcher {
                                     params {
-                                        YLog.debug("$TAG: eventClassName: ${this@apply.dismissWindowEvent.class_.nameOrNull}")
                                         this@apply.dismissWindowEvent.class_.nameOrNull?.let { eventClassName ->
                                             add(eventClassName)
                                         }
