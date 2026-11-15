@@ -38,6 +38,8 @@ A small Xposed module that adds quality-of-life features to Douyin
 - Block specific playback‑page components
 - Selectively removing some navigation items from the top or bottom bar
 - Hiding follow button below avatar on playback
+- Hiding home top corner entrances
+- Keep Clean Mode when switching feeds
 
 ---
 See more about future development: [PM.md](PM.md)
