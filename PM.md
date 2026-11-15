@@ -2,7 +2,6 @@
 
 ## In Progress
 
-- Keep Clean Mode active
 - Bypass download limits on time-limited moments
 
 ## TODO
@@ -35,3 +34,4 @@
 - [x] Hide the "Post" button in the center of the tab bar
 - [x] Improve module export configuration function
 - [x] Rework the module UI
+- [x] Keep Clean Mode active
