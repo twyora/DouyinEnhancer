@@ -189,7 +189,7 @@ class MainActivity : ComponentActivity() {
                 val langCode = LocalConfiguration.current.locales[0].language
                 LaunchedEffect(langCode) {
                     navFlow.collect { navKey ->
-                        if (backstack.lastOrNull() is AppRoutes.Verification) {
+                        if (backstack.lastOrNull() == navKey) {
                             return@collect
                         }
 
