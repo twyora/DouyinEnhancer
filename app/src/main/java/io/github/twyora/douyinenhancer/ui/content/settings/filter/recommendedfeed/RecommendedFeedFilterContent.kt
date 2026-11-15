@@ -19,6 +19,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -265,6 +266,15 @@ private fun RecommendedFeedFilterTitleKeywordGroup(
     )
 
     if (showEditorDialog) {
+        val draftKeywords = remember {
+            mutableStateListOf<String>().apply {
+                addAll(state.keywords)
+            }
+        }
+        var draftRegex by remember {
+            mutableStateOf(state.regexMode)
+        }
+
         AlertDialog(
             onDismissRequest = {
                 showEditorDialog = false
@@ -276,23 +286,26 @@ private fun RecommendedFeedFilterTitleKeywordGroup(
                 Column {
                     SwitchPreferenceItem(
                         title = stringResource(R.string.regex_mode),
-                        checked = state.regexMode,
+                        checked = draftRegex,
                         onCheckedChange = {
-                            actions.onRegexChange(it)
+                            draftRegex = it
                         }
                     )
                     KeywordEditorContent(
-                        keywords = state.keywords,
-                        onAddKeyword = actions.onAddKeyword,
-                        onKeywordTextChange = actions.onKeywordTextChange,
-                        onRemoveKeyword = actions.onRemoveKeyword
+                        keywords = draftKeywords
                     )
                 }
             },
             confirmButton = {
                 TextButton(
                     onClick = {
-                        if (actions.onSave()) {
+                        if (actions.onSave(
+                                draftKeywords.filter {
+                                    it.isNotBlank()
+                                }.toSet(),
+                                draftRegex
+                            )
+                        ) {
                             showEditorDialog = false
                         }
                     }
@@ -332,6 +345,12 @@ private fun RecommendedFeedFilterUidKeywordGroup(
     )
 
     if (showEditorDialog) {
+        val draftKeywords = remember {
+            mutableStateListOf<String>().apply {
+                addAll(state.keywords)
+            }
+        }
+
         AlertDialog(
             onDismissRequest = {
                 showEditorDialog = false
@@ -341,16 +360,18 @@ private fun RecommendedFeedFilterUidKeywordGroup(
             },
             text = {
                 KeywordEditorContent(
-                    keywords = state.keywords,
-                    onAddKeyword = actions.onAddKeyword,
-                    onKeywordTextChange = actions.onKeywordTextChange,
-                    onRemoveKeyword = actions.onRemoveKeyword
+                    keywords = draftKeywords
                 )
             },
             confirmButton = {
                 TextButton(
                     onClick = {
-                        if (actions.onSave()) {
+                        if (actions.onSave(
+                                draftKeywords.filter {
+                                    it.isNotBlank()
+                                }.toSet()
+                            )
+                        ) {
                             showEditorDialog = false
                         }
                     }
@@ -390,6 +411,13 @@ private fun RecommendedFeedFilterNicknameKeywordGroup(
     )
 
     if (showEditorDialog) {
+        val draftKeywords = remember {
+            mutableStateListOf<String>().apply { addAll(state.keywords) }
+        }
+        var draftRegex by remember {
+            mutableStateOf(state.regexMode)
+        }
+
         AlertDialog(
             onDismissRequest = {
                 showEditorDialog = false
@@ -401,23 +429,26 @@ private fun RecommendedFeedFilterNicknameKeywordGroup(
                 Column {
                     SwitchPreferenceItem(
                         title = stringResource(R.string.regex_mode),
-                        checked = state.regexMode,
+                        checked = draftRegex,
                         onCheckedChange = {
-                            actions.onRegexChange(it)
+                            draftRegex = it
                         }
                     )
                     KeywordEditorContent(
-                        keywords = state.keywords,
-                        onAddKeyword = actions.onAddKeyword,
-                        onKeywordTextChange = actions.onKeywordTextChange,
-                        onRemoveKeyword = actions.onRemoveKeyword
+                        keywords = draftKeywords
                     )
                 }
             },
             confirmButton = {
                 TextButton(
                     onClick = {
-                        if (actions.onSave()) {
+                        if (actions.onSave(
+                                draftKeywords.filter {
+                                    it.isNotBlank()
+                                }.toSet(),
+                                draftRegex
+                            )
+                        ) {
                             showEditorDialog = false
                         }
                     }
@@ -457,6 +488,13 @@ private fun RecommendedFeedFilterDescKeywordGroup(
     )
 
     if (showEditorDialog) {
+        val draftKeywords = remember {
+            mutableStateListOf<String>().apply { addAll(state.keywords) }
+        }
+        var draftRegex by remember {
+            mutableStateOf(state.regexMode)
+        }
+
         AlertDialog(
             onDismissRequest = {
                 showEditorDialog = false
@@ -468,23 +506,26 @@ private fun RecommendedFeedFilterDescKeywordGroup(
                 Column {
                     SwitchPreferenceItem(
                         title = stringResource(R.string.regex_mode),
-                        checked = state.regexMode,
+                        checked = draftRegex,
                         onCheckedChange = {
-                            actions.onRegexChange(it)
+                            draftRegex = it
                         }
                     )
                     KeywordEditorContent(
-                        keywords = state.keywords,
-                        onAddKeyword = actions.onAddKeyword,
-                        onKeywordTextChange = actions.onKeywordTextChange,
-                        onRemoveKeyword = actions.onRemoveKeyword
+                        keywords = draftKeywords
                     )
                 }
             },
             confirmButton = {
                 TextButton(
                     onClick = {
-                        if (actions.onSave()) {
+                        if (actions.onSave(
+                                draftKeywords.filter {
+                                    it.isNotBlank()
+                                }.toSet(),
+                                draftRegex
+                            )
+                        ) {
                             showEditorDialog = false
                         }
                     }
@@ -506,13 +547,7 @@ private fun RecommendedFeedFilterDescKeywordGroup(
 }
 
 @Composable
-private fun KeywordEditorContent(
-    modifier: Modifier = Modifier,
-    keywords: List<String>,
-    onAddKeyword: () -> Unit,
-    onKeywordTextChange: (index: Int, text: String) -> Unit,
-    onRemoveKeyword: (index: Int) -> Unit
-) {
+private fun KeywordEditorContent(modifier: Modifier = Modifier, keywords: MutableList<String>) {
     var newKeyword by remember {
         mutableStateOf("")
     }
@@ -537,10 +572,7 @@ private fun KeywordEditorContent(
             TextButton(
                 enabled = newKeyword.isNotBlank(),
                 onClick = {
-                    onAddKeyword()
-                    if (newKeyword.isNotBlank()) {
-                        onKeywordTextChange(keywords.size, newKeyword)
-                    }
+                    keywords.add(newKeyword)
                     newKeyword = ""
                 }
             ) {
@@ -556,7 +588,7 @@ private fun KeywordEditorContent(
                 OutlinedTextField(
                     value = text,
                     onValueChange = {
-                        onKeywordTextChange(index, it)
+                        keywords[index] = it
                     },
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Text,
@@ -567,7 +599,7 @@ private fun KeywordEditorContent(
                 )
                 TextButton(
                     onClick = {
-                        onRemoveKeyword(index)
+                        keywords.removeAt(index)
                     }
                 ) {
                     Text(text = stringResource(R.string.delete))
@@ -679,31 +711,16 @@ private fun RecommendedFeedFilterContentPreview() {
             ),
             keyword = RecommendedFeedFilterKeywordActions(
                 title = RecommendedFeedFilterTitleKeywordActions(
-                    onAddKeyword = {},
-                    onKeywordTextChange = { _, _ -> },
-                    onRemoveKeyword = {},
-                    onSave = { true },
-                    onRegexChange = {}
+                    onSave = { _, _ -> true }
                 ),
                 uid = RecommendedFeedFilterUidKeywordActions(
-                    onAddKeyword = {},
-                    onKeywordTextChange = { _, _ -> },
-                    onRemoveKeyword = {},
-                    onSave = { true }
+                    onSave = { _ -> true }
                 ),
                 nickname = RecommendedFeedFilterNicknameKeywordActions(
-                    onAddKeyword = {},
-                    onKeywordTextChange = { _, _ -> },
-                    onRemoveKeyword = { _ -> },
-                    onSave = { true },
-                    onRegexChange = { _ -> }
+                    onSave = { _, _ -> true }
                 ),
                 desc = RecommendedFeedFilterDescKeywordActions(
-                    onAddKeyword = {},
-                    onKeywordTextChange = { _, _ -> },
-                    onRemoveKeyword = {},
-                    onSave = { true },
-                    onRegexChange = {}
+                    onSave = { _, _ -> true }
                 )
             )
         )
