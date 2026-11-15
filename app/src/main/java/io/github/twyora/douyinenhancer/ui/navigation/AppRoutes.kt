@@ -23,5 +23,8 @@ object AppRoutes {
 
         @Serializable
         data object HomeTab : Settings
+
+        @Serializable
+        data object HomeTopCornerEntrance : Settings
     }
 }

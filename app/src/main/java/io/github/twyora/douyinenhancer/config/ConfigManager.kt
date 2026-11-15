@@ -4,6 +4,7 @@ import android.content.Context
 import io.github.twyora.douyinenhancer.config.kvstorage.IKVStorage
 import io.github.twyora.douyinenhancer.config.kvstorage.TransientKVStorage
 import io.github.twyora.douyinenhancer.config.provider.FeedConfigProvider
+import io.github.twyora.douyinenhancer.config.provider.HideHomeTopCornerEntranceConfigProvider
 import io.github.twyora.douyinenhancer.config.provider.HomeTabBlockConfigProvider
 import io.github.twyora.douyinenhancer.config.provider.MiscConfigProvider
 import io.github.twyora.douyinenhancer.config.provider.ModuleConfigProvider
@@ -67,6 +68,10 @@ object ConfigManager {
 
     val homeTab by lazy {
         HomeTabBlockConfigProvider(settingsStorage)
+    }
+
+    val hideHomeTopCornerEntrance by lazy {
+        HideHomeTopCornerEntranceConfigProvider(settingsStorage)
     }
 
     fun init(context: Context, ikvFactory: IKVStorage.IKVFactory = TransientKVStorage.Companion) {

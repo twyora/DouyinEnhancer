@@ -182,6 +182,13 @@ fun SettingsContentUiSection(uiState: SettingsContentUiConfig, uiActions: Settin
             uiActions.onNavigateToHomeTab()
         }
 
+        PreferenceItem(
+            title = stringResource(R.string.home_top_corner_entrance_dialog_title),
+            summary = stringResource(R.string.home_top_corner_entrance_dialog_summary)
+        ) {
+            uiActions.onNavigateToHomeTopCornerEntrance()
+        }
+
         SwitchPreferenceItem(
             title = stringResource(R.string.pref_ui_keep_danmaku_visible_title),
             summary = stringResource(R.string.pref_ui_keep_danmaku_visible_summary),
