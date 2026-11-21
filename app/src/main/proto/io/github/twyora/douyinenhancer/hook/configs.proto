@@ -418,6 +418,7 @@ message HomeTabDataSourceDefault {
 message FeedAvatarPresenter {
   optional Class class = 1;
   optional Method update_follow_view = 2;
+  optional Field m_follow_container_view = 3;
 }
 
 message PlayStatusHelper {

@@ -1169,6 +1169,8 @@ class DouyinPackage(classLoader: ClassLoader, context: Context) {
             configs.updateFollowView.nameOrNull,
             configs.updateFollowView.parameters.valuesListOrNull
         )
+
+        fun mFollowContainerView() = Field(configs.mFollowContainerView.nameOrNull)
     }
 
     class PlayStatusHelperModule internal constructor(private val configs: Configs.PlayStatusHelper, private val classLoader: ClassLoader) {
@@ -4335,7 +4337,19 @@ class DouyinPackage(classLoader: ClassLoader, context: Context) {
                             }.singleOrNull()
                         }
 
-                        if (feedAvatarPresenterClassData == null || updateFollowViewMethodData == null) {
+                        val mFollowContainerViewFieldData = feedAvatarPresenterClassData?.let {
+                            bridge.findField {
+                                searchClasses = listOf(it)
+                                matcher {
+                                    type = "android.widget.RelativeLayout"
+                                }
+                            }.singleOrNull()
+                        }
+
+                        if (feedAvatarPresenterClassData == null ||
+                            updateFollowViewMethodData == null ||
+                            mFollowContainerViewFieldData == null
+                        ) {
                             YLog.error(symbolNotFoundMsg.format(TAG, this::class.java.enclosingClass?.simpleName))
                             return@feedAvatarPresenter
                         }
@@ -4349,6 +4363,9 @@ class DouyinPackage(classLoader: ClassLoader, context: Context) {
                                 values.clear()
                                 values.addAll(updateFollowViewMethodData.paramTypeNames)
                             }
+                        }
+                        mFollowContainerView = field {
+                            name = mFollowContainerViewFieldData.name
                         }
                     }.onFailure {
                         YLog.error(populateFailedMsg.format(TAG), it)
