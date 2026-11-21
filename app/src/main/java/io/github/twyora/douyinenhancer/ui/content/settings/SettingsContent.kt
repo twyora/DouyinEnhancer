@@ -156,6 +156,14 @@ fun SettingsContentFeedSection(
         ) {
             feedActions.onBlockResumePlaybackChange(it)
         }
+
+        SwitchPreferenceItem(
+            title = stringResource(R.string.pref_feed_keep_inherited_speed_title),
+            summary = stringResource(R.string.pref_feed_keep_inherited_speed_summary),
+            checked = feedState.keepInheritedSpeed
+        ) {
+            feedActions.onKeepInheritedSpeedChange(it)
+        }
     }
 }
 
@@ -312,7 +320,8 @@ fun SettingsContentPreview() {
                 doubleTapOpenComment = false,
                 bypassListenAweme = false,
                 blockAutoReplay = false,
-                blockAutoResumePlayback = false
+                blockAutoResumePlayback = false,
+                keepInheritedSpeed = false
             ),
             SettingsContentUiConfig(keepDanmakuVisible = false, hideFollowButton = false, keepCleanMode = false),
             SettingsContentModuleConfig(hiddenFeature = false, disableVerbose = false)

@@ -19,7 +19,8 @@ class SettingsContentFeedActions(
     val onDoubleTabOpenCommentChange: (Boolean) -> Unit = {},
     val onBypassListenAwemeChange: (Boolean) -> Unit = {},
     val onBlockAutoReplayChange: (Boolean) -> Unit = {},
-    val onBlockResumePlaybackChange: (Boolean) -> Unit = {}
+    val onBlockResumePlaybackChange: (Boolean) -> Unit = {},
+    val onKeepInheritedSpeedChange: (Boolean) -> Unit = {}
 )
 
 @Stable

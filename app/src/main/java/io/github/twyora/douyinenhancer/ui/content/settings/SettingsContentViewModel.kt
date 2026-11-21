@@ -81,14 +81,16 @@ class SettingsContentViewModel : ViewModel() {
             doubleTapOpenComment.observe(),
             bypassListenAwemeRestriction.observe(),
             blockAutoReplay.observe(),
-            blockResumePlayback.observe()
-        ) { disableDoubleTapDigg, doubleTapOpenComment, bypassListenAweme, blockAutoReplay, blockAutoResumePlayback ->
+            blockResumePlayback.observe(),
+            keepInheritedSpeed.observe()
+        ) { values ->
             SettingsContentFeedConfig(
-                disableDoubleTapDigg = disableDoubleTapDigg,
-                doubleTapOpenComment = doubleTapOpenComment,
-                bypassListenAweme = bypassListenAweme,
-                blockAutoReplay = blockAutoReplay,
-                blockAutoResumePlayback = blockAutoResumePlayback
+                disableDoubleTapDigg = values[0],
+                doubleTapOpenComment = values[1],
+                bypassListenAweme = values[2],
+                blockAutoReplay = values[3],
+                blockAutoResumePlayback = values[4],
+                keepInheritedSpeed = values[5]
             )
         }
     }
@@ -149,7 +151,8 @@ class SettingsContentViewModel : ViewModel() {
                     doubleTapOpenComment = doubleTapOpenComment.defValue,
                     bypassListenAweme = bypassListenAwemeRestriction.defValue,
                     blockAutoReplay = blockAutoReplay.defValue,
-                    blockAutoResumePlayback = blockResumePlayback.defValue
+                    blockAutoResumePlayback = blockResumePlayback.defValue,
+                    keepInheritedSpeed = keepInheritedSpeed.defValue
                 )
             },
             uiState = with(ConfigManager.ui) {
@@ -346,6 +349,10 @@ class SettingsContentViewModel : ViewModel() {
 
     fun setBlockResumePlayback(enable: Boolean) {
         ConfigManager.feed.blockResumePlayback.value = enable
+    }
+
+    fun setKeepInheritedSpeed(enable: Boolean) {
+        ConfigManager.feed.keepInheritedSpeed.value = enable
     }
 
     fun setKeepDanmakuVisible(enable: Boolean) {
