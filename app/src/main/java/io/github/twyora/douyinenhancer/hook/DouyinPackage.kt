@@ -1170,7 +1170,10 @@ class DouyinPackage(classLoader: ClassLoader, context: Context) {
             configs.updateFollowView.parameters.valuesListOrNull
         )
 
-        fun mFollowContainerView() = Field(configs.mFollowContainerView.nameOrNull)
+        fun performFollow() = Method(
+            configs.performFollow.nameOrNull,
+            configs.performFollow.parameters.valuesListOrNull
+        )
     }
 
     class PlayStatusHelperModule internal constructor(private val configs: Configs.PlayStatusHelper, private val classLoader: ClassLoader) {
@@ -4336,19 +4339,24 @@ class DouyinPackage(classLoader: ClassLoader, context: Context) {
                                 }
                             }.singleOrNull()
                         }
-
-                        val mFollowContainerViewFieldData = feedAvatarPresenterClassData?.let {
-                            bridge.findField {
+                        val performFollowMethodData = feedAvatarPresenterClassData?.let {
+                            bridge.findMethod {
                                 searchClasses = listOf(it)
                                 matcher {
-                                    type = "android.widget.RelativeLayout"
+                                    modifiers = Modifier.PUBLIC
+                                    params {
+                                        add("java.lang.String")
+                                    }
+                                    returnType = "boolean"
+                                    usingStrings {
+                                        add("plus_sign")
+                                    }
                                 }
                             }.singleOrNull()
                         }
 
-                        if (feedAvatarPresenterClassData == null ||
-                            updateFollowViewMethodData == null ||
-                            mFollowContainerViewFieldData == null
+                        if (feedAvatarPresenterClassData == null || updateFollowViewMethodData == null ||
+                            performFollowMethodData == null
                         ) {
                             YLog.error(symbolNotFoundMsg.format(TAG, this::class.java.enclosingClass?.simpleName))
                             return@feedAvatarPresenter
@@ -4364,8 +4372,12 @@ class DouyinPackage(classLoader: ClassLoader, context: Context) {
                                 values.addAll(updateFollowViewMethodData.paramTypeNames)
                             }
                         }
-                        mFollowContainerView = field {
-                            name = mFollowContainerViewFieldData.name
+                        performFollow = method {
+                            name = performFollowMethodData.methodName
+                            parameters = MethodKt.parameters {
+                                values.clear()
+                                values.addAll(performFollowMethodData.paramTypeNames)
+                            }
                         }
                     }.onFailure {
                         YLog.error(populateFailedMsg.format(TAG), it)

@@ -1,6 +1,5 @@
 package io.github.twyora.douyinenhancer.hook.ui
 
-import android.view.View
 import com.highcapable.yukihookapi.extension.kavaref.intercept
 import com.highcapable.yukihookapi.hook.core.YukiHookCreator
 import com.highcapable.yukihookapi.hook.entity.YukiBaseHooker
@@ -8,7 +7,7 @@ import com.highcapable.yukihookapi.hook.log.YLog
 import io.github.twyora.douyinenhancer.config.ConfigManager
 import io.github.twyora.douyinenhancer.hook.DouyinPackage
 import io.github.twyora.douyinenhancer.hook.HookOnMainProcess
-import io.github.twyora.douyinenhancer.utils.reflect.getFieldOrNull
+import io.github.twyora.douyinenhancer.utils.hook.HookTransaction
 import io.github.twyora.douyinenhancer.utils.reflect.resolveMethodOrNull
 
 @HookOnMainProcess
@@ -26,27 +25,37 @@ object FeedHideFollowButtonHooker : YukiBaseHooker() {
             YLog.info("$TAG: follow button hiding disabled, skipping hook")
             return
         }
-        installHideFollowButtonHook()
+
+        HookTransaction(TAG).apply {
+            add(::installHideFollowButtonHook.name) {
+                installHideFollowButtonHook()
+            }
+            add(::installBlockFollowHook.name) {
+                installBlockFollowHook()
+            }
+            commit()
+        }
     }
 
-    private fun installHideFollowButtonHook(): YukiHookCreator.MemberHooker<*>.Handle? =
-        packageInstance.feedAvatarPresenter.selfClass?.resolveMethodOrNull(
+    private fun installHideFollowButtonHook(): YukiHookCreator.MemberHooker<*>.Handle? {
+        return packageInstance.feedAvatarPresenter.selfClass?.resolveMethodOrNull(
             packageInstance.feedAvatarPresenter.updateFollowView()
         )?.intercept {
             val followStatusIndex = args.indexOfFirst {
                 it is Int
             }.takeIf {
                 it >= 0
-            }
-            val followStatus = followStatusIndex?.let {
-                arg<Int>(it)
+            } ?: run {
+                YLog.error("$TAG: follow status not found in argument list")
+                return@intercept proceed()
             }
 
-            val result = if (followStatusIndex != null && followStatus == DouyinPackage.UserModule.FOLLOW_STATUS_UNFOLLOWED) {
+            val followStatus = arg<Int>(followStatusIndex)
+
+            if (followStatus == DouyinPackage.UserModule.FOLLOW_STATUS_UNFOLLOWED) {
                 if (verbose) {
                     YLog.debug("$TAG: forcing unfollowed status to ${DouyinPackage.UserModule.FOLLOW_STATUS_FOLLOWING}")
                 }
-                // Spoof the following state so the host hides the follow button.
                 proceed(
                     args.toTypedArray().apply {
                         set(followStatusIndex, DouyinPackage.UserModule.FOLLOW_STATUS_FOLLOWING)
@@ -55,30 +64,29 @@ object FeedHideFollowButtonHooker : YukiBaseHooker() {
             } else {
                 proceed()
             }
-
-            if (
-                // Fallback: force-hide the follow button when follow state cannot be resolved.
-                // NOTE: A race condition during initial feed render may still leave the button visible.
-                followStatusIndex == null ||
-                // #242: Tapping the hidden follow area still triggers follow.
-                // GONE takes the container out of hit‑testing, preventing taps from reaching the follow handler.
-                followStatus == DouyinPackage.UserModule.FOLLOW_STATUS_UNFOLLOWED
-            ) {
-                instance.getFieldOrNull<View?>(
-                    packageInstance.feedAvatarPresenter.mFollowContainerView()
-                )?.let {
-                    it.visibility = View.GONE
-                }?.also {
-                    if (verbose) {
-                        YLog.debug("$TAG: follow button kept hidden on avatar view")
-                    }
-                }
-            }
-
-            result
         }?.apply {
             onCallbackFailure { _, throwable ->
                 YLog.error("$TAG: failed to hide follow button", throwable)
             }
         }
+    }
+
+    private fun installBlockFollowHook(): YukiHookCreator.MemberHooker<*>.Handle? {
+        // Why does ktlint convert block returns to expression bodies sometimes, but not always?
+        return packageInstance.feedAvatarPresenter.selfClass?.resolveMethodOrNull(
+            packageInstance.feedAvatarPresenter.performFollow()
+        )?.intercept {
+            if (verbose) {
+                val source = args.firstNotNullOfOrNull {
+                    it as? String
+                }
+                YLog.debug("$TAG: blocking follow action from $source")
+            }
+            false
+        }?.apply {
+            onCallbackFailure { _, throwable ->
+                YLog.error("$TAG: failed to block follow action", throwable)
+            }
+        }
+    }
 }
