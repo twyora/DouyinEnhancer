@@ -12,7 +12,7 @@ import io.github.twyora.douyinenhancer.utils.reflect.getFieldOrNull
 import io.github.twyora.douyinenhancer.utils.reflect.resolveMethodOrNull
 
 @HookOnMainProcess
-object FeedAvatarHooker : YukiBaseHooker() {
+object FeedHideFollowButtonHooker : YukiBaseHooker() {
     private val TAG = this::class.simpleName
 
     private val packageInstance
