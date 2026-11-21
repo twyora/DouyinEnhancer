@@ -20,6 +20,11 @@ object FeedKeepInheritedSpeedHooker : YukiBaseHooker() {
         get() = !ConfigManager.module.verboseDisabled.value
 
     override fun onHook() {
+        if (!ConfigManager.feed.keepInheritedSpeed.value) {
+            YLog.info("$TAG: keep inherited speed is disabled, skipping hook")
+            return
+        }
+
         installForceSpeedInheritHook()
     }
 

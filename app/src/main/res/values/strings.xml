@@ -31,6 +31,8 @@
     <string name="pref_feed_block_auto_replay_summary">Pause video once playback completes</string>
     <string name="pref_feed_block_resume_playback_title">Block Resume Playback</string>
     <string name="pref_feed_block_resume_playback_summary">Prevent automatic video resumption when returning to the foreground</string>
+    <string name="pref_feed_keep_inherited_speed_title">Keep Playback Speed</string>
+    <string name="pref_feed_keep_inherited_speed_summary">Carry over playback speed from the previous video when switching content</string>
     <string name="pref_ui_keep_danmaku_visible_title">Keep Danmaku Visible</string>
     <string name="pref_ui_keep_danmaku_visible_summary">Keep danmaku visible when entering clean mode</string>
     <string name="pref_ui_hide_follow_button_title">Hide Follow Button</string>

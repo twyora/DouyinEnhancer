@@ -14,7 +14,8 @@ data class SettingsContentFeedConfig(
     val doubleTapOpenComment: Boolean,
     val bypassListenAweme: Boolean,
     val blockAutoReplay: Boolean,
-    val blockAutoResumePlayback: Boolean
+    val blockAutoResumePlayback: Boolean,
+    val keepInheritedSpeed: Boolean
 )
 
 data class SettingsContentUiConfig(val keepDanmakuVisible: Boolean, val hideFollowButton: Boolean, val keepCleanMode: Boolean)

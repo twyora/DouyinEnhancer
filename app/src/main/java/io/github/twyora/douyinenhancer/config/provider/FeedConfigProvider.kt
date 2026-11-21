@@ -14,6 +14,7 @@ class FeedConfigProvider(
     val doubleTapOpenComment = configItem(FEED_DOUBLE_TAP_OPEN_COMMENT, false)
     val blockAutoReplay = configItem(FEED_BLOCK_AUTO_REPLAY, false)
     val blockResumePlayback = configItem(FEED_BLOCK_RESUME_PLAYBACK, false)
+    val keepInheritedSpeed = configItem(KEEP_INHERITED_SPEED, false)
 
     companion object {
         const val BYPASS_LISTEN_AWEME_RESTRICTION = "bypass_listen_aweme_restriction"
@@ -21,5 +22,6 @@ class FeedConfigProvider(
         const val FEED_DOUBLE_TAP_OPEN_COMMENT = "feed_double_tap_open_comment"
         const val FEED_BLOCK_AUTO_REPLAY = "block_feed_auto_replay"
         const val FEED_BLOCK_RESUME_PLAYBACK = "block_feed_resume_playback"
+        const val KEEP_INHERITED_SPEED = "keep_inherited_speed"
     }
 }
