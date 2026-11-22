@@ -105,7 +105,7 @@ object CommentAudioHooker : YukiBaseHooker() {
             }
 
             args.firstOrNull {
-                packageInstance.comment.selfClass?.isInstance(it) == true
+                packageInstance.commentActionParams.selfClass?.isInstance(it) == true
             }?.getFieldOrNull(
                 packageInstance.commentActionParams.comment()
             )?.getFieldOrNull(
