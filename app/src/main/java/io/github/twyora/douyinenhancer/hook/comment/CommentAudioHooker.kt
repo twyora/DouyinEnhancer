@@ -306,7 +306,7 @@ object CommentAudioHooker : YukiBaseHooker() {
             )
             newImageUrlModel
         } else {
-            existingImageUrlList
+            existingImageUrlModel
         } ?: return false
 
         imageUrlModel.setFieldQuietly(
