@@ -472,6 +472,45 @@ message CompilationSpeedInheritComponent {
   optional Method need_inherit_speed = 2;
 }
 
+message Story25LongPressPanelConfig {
+  optional Class class = 1;
+  optional Method get_function_group_list = 2;
+}
+
+message LPPConfigModuleId {
+  optional Class class = 1;
+  optional Method get_id = 2;
+  optional Field to_story = 3;
+  optional Field dislike = 4;
+  optional Field report = 5;
+  optional Field block_post = 6;
+  optional Field auth = 7;
+  optional Field download = 8;
+  optional Field timing_close = 9;
+  optional Field auto_feed = 10;
+  optional Field auto_feed_pad = 11;
+}
+
+message Story25SharePanelConfig {
+  optional Class class = 1;
+  optional Method get_other_function_white_list = 2;
+}
+
+message SharePanelFuncConfig {
+  optional Class class = 1;
+  optional Method get_func_config = 2;
+}
+
+message SharePanelLine {
+  optional Class class = 1;
+  optional Field line = 2;
+}
+
+message SharePanelBtn {
+  optional Class class = 1;
+  optional Field key = 2;
+}
+
 message HookInfo {
   uint64 last_update_time = 1;
   uint32 module_version_code = 2;
@@ -538,6 +577,12 @@ message HookInfo {
   optional TopCornerEntranceDataSource top_corner_entrance_data_source = 74;
   optional TopCornerEntranceData top_corner_entrance_data = 75;
   optional CompilationSpeedInheritComponent compilation_speed_inherit_component = 76;
+  optional Story25LongPressPanelConfig story25_long_press_panel_config = 77;
+  optional LPPConfigModuleId lpp_config_module_id = 78;
+  optional Story25SharePanelConfig story25_share_panel_config = 79;
+  optional SharePanelFuncConfig share_panel_func_config = 80;
+  optional SharePanelLine share_panel_line = 81;
+  optional SharePanelBtn share_panel_btn = 82;
 
   reserved 13, 18, 32, 35, 36, 38, 39, 40, 55, 64, 65;
 }

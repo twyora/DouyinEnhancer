@@ -37,6 +37,7 @@ import org.json.JSONObject
 import org.luckypray.dexkit.DexKitBridge
 import org.luckypray.dexkit.query.enums.MatchType
 import org.luckypray.dexkit.query.enums.StringMatchType
+import org.luckypray.dexkit.query.enums.UsingType
 import org.luckypray.dexkit.query.matchers.base.AccessFlagsMatcher
 import org.luckypray.dexkit.query.matchers.base.IntRange
 import org.luckypray.dexkit.query.matchers.base.OpCodesMatcher
@@ -68,7 +69,7 @@ val Configs.Method.Parameters.valuesListOrNull
         null
     }
 
-class DouyinPackage(classLoader: ClassLoader, context: Context) {
+class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
     private val hookInfo: Configs.HookInfo = run {
         val (result, time) = measureTimedValue {
             readHookInfo(context)
@@ -82,6 +83,14 @@ class DouyinPackage(classLoader: ClassLoader, context: Context) {
         result
     }
 
+    /**
+     * NOTE: Use this function solely as a guard for legacy code that has been removed.
+     * It is NOT intended for feature specialization based on host version!
+     *
+     * Misuse will create fragile version coupling.
+     * Any exceptional usage must have a valid justified at the call site;
+     *  otherwise it will not be accepted during code review.
+     */
     fun hostVersionCode() = hookInfo.hostVersionCode
 
     val commentImageStruct = CommentImageStructModule(hookInfo.commentImageStruct, classLoader)
@@ -143,6 +152,18 @@ class DouyinPackage(classLoader: ClassLoader, context: Context) {
     val heifFrame = HeifFrameModule(hookInfo.heifFrame, classLoader)
     val pinchViewModel = PinchViewModelModule(hookInfo.pinchViewModel, classLoader)
     val dismissWindowEvent = DismissWindowEventModule(hookInfo.dismissWindowEvent, classLoader)
+    val story25LongPressPanelConfig: Story25LongPressPanelConfigModule
+        get() = run {
+            check(hostVersionCode() < 400301) {
+                "Story25LongPressPanelConfig has been removed since host version 40.3.0"
+            }
+            Story25LongPressPanelConfigModule(hookInfo.story25LongPressPanelConfig, classLoader)
+        }
+    val lppConfigModuleId = LPPConfigModuleIdModule(hookInfo.lppConfigModuleId, classLoader)
+    val story25SharePanelConfig = Story25SharePanelConfigModule(hookInfo.story25SharePanelConfig, classLoader)
+    val sharePanelFuncConfig = SharePanelFuncConfigModule(hookInfo.sharePanelFuncConfig, classLoader)
+    val sharePanelLine = SharePanelLineModule(hookInfo.sharePanelLine, classLoader)
+    val sharePanelBtn = SharePanelBtnModule(hookInfo.sharePanelBtn, classLoader)
 
     class CommentImageStructModule internal constructor(
         private val configs: Configs.CommentImageStruct,
@@ -1035,6 +1056,96 @@ class DouyinPackage(classLoader: ClassLoader, context: Context) {
             configs.needInheritSpeed.nameOrNull,
             configs.needInheritSpeed.parameters.valuesListOrNull
         )
+    }
+
+    class Story25LongPressPanelConfigModule internal constructor(
+        private val configs: Configs.Story25LongPressPanelConfig,
+        private val classLoader: ClassLoader
+    ) {
+        val selfClass by weak {
+            configs.class_.nameOrNull?.toClass(classLoader)
+        }
+
+        fun getFunctionGroupList() = Method(
+            configs.getFunctionGroupList.nameOrNull,
+            configs.getFunctionGroupList.parameters.valuesListOrNull
+        )
+    }
+
+    class LPPConfigModuleIdModule internal constructor(
+        private val configs: Configs.LPPConfigModuleId,
+        private val classLoader: ClassLoader
+    ) {
+        val selfClass by weak {
+            configs.class_.nameOrNull?.toClass(classLoader)
+        }
+
+        fun getId() = Method(
+            configs.getId.nameOrNull,
+            configs.getId.parameters.valuesListOrNull
+        )
+
+        fun toStory() = Field(configs.toStory.nameOrNull)
+
+        fun dislike() = Field(configs.dislike.nameOrNull)
+
+        fun report() = Field(configs.report.nameOrNull)
+
+        fun blockPost() = Field(configs.blockPost.nameOrNull)
+
+        fun auth() = Field(configs.auth.nameOrNull)
+
+        fun download() = Field(configs.download.nameOrNull)
+
+        fun timingClose() = Field(configs.timingClose.nameOrNull)
+
+        fun autoFeed() = Field(configs.autoFeed.nameOrNull)
+
+        fun autoFeedPad() = Field(configs.autoFeedPad.nameOrNull)
+    }
+
+    class Story25SharePanelConfigModule internal constructor(
+        private val configs: Configs.Story25SharePanelConfig,
+        private val classLoader: ClassLoader
+    ) {
+        val selfClass by weak {
+            configs.class_.nameOrNull?.toClass(classLoader)
+        }
+
+        fun getOtherFunctionWhiteList() = Method(
+            configs.getOtherFunctionWhiteList.nameOrNull,
+            configs.getOtherFunctionWhiteList.parameters.valuesListOrNull
+        )
+    }
+
+    class SharePanelFuncConfigModule internal constructor(
+        private val configs: Configs.SharePanelFuncConfig,
+        private val classLoader: ClassLoader
+    ) {
+        val selfClass by weak {
+            configs.class_.nameOrNull?.toClass(classLoader)
+        }
+
+        fun getFuncConfig() = Method(
+            configs.getFuncConfig.nameOrNull,
+            configs.getFuncConfig.parameters.valuesListOrNull
+        )
+    }
+
+    class SharePanelLineModule internal constructor(private val configs: Configs.SharePanelLine, private val classLoader: ClassLoader) {
+        val selfClass by weak {
+            configs.class_.nameOrNull?.toClass(classLoader)
+        }
+
+        fun line() = Field(configs.line.nameOrNull)
+    }
+
+    class SharePanelBtnModule internal constructor(private val configs: Configs.SharePanelBtn, private val classLoader: ClassLoader) {
+        val selfClass by weak {
+            configs.class_.nameOrNull?.toClass(classLoader)
+        }
+
+        fun key() = Field(configs.key.nameOrNull)
     }
 
     class DanmakuViewModule internal constructor(private val configs: Configs.DanmakuView, private val classLoader: ClassLoader) {
@@ -4846,6 +4957,352 @@ class DouyinPackage(classLoader: ClassLoader, context: Context) {
                         }
                         needInheritSpeed = method {
                             name = needInheritSpeedMethodData.methodName
+                        }
+                    }.onFailure {
+                        YLog.error(populateFailedMsg.format(TAG), it)
+                    }
+                }
+
+                if (hostVersionCode < 400301) {
+                    story25LongPressPanelConfig = story25LongPressPanelConfig {
+                        runCatching {
+                            val functionGroupListFieldData = bridge.findField {
+                                matcher {
+                                    annotations {
+                                        add {
+                                            type = "com.google.gson.annotations.SerializedName"
+                                            addElement {
+                                                name = "value"
+                                                stringValue("function_group_list")
+                                            }
+                                        }
+                                    }
+                                }
+                            }.singleOrNull()
+                            val story25LongPressPanelConfigClassData = functionGroupListFieldData?.declaredClass
+                            val getFunctionGroupListMethodData = story25LongPressPanelConfigClassData?.let {
+                                bridge.findMethod {
+                                    searchClasses = listOf(it)
+                                    matcher {
+                                        returnType = "java.util.List"
+                                        paramCount = 0
+                                    }
+                                }.singleOrNull()
+                            }
+
+                            if (functionGroupListFieldData == null || story25LongPressPanelConfigClassData == null ||
+                                getFunctionGroupListMethodData == null
+                            ) {
+                                YLog.error(symbolNotFoundMsg.format(TAG, this::class.java.enclosingClass?.simpleName))
+                                return@story25LongPressPanelConfig
+                            }
+
+                            class_ = class_ {
+                                name = story25LongPressPanelConfigClassData.name
+                            }
+                            getFunctionGroupList = method {
+                                name = getFunctionGroupListMethodData.methodName
+                                parameters = MethodKt.parameters {
+                                    values.clear()
+                                    values.addAll(getFunctionGroupListMethodData.paramTypeNames)
+                                }
+                            }
+                        }.onFailure {
+                            YLog.error(populateFailedMsg.format(TAG), it)
+                        }
+                    }
+                } else {
+                    YLog.warn(
+                        "$TAG: story25LongPressPanelConfig has been removed since host version 40.3.0," +
+                            " fields are intentionally left unfilled"
+                    )
+                }
+
+                lppConfigModuleId = lPPConfigModuleId {
+                    runCatching {
+                        val lppConfigModuleIdClassData = bridge.findClass {
+                            matcher {
+                                superClass = "java.lang.Enum"
+                                usingStrings {
+                                    add("block_post", StringMatchType.Equals)
+                                    add("dislike", StringMatchType.Equals)
+                                    add("download", StringMatchType.Equals)
+                                    add("2_story", StringMatchType.Equals)
+                                }
+                            }
+                        }.singleOrNull()
+                        val getIdMethodData = lppConfigModuleIdClassData?.let {
+                            bridge.findMethod {
+                                searchClasses = listOf(it)
+                                matcher {
+                                    paramCount = 0
+                                    returnType = "java.lang.String"
+                                }
+                            }.singleOrNull()
+                        }
+
+                        if (lppConfigModuleIdClassData == null || getIdMethodData == null) {
+                            YLog.error(symbolNotFoundMsg.format(TAG, this::class.java.enclosingClass?.simpleName))
+                            return@lPPConfigModuleId
+                        }
+
+                        class_ = class_ {
+                            name = lppConfigModuleIdClassData.name
+                        }
+                        getId = method {
+                            name = getIdMethodData.methodName
+                            parameters = MethodKt.parameters {
+                                values.clear()
+                                values.addAll(getIdMethodData.paramTypeNames)
+                            }
+                        }
+                        // In fact, enum fields may be renamed by R8.
+                        // As the fields are hard to reference, keep hardcoding.
+                        toStory = field {
+                            name = "TO_STORY"
+                        }
+                        dislike = field {
+                            name = "DISLIKE"
+                        }
+                        report = field {
+                            name = "REPORT"
+                        }
+                        blockPost = field {
+                            name = "BLOCK_POST"
+                        }
+                        auth = field {
+                            name = "AUTH"
+                        }
+                        download = field {
+                            name = "DOWNLOAD"
+                        }
+                        timingClose = field {
+                            name = "TIMING_CLOSE"
+                        }
+                        autoFeed = field {
+                            name = "AUTO_FEED"
+                        }
+                        autoFeedPad = field {
+                            name = "AUTO_FEED_PAD"
+                        }
+                    }.onFailure {
+                        YLog.error(populateFailedMsg.format(TAG), it)
+                    }
+                }
+
+                story25SharePanelConfig = story25SharePanelConfig {
+                    runCatching {
+                        val otherFunctionWhiteListFieldData = bridge.findField {
+                            matcher {
+                                annotations {
+                                    add {
+                                        type = "com.google.gson.annotations.SerializedName"
+                                        addElement {
+                                            name = "value"
+                                            stringValue("other_function_white_list")
+                                        }
+                                    }
+                                }
+                            }
+                        }.singleOrNull()
+                        val story25SharePanelConfigClassData = otherFunctionWhiteListFieldData?.declaredClass
+                        val getOtherFunctionWhiteListMethodData = story25SharePanelConfigClassData?.let {
+                            bridge.findMethod {
+                                searchClasses = listOf(it)
+                                matcher {
+                                    returnType = "java.util.List"
+                                    paramCount = 0
+                                    addUsingField {
+                                        descriptor = otherFunctionWhiteListFieldData.descriptor
+                                    }
+                                }
+                            }.singleOrNull()
+                        }
+
+                        if (otherFunctionWhiteListFieldData == null || story25SharePanelConfigClassData == null ||
+                            getOtherFunctionWhiteListMethodData == null
+                        ) {
+                            YLog.error(symbolNotFoundMsg.format(TAG, this::class.java.enclosingClass?.simpleName))
+                            return@story25SharePanelConfig
+                        }
+
+                        class_ = class_ {
+                            name = story25SharePanelConfigClassData.name
+                        }
+                        getOtherFunctionWhiteList = method {
+                            name = getOtherFunctionWhiteListMethodData.methodName
+                            parameters = MethodKt.parameters {
+                                values.clear()
+                                values.addAll(getOtherFunctionWhiteListMethodData.paramTypeNames)
+                            }
+                        }
+                    }.onFailure {
+                        YLog.error(populateFailedMsg.format(TAG), it)
+                    }
+                }
+
+                sharePanelFuncConfig = sharePanelFuncConfig {
+                    runCatching {
+                        val funcConfigFieldData = bridge.findField {
+                            matcher {
+                                type = "java.util.List"
+                                declaredClass {
+                                    // Another `Diff` class holds a field annotated base_conf;
+                                    // this is not our target, filter it out.
+                                    noneOf {
+                                        add {
+                                            fields {
+                                                add {
+                                                    annotations {
+                                                        add {
+                                                            type = "com.google.gson.annotations.SerializedName"
+                                                            addElement {
+                                                                name = "value"
+                                                                stringValue("base_conf")
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                annotations {
+                                    add {
+                                        type = "com.google.gson.annotations.SerializedName"
+                                        addElement {
+                                            name = "value"
+                                            stringValue("func_config")
+                                        }
+                                    }
+                                }
+                            }
+                        }.singleOrNull()
+                        val funcConfigClassData = funcConfigFieldData?.declaredClass
+                        val getFuncConfigMethodData = funcConfigClassData?.let {
+                            bridge.findMethod {
+                                searchClasses = listOf(it)
+                                matcher {
+                                    returnType = "java.util.List"
+                                    addUsingField {
+                                        usingType = UsingType.Read
+                                        descriptor = funcConfigFieldData.descriptor
+                                    }
+                                }
+                            }.singleOrNull()
+                        }
+
+                        if (funcConfigFieldData == null || funcConfigClassData == null ||
+                            getFuncConfigMethodData == null
+                        ) {
+                            YLog.error(symbolNotFoundMsg.format(TAG, this::class.java.enclosingClass?.simpleName))
+                            return@sharePanelFuncConfig
+                        }
+
+                        class_ = class_ {
+                            name = funcConfigClassData.name
+                        }
+                        getFuncConfig = method {
+                            name = getFuncConfigMethodData.methodName
+                            parameters = MethodKt.parameters {
+                                values.clear()
+                                values.addAll(getFuncConfigMethodData.paramTypeNames)
+                            }
+                        }
+                    }.onFailure {
+                        YLog.error(populateFailedMsg.format(TAG), it)
+                    }
+                }
+
+                sharePanelLine = sharePanelLine {
+                    runCatching {
+                        val lineFieldData = bridge.findField {
+                            matcher {
+                                declaredClass {
+                                    interfaces {
+                                        add {
+                                            className = "android.os.Parcelable"
+                                        }
+                                    }
+                                }
+                                type = "java.util.List"
+                                annotations {
+                                    add {
+                                        type = "com.google.gson.annotations.SerializedName"
+                                        addElement {
+                                            name = "value"
+                                            stringValue("line", matchType = StringMatchType.Equals)
+                                        }
+                                    }
+                                }
+                            }
+                        }.singleOrNull()
+
+                        if (lineFieldData == null) {
+                            YLog.error(symbolNotFoundMsg.format(TAG, this::class.java.enclosingClass?.simpleName))
+                            return@sharePanelLine
+                        }
+
+                        class_ = class_ {
+                            name = lineFieldData.className
+                        }
+                        line = field {
+                            name = lineFieldData.name
+                        }
+                    }.onFailure {
+                        YLog.error(populateFailedMsg.format(TAG), it)
+                    }
+                }
+
+                sharePanelBtn = sharePanelBtn {
+                    runCatching {
+                        // Target field annotation value is "key";
+                        // its declaring class needs a field annotated with "light_icon_url".
+                        val keyFieldData = bridge.findField {
+                            matcher {
+                                declaredClass {
+                                    interfaces {
+                                        add {
+                                            className = "android.os.Parcelable"
+                                        }
+                                    }
+                                    fields {
+                                        add {
+                                            annotations {
+                                                add {
+                                                    type = "com.google.gson.annotations.SerializedName"
+                                                    addElement {
+                                                        name = "value"
+                                                        stringValue("light_icon_url")
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                type = "java.lang.String"
+                                annotations {
+                                    add {
+                                        type = "com.google.gson.annotations.SerializedName"
+                                        addElement {
+                                            name = "value"
+                                            stringValue("key")
+                                        }
+                                    }
+                                }
+                            }
+                        }.singleOrNull()
+
+                        if (keyFieldData == null) {
+                            YLog.error(symbolNotFoundMsg.format(TAG, this::class.java.enclosingClass?.simpleName))
+                            return@sharePanelBtn
+                        }
+
+                        class_ = class_ {
+                            name = keyFieldData.className
+                        }
+                        key = field {
+                            name = keyFieldData.name
                         }
                     }.onFailure {
                         YLog.error(populateFailedMsg.format(TAG), it)
