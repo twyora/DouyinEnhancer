@@ -623,6 +623,9 @@ class MainActivity : ComponentActivity() {
                 },
                 onRemoveMultiImageWatermarkChange = {
                     vm.setRemoveMultiImageWatermark(it)
+                },
+                onUnfilterTodayPubDownloadChange = {
+                    vm.setUnfilterTodayPubDownload(it)
                 }
             )
         }

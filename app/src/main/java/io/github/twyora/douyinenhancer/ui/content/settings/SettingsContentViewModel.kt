@@ -62,7 +62,8 @@ class SettingsContentViewModel : ViewModel() {
             downloadCommentAudio.observe(),
             feedVideoRemoveWatermark.observe(),
             feedMultiImageRemoveWatermark.observe(),
-            feedDownloadBypass.observe()
+            feedDownloadBypass.observe(),
+            unfilterTodayPubDownload.observe()
         ) { values ->
             SettingsContentSaveConfig(
                 purifyCommentImage = values[0],
@@ -70,7 +71,8 @@ class SettingsContentViewModel : ViewModel() {
                 downloadCommentAudio = values[2],
                 removeVideoWatermark = values[3],
                 removeMultiImageWatermark = values[4],
-                bypassVideoDownload = values[5]
+                bypassVideoDownload = values[5],
+                unfilterTodayPubDownload = values[6]
             )
         }
     }
@@ -142,7 +144,8 @@ class SettingsContentViewModel : ViewModel() {
                     downloadCommentAudio = downloadCommentAudio.defValue,
                     removeVideoWatermark = feedVideoRemoveWatermark.defValue,
                     bypassVideoDownload = feedDownloadBypass.defValue,
-                    removeMultiImageWatermark = feedMultiImageRemoveWatermark.defValue
+                    removeMultiImageWatermark = feedMultiImageRemoveWatermark.defValue,
+                    unfilterTodayPubDownload = unfilterTodayPubDownload.defValue
                 )
             },
             feedState = with(ConfigManager.feed) {
@@ -329,6 +332,10 @@ class SettingsContentViewModel : ViewModel() {
 
     fun setRemoveMultiImageWatermark(enable: Boolean) {
         ConfigManager.save.feedMultiImageRemoveWatermark.value = enable
+    }
+
+    fun setUnfilterTodayPubDownload(enable: Boolean) {
+        ConfigManager.save.unfilterTodayPubDownload.value = enable
     }
 
     fun setDisableDoubleTapDigg(enable: Boolean) {

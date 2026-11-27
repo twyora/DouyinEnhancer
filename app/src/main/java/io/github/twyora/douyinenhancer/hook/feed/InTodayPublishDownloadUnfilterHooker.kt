@@ -35,6 +35,11 @@ object InTodayPublishDownloadUnfilterHooker : YukiBaseHooker() {
     }
 
     override fun onHook() {
+        if (!ConfigManager.save.unfilterTodayPubDownload.value) {
+            YLog.info("$TAG: unfilter in-today-publish download is disabled, skipping hook")
+            return
+        }
+
         if (packageInstance.hostVersionCode() < 400301) {
             // The old story panel function group list implementation
             //  is completely removed starting from host version 40.3.0.

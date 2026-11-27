@@ -9,7 +9,8 @@ class SettingsContentSaveActions(
     val onDownloadCommentAudioChange: (Boolean) -> Unit = {},
     val onRemoveVideoWatermarkChange: (Boolean) -> Unit = {},
     val onBypassVideoDownloadChange: (Boolean) -> Unit = {},
-    val onRemoveMultiImageWatermarkChange: (Boolean) -> Unit = {}
+    val onRemoveMultiImageWatermarkChange: (Boolean) -> Unit = {},
+    val onUnfilterTodayPubDownloadChange: (Boolean) -> Unit = {}
 )
 
 @Stable

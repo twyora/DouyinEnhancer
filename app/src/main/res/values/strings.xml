@@ -18,6 +18,8 @@
     <string name="pref_feed_download_bypass_summary">Bypass recommended feed save restrictions</string>
     <string name="pref_feed_multi_image_remove_watermark_title">Save Watermark-Free Multi-Image Posts</string>
     <string name="pref_feed_multi_image_remove_watermark_summary">Remove in-image and border watermarks</string>
+    <string name="pref_save_unfilter_today_pub_download_title">Restore In Today Publish Save</string>
+    <string name="pref_save_unfilter_today_pub_download_summary">Remove the In Today Publish save-to-album button from the blacklist/whitelist filter</string>
 
     <string name="pref_category_feed">Feed</string>
     <string name="pref_feed_disable_double_tap_digg_title">Disable double-tap digg</string>

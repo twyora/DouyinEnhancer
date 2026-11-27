@@ -95,6 +95,14 @@ fun SettingsContentSaveSection(
         ) {
             saveActions.onRemoveMultiImageWatermarkChange(it)
         }
+
+        SwitchPreferenceItem(
+            title = stringResource(R.string.pref_save_unfilter_today_pub_download_title),
+            summary = stringResource(R.string.pref_save_unfilter_today_pub_download_summary),
+            checked = saveState.unfilterTodayPubDownload
+        ) {
+            saveActions.onUnfilterTodayPubDownloadChange(it)
+        }
     }
 }
 
@@ -302,7 +310,7 @@ fun SettingsContentModuleSection(
     }
 }
 
-@Preview
+@Preview(locale = "zh")
 @Composable
 fun SettingsContentPreview() {
     SettingsContent(
@@ -313,7 +321,8 @@ fun SettingsContentPreview() {
                 downloadCommentAudio = false,
                 removeVideoWatermark = false,
                 bypassVideoDownload = false,
-                removeMultiImageWatermark = false
+                removeMultiImageWatermark = false,
+                unfilterTodayPubDownload = false
             ),
             SettingsContentFeedConfig(
                 disableDoubleTapDigg = false,

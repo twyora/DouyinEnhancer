@@ -19,6 +19,8 @@
     <string name="pref_feed_download_bypass_summary">绕过推荐内容保存限制</string>
     <string name="pref_feed_multi_image_remove_watermark_title">保存无水印多图帖</string>
     <string name="pref_feed_multi_image_remove_watermark_summary">去除图片内置水印与边框水印</string>
+    <string name="pref_save_unfilter_today_pub_download_title">恢复限时日常保存</string>
+    <string name="pref_save_unfilter_today_pub_download_summary">将限时日常的保存至相册按钮从黑白名单中剔除</string>
 
     <string name="pref_category_feed">内容</string>
     <string name="pref_feed_disable_double_tap_digg_title">禁用双击点赞</string>
