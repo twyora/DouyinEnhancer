@@ -6,7 +6,8 @@ data class SettingsContentSaveConfig(
     val downloadCommentAudio: Boolean,
     val removeVideoWatermark: Boolean,
     val bypassVideoDownload: Boolean,
-    val removeMultiImageWatermark: Boolean
+    val removeMultiImageWatermark: Boolean,
+    val unfilterTodayPubDownload: Boolean
 )
 
 data class SettingsContentFeedConfig(

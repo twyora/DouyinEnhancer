@@ -15,6 +15,7 @@ class SaveConfigProvider(
     val feedVideoRemoveWatermark = configItem(FEED_VIDEO_REMOVE_WATERMARK, false)
     val feedMultiImageRemoveWatermark = configItem(FEED_MULTI_IMAGE_REMOVE_WATERMARK, false)
     val feedDownloadBypass = configItem(FEED_DOWNLOAD_BYPASS, false)
+    val unfilterTodayPubDownload = configItem(UNFILTER_TODAY_PUB_DOWNLOAD, false)
 
     companion object {
         const val PURIFY_COMMENT_IMAGE = "purify_comment_image"
@@ -23,5 +24,6 @@ class SaveConfigProvider(
         const val FEED_VIDEO_REMOVE_WATERMARK = "feed_video_remove_watermark"
         const val FEED_MULTI_IMAGE_REMOVE_WATERMARK = "feed_multi_image_remove_watermark"
         const val FEED_DOWNLOAD_BYPASS = "feed_download_bypass"
+        const val UNFILTER_TODAY_PUB_DOWNLOAD = "unfilter_today_pub_download"
     }
 }
