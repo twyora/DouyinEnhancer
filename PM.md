@@ -2,8 +2,6 @@
 
 ## In Progress
 
-- Bypass download limits on time-limited moments
-
 ## TODO
 
 - [ ] Save favorited emojis to album
@@ -35,3 +33,4 @@
 - [x] Improve module export configuration function
 - [x] Rework the module UI
 - [x] Keep Clean Mode active
+- [x] ~~Bypass download limits on time-limited moments~~ Unfilter in-today-publish save-to-album
