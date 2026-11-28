@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- This file is consumed by tika-core to detect MIME types that
+        tika-core itself does not recognize. -->
+<mime-info>
+    <mime-type type="image/vvic">
+        <_comment>VVIC Image Format</_comment>
+        <magic priority="50">
+            <match value="ftyp" type="string" offset="4" />
+            <match value="vvic" type="string" offset="8" />
+        </magic>
+        <glob pattern="*" />
+    </mime-type>
+</mime-info>

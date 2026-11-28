@@ -27,6 +27,7 @@ navigation3 = "1.2.0"
 protobuf = "0.10.1"
 protobuf-lib = "4.36.2"
 spotless = "8.11.0"
+tika = "4.2.0"
 yukihook-bom = "1.5.0"
 
 [libraries]
@@ -67,6 +68,7 @@ protobuf-java = { module = "com.google.protobuf:protobuf-java", version.ref = "p
 protobuf-java-util = { module = "com.google.protobuf:protobuf-java-util", version.ref = "protobuf-lib" }
 protobuf-kotlin = { module = "com.google.protobuf:protobuf-kotlin", version.ref = "protobuf-lib" }
 protobuf-protoc = { module = "com.google.protobuf:protoc", version.ref = "protobuf-lib" }
+tika-core = { module = "org.apache.tika:tika-core", version.ref = "tika" }
 yukihook-bom = { module = "com.highcapable.yukihookapi:yukihook-bom", version.ref = "yukihook-bom" }
 yukihook-compiler = { module = "com.highcapable.yukihookapi:yukihook-compiler" }
 yukihook-core = { module = "com.highcapable.yukihookapi:yukihook-core" }

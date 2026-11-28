@@ -11,7 +11,7 @@ import io.github.twyora.douyinenhancer.config.ConfigManager
 import io.github.twyora.douyinenhancer.hook.DouyinPackage
 import io.github.twyora.douyinenhancer.hook.HookOnMainProcess
 import io.github.twyora.douyinenhancer.utils.crypto.md5Hex
-import io.github.twyora.douyinenhancer.utils.file.FileTypeDetector
+import io.github.twyora.douyinenhancer.utils.file.MimeTypeDetector
 import io.github.twyora.douyinenhancer.utils.hook.HookTransaction
 import io.github.twyora.douyinenhancer.utils.reflect.getFieldOrNull
 import io.github.twyora.douyinenhancer.utils.reflect.invokeMethodOnlyQuietly
@@ -105,7 +105,7 @@ object CommentAudioHooker : YukiBaseHooker() {
             }
 
             args.firstOrNull {
-                packageInstance.comment.selfClass?.isInstance(it) == true
+                packageInstance.commentActionParams.selfClass?.isInstance(it) == true
             }?.getFieldOrNull(
                 packageInstance.commentActionParams.comment()
             )?.getFieldOrNull(
@@ -198,7 +198,7 @@ object CommentAudioHooker : YukiBaseHooker() {
                 YLog.error("$TAG: failed to get downloaded audio file path")
                 return@intercept proceed()
             }
-            val ftypeInfo = FileTypeDetector.detect(sourcePath)
+            val ftypeInfo = MimeTypeDetector.default.detect(sourcePath).getOrThrow()
 
             val dlUrl = downloadInfo.getFieldOrNull<String>(
                 packageInstance.downloadInfo.url()
@@ -206,15 +206,12 @@ object CommentAudioHooker : YukiBaseHooker() {
                 YLog.error("$TAG: failed to get download url from download info")
                 return@intercept proceed()
             }
-            if (!dlUrl.contains("mime_type=audio")) {
-                if (verbose) {
-                    YLog.debug("$TAG: download url is not an audio url, skipping saving audio")
-                }
-                return@intercept proceed()
-            } else if (!ftypeInfo.mimeType.startsWith("audio/")) {
-                YLog.error("$TAG: audio MIME type restricted: ${ftypeInfo.mimeType}")
+            if (!ftypeInfo.mimeType.startsWith("audio/")) {
+                YLog.warn("$TAG: not an audio file, MIME type: ${ftypeInfo.mimeType}")
                 return@intercept proceed()
             }
+
+            YLog.info("$TAG: detected audio file, MIME type: ${ftypeInfo.mimeType}")
 
             val context = instance.getFieldOrNull(
                 packageInstance.commentImageSaveDownloadListener.listenerProviderParam()
@@ -227,7 +224,7 @@ object CommentAudioHooker : YukiBaseHooker() {
 
             val targetFileName = "audio_${
                 (dlUrl + System.currentTimeMillis().toString()).md5Hex()
-            }.${ftypeInfo.extensions.first()}".also {
+            }${ftypeInfo.dotExtensions?.firstOrNull() ?: ".mp3"}".also {
                 if (verbose) {
                     YLog.debug("$TAG: audio file name: $it")
                 }
@@ -246,7 +243,7 @@ object CommentAudioHooker : YukiBaseHooker() {
             )?.takeIf {
                 it != Uri.EMPTY
             } ?: run {
-                YLog.error("$TAG: audioUri is null or empty")
+                YLog.error("$TAG: audio uri is null or empty")
                 return@intercept proceed()
             }
 
@@ -306,7 +303,7 @@ object CommentAudioHooker : YukiBaseHooker() {
             )
             newImageUrlModel
         } else {
-            existingImageUrlList
+            existingImageUrlModel
         } ?: return false
 
         imageUrlModel.setFieldQuietly(

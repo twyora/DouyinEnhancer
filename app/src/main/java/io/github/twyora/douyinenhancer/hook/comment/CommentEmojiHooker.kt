@@ -14,7 +14,7 @@ import io.github.twyora.douyinenhancer.config.ConfigManager
 import io.github.twyora.douyinenhancer.hook.DouyinPackage
 import io.github.twyora.douyinenhancer.hook.HookOnMainProcess
 import io.github.twyora.douyinenhancer.utils.crypto.md5Hex
-import io.github.twyora.douyinenhancer.utils.file.FileTypeDetector
+import io.github.twyora.douyinenhancer.utils.file.MimeTypeDetector
 import io.github.twyora.douyinenhancer.utils.hook.HookTransaction
 import io.github.twyora.douyinenhancer.utils.reflect.getFieldOrNull
 import io.github.twyora.douyinenhancer.utils.reflect.getStaticFieldOrNull
@@ -167,13 +167,6 @@ object CommentEmojiHooker : YukiBaseHooker() {
                 YLog.error("$TAG: failed to get download url from download info, skipping emoji handling")
                 return@intercept proceed()
             }
-            // emoji animateUrl file extension is always .heif
-            if (!dlUrl.contains(".heif")) {
-                if (verbose) {
-                    YLog.debug("$TAG: download url does not contain \".heif\", skipping")
-                }
-                return@intercept proceed()
-            }
 
             // downloaded file save path
             val sourcePath = downloadInfo.invokeMethodOrNull<String?>(
@@ -182,7 +175,7 @@ object CommentEmojiHooker : YukiBaseHooker() {
                 YLog.error("$TAG: failed to get downloaded emoji file path")
                 return@intercept proceed()
             }
-            val sourceFileInfo = FileTypeDetector.detect(sourcePath)
+            val sourceFileInfo = MimeTypeDetector.default.detect(sourcePath).getOrThrow()
             YLog.info("$TAG: source MIME type: ${sourceFileInfo.mimeType}")
 
             val saveFilePrefix = "comment_${
@@ -191,21 +184,19 @@ object CommentEmojiHooker : YukiBaseHooker() {
 
             // prepare file to save
             var fileToSave = sourcePath
-            var saveFileExt = sourceFileInfo.extensions.first()
+            var saveFileExt = sourceFileInfo.dotExtensions?.firstOrNull() ?: ".gif"
             var hasTempFile = false
 
-            if (!sourceFileInfo.mimeType.startsWith("image/") &&
-                !sourceFileInfo.mimeType.startsWith("video/")
-            ) {
-                YLog.error(
-                    "$TAG: source MIME type restricted: ${sourceFileInfo.mimeType}"
-                )
+            if (!sourceFileInfo.mimeType.startsWith("image/heif")) {
+                YLog.warn("$TAG: not a gif file, MIME type: ${sourceFileInfo.mimeType}")
                 return@intercept proceed()
             }
 
+            YLog.info("$TAG: detected emoji file, MIME type: ${sourceFileInfo.mimeType}")
+
             // convert video source to GIF animation
-            if (sourceFileInfo.mimeType.startsWith("video/")) {
-                YLog.info("$TAG: source MIME type is video, converting to GIF")
+            if (sourceFileInfo.mimeType == "image/heif-sequence") {
+                YLog.info("$TAG: source MIME type is animated HEIF, converting to GIF")
 
                 val gifTempPath = "${
                     packageInstance.ugFileUtils.selfClass?.invokeStaticMethodOrNull<String>(
@@ -217,7 +208,7 @@ object CommentEmojiHooker : YukiBaseHooker() {
 
                 if (convertMedia2Gif(sourcePath, gifTempPath)) {
                     fileToSave = gifTempPath
-                    saveFileExt = "gif"
+                    saveFileExt = ".gif"
                     hasTempFile = true
                 } else {
                     YLog.error("$TAG: convert video to GIF failed, falling back to direct copy")
@@ -231,7 +222,7 @@ object CommentEmojiHooker : YukiBaseHooker() {
                 false,
                 false
             )?.let {
-                "$it${File.separator}$saveFilePrefix.$saveFileExt"
+                "$it${File.separator}$saveFilePrefix$saveFileExt"
             }?.also {
                 if (verbose) {
                     YLog.debug("$TAG: saving emoji to $it")

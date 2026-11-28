@@ -9,6 +9,7 @@ import io.github.twyora.douyinenhancer.BuildConfig
 import io.github.twyora.douyinenhancer.bridge.ModuleApp
 import io.github.twyora.douyinenhancer.config.ConfigManager
 import io.github.twyora.douyinenhancer.config.kvstorage.RemoteKVStorage
+import io.github.twyora.douyinenhancer.utils.file.MimeTypeDetector
 
 @YukiHookLibXposedEntry(
     targetApiVersion = 102,
@@ -34,6 +35,7 @@ object HookEntry : YukiHookXposedModule {
                 withApplicationReady { application ->
                     ModuleApp.init(this@withProcess)
                     ConfigManager.init(application, RemoteKVStorage.Companion)
+                    MimeTypeDetector.init(this@withProcess.module.javaClass.classLoader)
                     // load cached HookInfo and run hooks when app context is available
                     DouyinPackage.init(application.classLoader, application)
 
