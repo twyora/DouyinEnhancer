@@ -9,6 +9,10 @@ import io.github.twyora.douyinenhancer.hook.DouyinPackage
 import io.github.twyora.douyinenhancer.hook.HookOnMainProcess
 import io.github.twyora.douyinenhancer.utils.reflect.resolveMethodOrNull
 
+/**
+ * This hooker functionality is part of #211,
+ *  which provides inherited playback speed across feed switches.
+ */
 @HookOnMainProcess
 object FeedKeepInheritedSpeedHooker : YukiBaseHooker() {
     private val TAG = this::class.simpleName
