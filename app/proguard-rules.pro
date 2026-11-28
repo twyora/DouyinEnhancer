@@ -42,3 +42,7 @@
     public <methods>;
 }
 # end protobuf
+
+# begin tika
+-keep class org.apache.tika.mime.MimeTypesReader # Avoid NPE on MimeTypesReader.class.getPackage()
+# end tika
