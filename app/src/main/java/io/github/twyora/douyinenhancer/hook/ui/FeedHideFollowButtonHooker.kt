@@ -72,7 +72,7 @@ object FeedHideFollowButtonHooker : YukiBaseHooker() {
     }
 
     private fun installBlockFollowHook(): YukiHookCreator.MemberHooker<*>.Handle? {
-        // Why does ktlint convert block returns to expression bodies sometimes, but not always?
+        // Fix #242: Tapping the hidden follow area still triggers follow.
         return packageInstance.feedAvatarPresenter.selfClass?.resolveMethodOrNull(
             packageInstance.feedAvatarPresenter.performFollow()
         )?.intercept {

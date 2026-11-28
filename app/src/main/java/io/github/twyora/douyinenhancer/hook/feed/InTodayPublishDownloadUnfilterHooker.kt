@@ -14,6 +14,9 @@ import io.github.twyora.douyinenhancer.utils.reflect.invokeMethodOrNull
 import io.github.twyora.douyinenhancer.utils.reflect.resolveMethodOrNull
 import io.github.twyora.douyinenhancer.utils.reflect.setFieldQuietly
 
+/**
+ * Fix #255: In-today-publish feed media does not allow download
+ */
 @HookOnMainProcess
 object InTodayPublishDownloadUnfilterHooker : YukiBaseHooker() {
     private val TAG = this::class.simpleName
