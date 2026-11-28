@@ -8,7 +8,7 @@ import com.highcapable.yukihookapi.hook.log.YLog
 import io.github.twyora.douyinenhancer.config.ConfigManager
 import io.github.twyora.douyinenhancer.hook.DouyinPackage
 import io.github.twyora.douyinenhancer.hook.HookOnMainProcess
-import io.github.twyora.douyinenhancer.utils.file.FileTypeDetector
+import io.github.twyora.douyinenhancer.utils.file.MimeTypeDetector
 import io.github.twyora.douyinenhancer.utils.reflect.getFieldOrNull
 import io.github.twyora.douyinenhancer.utils.reflect.invokeMethodOrNull
 import io.github.twyora.douyinenhancer.utils.reflect.invokeStaticMethodOrNull
@@ -165,7 +165,8 @@ object FeedMultiImageHooker : YukiBaseHooker() {
             val vvicImagePathList = downloadTask.invokeMethodOrNull<List<String?>>(
                 packageInstance.absTask.getTargetFilePaths()
             )?.filterNotNull()?.filter {
-                it.isNotBlank() && File(it).exists() && FileTypeDetector.detect(it).mimeType == "image/vvic"
+                it.isNotBlank() && File(it).exists() &&
+                    MimeTypeDetector.default.detect(it).getOrThrow().mimeType == "image/vvic"
             }
 
             if (verbose) {
@@ -213,7 +214,8 @@ object FeedMultiImageHooker : YukiBaseHooker() {
             val imageFilePath = downloadTask.invokeMethodOrNull<List<String?>>(
                 packageInstance.absTask.getTargetFilePaths()
             )?.filterNotNull()?.filter {
-                it.isNotBlank() && File(it).exists() && FileTypeDetector.detect(it).mimeType == "image/vvic"
+                it.isNotBlank() && File(it).exists() &&
+                    MimeTypeDetector.default.detect(it).getOrThrow().mimeType == "image/vvic"
             } ?: run {
                 YLog.error("$TAG: failed to get image file path when downloading image")
                 return@intercept proceed()
@@ -241,7 +243,8 @@ object FeedMultiImageHooker : YukiBaseHooker() {
                 return@intercept proceed()
             }
             val vvicImagePath = imagePath.takeIf {
-                it.isNotBlank() && File(it).exists() && FileTypeDetector.detect(it).mimeType == "image/vvic"
+                it.isNotBlank() && File(it).exists() &&
+                    MimeTypeDetector.default.detect(it).getOrThrow().mimeType == "image/vvic"
             }
             if (vvicImagePath == null) {
                 return@intercept proceed()
@@ -270,7 +273,8 @@ object FeedMultiImageHooker : YukiBaseHooker() {
                 return@intercept proceed()
             }
             val vvicImagePathList = imagePathList.flatten().filterNotNull().filter {
-                it.isNotBlank() && File(it).exists() && FileTypeDetector.detect(it).mimeType == "image/vvic"
+                it.isNotBlank() && File(it).exists() &&
+                    MimeTypeDetector.default.detect(it).getOrThrow().mimeType == "image/vvic"
             }
 
             if (verbose) {
@@ -300,7 +304,7 @@ object FeedMultiImageHooker : YukiBaseHooker() {
             YLog.debug("$TAG: image file absolute path: ${imageFile.absolutePath}")
         }
 
-        val fvvicInfo = FileTypeDetector.detect(imageFile)
+        val fvvicInfo = MimeTypeDetector.default.detect(imageFile).getOrThrow()
         if (fvvicInfo.mimeType != "image/vvic") {
             if (verbose) {
                 YLog.debug("$TAG: image is not in vvic format (got ${fvvicInfo.mimeType}), skipping")
