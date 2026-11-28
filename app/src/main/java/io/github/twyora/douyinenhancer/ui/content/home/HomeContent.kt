@@ -13,7 +13,7 @@ import io.github.twyora.douyinenhancer.ui.components.SwitchPreferenceItem
 import java.text.SimpleDateFormat
 
 @Composable
-fun HomeContent(uiState: HomeContentUiState, modifier: Modifier = Modifier, uiActions: HomeContentUiActions = HomeContentUiActions()) {
+fun HomeContent(uiState: HomeContentUiState, uiActions: HomeContentUiActions, modifier: Modifier = Modifier) {
     LazyColumn(modifier = modifier) {
         item {
             PreferenceCategory(title = stringResource(R.string.pref_category_settings))

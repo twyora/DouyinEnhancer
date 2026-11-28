@@ -17,7 +17,7 @@ import kotlinx.coroutines.flow.update
 
 class VerifyDialogViewModel(private val validUrls: Array<String>) : ViewModel() {
     val uiState: StateFlow<VerifyDialogUiState>
-        field = MutableStateFlow(VerifyDialogUiState(inputUrl = ""))
+        field = MutableStateFlow(VerifyDialogUiState(inputUrl = "", supportingText = null))
 
     val snackFlow: SharedFlow<SnackEvent>
         field = MutableSharedFlow<SnackEvent>(
