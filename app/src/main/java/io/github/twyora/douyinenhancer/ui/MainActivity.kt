@@ -648,6 +648,9 @@ class MainActivity : ComponentActivity() {
                 },
                 onBlockResumePlaybackChange = {
                     vm.setBlockResumePlayback(it)
+                },
+                onKeepInheritedSpeedChange = {
+                    vm.setKeepInheritedSpeed(it)
                 }
             )
         }
