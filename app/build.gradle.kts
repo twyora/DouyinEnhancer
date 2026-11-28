@@ -196,6 +196,7 @@ dependencies {
     // media & utilities
     implementation(libs.gifkt)
     implementation(libs.commons.collections4)
+    implementation(libs.tika.core)
 
     // compose
     implementation(platform(libs.androidx.compose.bom))
