@@ -105,7 +105,7 @@ object CommentAudioHooker : YukiBaseHooker() {
             }
 
             args.firstOrNull {
-                packageInstance.commentActionParams.selfClass?.isInstance(it) == true
+                packageInstance.comment.selfClass?.isInstance(it) == true
             }?.getFieldOrNull(
                 packageInstance.commentActionParams.comment()
             )?.getFieldOrNull(
@@ -200,16 +200,18 @@ object CommentAudioHooker : YukiBaseHooker() {
             }
             val ftypeInfo = FileTypeDetector.detect(sourcePath)
 
-            // TODO: mp42 downloads from video-backed audio URLs are saved as mp3 for now;
-            //  detect the real audio format instead of hardcoding MIME and extension.
             val dlUrl = downloadInfo.getFieldOrNull<String>(
                 packageInstance.downloadInfo.url()
-            ) ?: ""
-            if (
-                !listOf("audio/", "video/").any {
-                    ftypeInfo.mimeType.startsWith(it)
+            ) ?: run {
+                YLog.error("$TAG: failed to get download url from download info")
+                return@intercept proceed()
+            }
+            if (!dlUrl.contains("mime_type=audio")) {
+                if (verbose) {
+                    YLog.debug("$TAG: download url is not an audio url, skipping saving audio")
                 }
-            ) {
+                return@intercept proceed()
+            } else if (!ftypeInfo.mimeType.startsWith("audio/")) {
                 YLog.error("$TAG: audio MIME type restricted: ${ftypeInfo.mimeType}")
                 return@intercept proceed()
             }
@@ -225,7 +227,7 @@ object CommentAudioHooker : YukiBaseHooker() {
 
             val targetFileName = "audio_${
                 (dlUrl + System.currentTimeMillis().toString()).md5Hex()
-            }.mp3".also {
+            }.${ftypeInfo.extensions.first()}".also {
                 if (verbose) {
                     YLog.debug("$TAG: audio file name: $it")
                 }
@@ -234,7 +236,7 @@ object CommentAudioHooker : YukiBaseHooker() {
                 packageInstance.ugFileUtils.getAudioUri(),
                 context,
                 targetFileName,
-                "audio/mpeg",
+                ftypeInfo.mimeType,
                 "Music/douyin/audio",
                 instance.getFieldOrNull(
                     packageInstance.commentImageSaveDownloadListener.listenerProviderParam()
@@ -304,7 +306,7 @@ object CommentAudioHooker : YukiBaseHooker() {
             )
             newImageUrlModel
         } else {
-            existingImageUrlModel
+            existingImageUrlList
         } ?: return false
 
         imageUrlModel.setFieldQuietly(
