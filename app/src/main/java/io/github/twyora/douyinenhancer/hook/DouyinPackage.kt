@@ -20,6 +20,8 @@ import io.github.twyora.douyinenhancer.config.provider.ModuleConfigProvider
 import io.github.twyora.douyinenhancer.constant.HookInfoFiles
 import io.github.twyora.douyinenhancer.constant.SignatureKeys
 import io.github.twyora.douyinenhancer.generated.AppProperties
+import io.github.twyora.douyinenhancer.utils.RequireThen.requireAllNotNullThen
+import io.github.twyora.douyinenhancer.utils.RequireThen.requireNotNullThen
 import io.github.twyora.douyinenhancer.utils.crypto.verifySha256RsaSignature
 import io.github.twyora.douyinenhancer.utils.reflect.Field
 import io.github.twyora.douyinenhancer.utils.reflect.Method
@@ -1601,8 +1603,7 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
         }
 
         private fun initHookInfo(context: Context) = Configs.HookInfo.newBuilder().apply {
-            val symbolNotFoundMsg = "%s: unable to populate %s config, possibly due to unfound obfuscated symbols"
-            val populateFailedMsg = "%s: unable to populate config"
+            val populateFailedMsg = "%s: unable to populate %s config"
 
             val hostAppClassLoader = context.classLoader
             val hostAppPackageInfo = context.packageManager.getPackageInfo(
@@ -1689,31 +1690,38 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
                                 }
                             }.singleOrNull()
                         }
-                        if (commentImageStructClassData == null || originUrlFieldData == null ||
-                            downloadUrlFieldData == null || getDownloadUrlMethodData == null
-                        ) {
-                            YLog.error(symbolNotFoundMsg.format(TAG, this::class.java.enclosingClass?.simpleName))
-                            return@commentImageStruct
-                        }
 
-                        class_ = class_ {
-                            name = commentImageStructClassData.name
-                        }
-                        originUrl = field {
-                            name = originUrlFieldData.name
-                        }
-                        downloadUrl = field {
-                            name = downloadUrlFieldData.name
-                        }
-                        getDownloadUrl = method {
-                            name = getDownloadUrlMethodData.methodName
-                            parameters = MethodKt.parameters {
-                                values.clear()
-                                values.addAll(getDownloadUrlMethodData.paramTypeNames)
+                        requireAllNotNullThen(
+                            commentImageStructClassData,
+                            originUrlFieldData,
+                            downloadUrlFieldData,
+                            getDownloadUrlMethodData
+                        ) { classData, originField, downloadField, getDownloadMethod ->
+                            class_ = class_ {
+                                name = classData.name
+                            }
+                            originUrl = field {
+                                name = originField.name
+                            }
+                            downloadUrl = field {
+                                name = downloadField.name
+                            }
+                            getDownloadUrl = method {
+                                name = getDownloadMethod.methodName
+                                parameters = MethodKt.parameters {
+                                    values.clear()
+                                    values.addAll(getDownloadMethod.paramTypeNames)
+                                }
                             }
                         }
                     }.onFailure {
-                        YLog.error(populateFailedMsg.format(TAG), it)
+                        YLog.error(
+                            populateFailedMsg.format(
+                                TAG,
+                                Configs.CommentImageStruct.getDescriptor().name
+                            ),
+                            it
+                        )
                     }
                 }
 
@@ -1763,19 +1771,25 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
                             }.singleOrNull()
                         }
 
-                        if (commentAudioStructClassData == null || contentFieldData == null) {
-                            YLog.error(symbolNotFoundMsg.format(TAG, this::class.java.enclosingClass?.simpleName))
-                            return@commentAudioStruct
-                        }
-
-                        class_ = class_ {
-                            name = commentAudioStructClassData.name
-                        }
-                        content = field {
-                            name = contentFieldData.name
+                        requireAllNotNullThen(
+                            commentAudioStructClassData,
+                            contentFieldData
+                        ) { classData, contentField ->
+                            class_ = class_ {
+                                name = classData.name
+                            }
+                            content = field {
+                                name = contentField.name
+                            }
                         }
                     }.onFailure {
-                        YLog.error(populateFailedMsg.format(TAG), it)
+                        YLog.error(
+                            populateFailedMsg.format(
+                                TAG,
+                                Configs.CommentAudioStruct.getDescriptor().name
+                            ),
+                            it
+                        )
                     }
                 }
 
@@ -1842,19 +1856,26 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
                                 }
                             }.singleOrNull()
                         }
-                        if (commentActionParamsClassData == null || commentFieldData == null) {
-                            YLog.error(symbolNotFoundMsg.format(TAG, this::class.java.enclosingClass?.simpleName))
-                            return@commentActionParams
-                        }
 
-                        class_ = class_ {
-                            name = commentActionParamsClassData.name
-                        }
-                        comment = field {
-                            name = commentFieldData.name
+                        requireAllNotNullThen(
+                            commentActionParamsClassData,
+                            commentFieldData
+                        ) { classData, commentField ->
+                            class_ = class_ {
+                                name = classData.name
+                            }
+                            comment = field {
+                                name = commentField.name
+                            }
                         }
                     }.onFailure {
-                        YLog.error(populateFailedMsg.format(TAG), it)
+                        YLog.error(
+                            populateFailedMsg.format(
+                                TAG,
+                                Configs.CommentActionParams.getDescriptor().name
+                            ),
+                            it
+                        )
                     }
                 }
 
@@ -1874,19 +1895,25 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
                             }.singleOrNull()
                         }
 
-                        if (commentLongPressItemModelClassData == null || commentActionParamsFieldData == null) {
-                            YLog.error(symbolNotFoundMsg.format(TAG, this::class.java.enclosingClass?.simpleName))
-                            return@commentLongPressItemModel
-                        }
-
-                        class_ = class_ {
-                            name = commentLongPressItemModelClassData.name
-                        }
-                        commentActionParams = field {
-                            name = commentActionParamsFieldData.name
+                        requireAllNotNullThen(
+                            commentLongPressItemModelClassData,
+                            commentActionParamsFieldData
+                        ) { classData, commentActionParamsField ->
+                            class_ = class_ {
+                                name = classData.name
+                            }
+                            commentActionParams = field {
+                                name = commentActionParamsField.name
+                            }
                         }
                     }.onFailure {
-                        YLog.error(populateFailedMsg.format(TAG), it)
+                        YLog.error(
+                            populateFailedMsg.format(
+                                TAG,
+                                Configs.CommentLongPressItemModel.getDescriptor().name
+                            ),
+                            it
+                        )
                     }
                 }
 
@@ -1929,30 +1956,38 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
                                 }
                             }.singleOrNull()
                         }
-                        if (saveImageActionItemClassData == null || isVisibleMethodData == null || onClickMethodData == null) {
-                            YLog.error(symbolNotFoundMsg.format(TAG, this::class.java.enclosingClass?.simpleName))
-                            return@saveImageActionItem
-                        }
 
-                        class_ = class_ {
-                            name = saveImageActionItemClassData.name
-                        }
-                        isVisible = method {
-                            name = isVisibleMethodData.methodName
-                            parameters = MethodKt.parameters {
-                                values.clear()
-                                values.addAll(isVisibleMethodData.paramTypeNames)
+                        requireAllNotNullThen(
+                            saveImageActionItemClassData,
+                            isVisibleMethodData,
+                            onClickMethodData
+                        ) { classData, isVisibleMethod, onClickMethod ->
+                            class_ = class_ {
+                                name = classData.name
                             }
-                        }
-                        onClick = method {
-                            name = onClickMethodData.name
-                            parameters = MethodKt.parameters {
-                                values.clear()
-                                values.addAll(onClickMethodData.paramTypeNames)
+                            isVisible = method {
+                                name = isVisibleMethod.methodName
+                                parameters = MethodKt.parameters {
+                                    values.clear()
+                                    values.addAll(isVisibleMethod.paramTypeNames)
+                                }
+                            }
+                            onClick = method {
+                                name = onClickMethod.name
+                                parameters = MethodKt.parameters {
+                                    values.clear()
+                                    values.addAll(onClickMethod.paramTypeNames)
+                                }
                             }
                         }
                     }.onFailure {
-                        YLog.error(populateFailedMsg.format(TAG), it)
+                        YLog.error(
+                            populateFailedMsg.format(
+                                TAG,
+                                Configs.SaveImageActionItem.getDescriptor().name
+                            ),
+                            it
+                        )
                     }
                 }
 
@@ -1998,22 +2033,29 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
                                 type = "com.bytedance.bpea.cert.token.TokenCert"
                             }?.self?.name
 
-                        if (clsName == null || contextFieldName == null || certFieldName == null) {
-                            YLog.error(symbolNotFoundMsg.format(TAG, this::class.java.enclosingClass?.simpleName))
-                            return@listenerProviderParam
-                        }
-
-                        class_ = class_ {
-                            name = clsName
-                        }
-                        this.context = field {
-                            name = contextFieldName
-                        }
-                        cert = field {
-                            name = certFieldName
+                        requireAllNotNullThen(
+                            clsName,
+                            contextFieldName,
+                            certFieldName
+                        ) { paramClassName, contextFieldNameVal, certFieldNameVal ->
+                            class_ = class_ {
+                                name = paramClassName
+                            }
+                            this.context = field {
+                                name = contextFieldNameVal
+                            }
+                            cert = field {
+                                name = certFieldNameVal
+                            }
                         }
                     }.onFailure {
-                        YLog.error(populateFailedMsg.format(TAG), it)
+                        YLog.error(
+                            populateFailedMsg.format(
+                                TAG,
+                                Configs.ListenerProviderParam.getDescriptor().name
+                            ),
+                            it
+                        )
                     }
                 }
 
@@ -2047,36 +2089,44 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
                         val listenerProviderParamFieldName = clsName?.toClass(hostAppClassLoader)?.resolve()?.firstFieldOrNull {
                             type = this@apply.listenerProviderParam.class_.nameOrNull
                         }?.self?.name
-                        if (onSuccessedMethodData == null || notifyResultMethod == null || listenerProviderParamFieldName == null) {
-                            YLog.error(symbolNotFoundMsg.format(TAG, this::class.java.enclosingClass?.simpleName))
-                            return@commentImageSaveDownloadListener
-                        }
 
-                        class_ = class_ {
-                            name = clsName
-                        }
-                        onSuccessed = method {
-                            name = onSuccessedMethodData.name
-                            parameters = MethodKt.parameters {
-                                values.clear()
-                                values.addAll(onSuccessedMethodData.paramTypeNames)
+                        requireAllNotNullThen(
+                            clsName,
+                            onSuccessedMethodData,
+                            notifyResultMethod,
+                            listenerProviderParamFieldName
+                        ) { listenerClassName, onSuccessedMethod, notifyResultMethodVal, listenerProviderParamField ->
+                            class_ = class_ {
+                                name = listenerClassName
                             }
-                        }
-                        notifyResult = method {
-                            name = notifyResultMethod.name
-                            parameters = MethodKt.parameters {
-                                values.clear()
-                                notifyResultMethod.parameterTypes.forEach { paramType ->
-                                    values.add(paramType.name)
+                            onSuccessed = method {
+                                name = onSuccessedMethod.name
+                                parameters = MethodKt.parameters {
+                                    values.clear()
+                                    values.addAll(onSuccessedMethod.paramTypeNames)
                                 }
                             }
+                            notifyResult = method {
+                                name = notifyResultMethodVal.name
+                                parameters = MethodKt.parameters {
+                                    values.clear()
+                                    notifyResultMethodVal.parameterTypes.forEach { paramType ->
+                                        values.add(paramType.name)
+                                    }
+                                }
+                            }
+                            listenerProviderParam = field {
+                                name = listenerProviderParamField
+                            }
                         }
-                        listenerProviderParam = field {
-                            name = listenerProviderParamFieldName
-                        }
-                        return@commentImageSaveDownloadListener
                     }.onFailure {
-                        YLog.error(populateFailedMsg.format(TAG), it)
+                        YLog.error(
+                            populateFailedMsg.format(
+                                TAG,
+                                Configs.CommentImageSaveDownloadListener.getDescriptor().name
+                            ),
+                            it
+                        )
                     }
                 }
 
@@ -2101,25 +2151,32 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
                             modifiers(Modifiers.PUBLIC, Modifiers.STATIC)
                             parameters(String::class)
                         }?.self
-                        if (md5HexFieldMethod == null) {
-                            YLog.error(symbolNotFoundMsg.format(TAG, this::class.java.enclosingClass?.simpleName))
-                            return@digestUtils
-                        }
 
-                        class_ = class_ {
-                            name = digestUtilsClsName
-                        }
-                        md5Hex = method {
-                            name = md5HexFieldMethod.name
-                            parameters = MethodKt.parameters {
-                                values.clear()
-                                md5HexFieldMethod.parameterTypes.forEach { paramType ->
-                                    values.add(paramType.name)
+                        requireAllNotNullThen(
+                            digestUtilsClsName,
+                            md5HexFieldMethod
+                        ) { className, md5HexFieldMethod ->
+                            class_ = class_ {
+                                name = className
+                            }
+                            md5Hex = method {
+                                name = md5HexFieldMethod.name
+                                parameters = MethodKt.parameters {
+                                    values.clear()
+                                    md5HexFieldMethod.parameterTypes.forEach { paramType ->
+                                        values.add(paramType.name)
+                                    }
                                 }
                             }
                         }
                     }.onFailure {
-                        YLog.error(populateFailedMsg.format(TAG), it)
+                        YLog.error(
+                            populateFailedMsg.format(
+                                TAG,
+                                Configs.DigestUtils.getDescriptor().name
+                            ),
+                            it
+                        )
                     }
                 }
 
@@ -2273,64 +2330,83 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
                                 }
                             }.singleOrNull()
                         }
-                        if (contextFieldData == null || copyFileMethodData == null || getStorageDirMethodData == null ||
-                            getExternalStorageDirectoryMethodData == null ||
-                            getImageUriMethodData == null || createUriMethodData == null || getAudioUriMethodData == null
-                        ) {
-                            YLog.error(symbolNotFoundMsg.format(TAG, this::class.java.enclosingClass?.simpleName))
-                            return@uGFileUtilsKt
-                        }
 
-                        class_ = class_ {
-                            name = ugFileUtilsClassData.name
-                        }
-                        this.context = field {
-                            name = contextFieldData.name
-                        }
-                        copyFile = method {
-                            name = copyFileMethodData.name
-                            parameters = MethodKt.parameters {
-                                values.clear()
-                                values.addAll(copyFileMethodData.paramTypeNames)
+                        requireAllNotNullThen(
+                            ugFileUtilsClassData,
+                            contextFieldData,
+                            copyFileMethodData,
+                            getStorageDirMethodData,
+                            getExternalStorageDirectoryMethodData,
+                            getImageUriMethodData,
+                            createUriMethodData,
+                            getAudioUriMethodData
+                        ) {
+                                classData,
+                                contextField,
+                                copyFileMethod,
+                                getStorageDirMethod,
+                                getExternalStorageDirectoryMethod,
+                                getImageUriMethod,
+                                createUriMethod,
+                                getAudioUriMethod
+                            ->
+                            class_ = class_ {
+                                name = classData.name
                             }
-                        }
-                        getStorageDir = method {
-                            name = getStorageDirMethodData.name
-                            parameters = MethodKt.parameters {
-                                values.clear()
-                                values.addAll(getStorageDirMethodData.paramTypeNames)
+                            this.context = field {
+                                name = contextField.name
                             }
-                        }
-                        getExternalStorageDir = method {
-                            name = getExternalStorageDirectoryMethodData.name
-                            parameters = MethodKt.parameters {
-                                values.clear()
-                                values.addAll(getExternalStorageDirectoryMethodData.paramTypeNames)
+                            copyFile = method {
+                                name = copyFileMethod.name
+                                parameters = MethodKt.parameters {
+                                    values.clear()
+                                    values.addAll(copyFileMethod.paramTypeNames)
+                                }
                             }
-                        }
-                        getImageUri = method {
-                            name = getImageUriMethodData.name
-                            parameters = MethodKt.parameters {
-                                values.clear()
-                                values.addAll(getImageUriMethodData.paramTypeNames)
+                            getStorageDir = method {
+                                name = getStorageDirMethod.name
+                                parameters = MethodKt.parameters {
+                                    values.clear()
+                                    values.addAll(getStorageDirMethod.paramTypeNames)
+                                }
                             }
-                        }
-                        createUri = method {
-                            name = createUriMethodData.name
-                            parameters = MethodKt.parameters {
-                                values.clear()
-                                values.addAll(createUriMethodData.paramTypeNames)
+                            getExternalStorageDir = method {
+                                name = getExternalStorageDirectoryMethod.name
+                                parameters = MethodKt.parameters {
+                                    values.clear()
+                                    values.addAll(getExternalStorageDirectoryMethod.paramTypeNames)
+                                }
                             }
-                        }
-                        getAudioUri = method {
-                            name = getAudioUriMethodData.name
-                            parameters = MethodKt.parameters {
-                                values.clear()
-                                values.addAll(getAudioUriMethodData.paramTypeNames)
+                            getImageUri = method {
+                                name = getImageUriMethod.name
+                                parameters = MethodKt.parameters {
+                                    values.clear()
+                                    values.addAll(getImageUriMethod.paramTypeNames)
+                                }
+                            }
+                            createUri = method {
+                                name = createUriMethod.name
+                                parameters = MethodKt.parameters {
+                                    values.clear()
+                                    values.addAll(createUriMethod.paramTypeNames)
+                                }
+                            }
+                            getAudioUri = method {
+                                name = getAudioUriMethod.name
+                                parameters = MethodKt.parameters {
+                                    values.clear()
+                                    values.addAll(getAudioUriMethod.paramTypeNames)
+                                }
                             }
                         }
                     }.onFailure {
-                        YLog.error(populateFailedMsg.format(TAG), it)
+                        YLog.error(
+                            populateFailedMsg.format(
+                                TAG,
+                                Configs.UGFileUtilsKt.getDescriptor().name
+                            ),
+                            it
+                        )
                     }
                 }
 
@@ -2377,22 +2453,28 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
                             type = "com.ss.android.ugc.aweme.setting.ui.SettingNestedScrollView"
                         }?.self?.name
 
-                        if (settingsScrollViewFieldName == null) {
-                            YLog.error("$TAG: unable to populate config, settingsScrollViewFieldName is null")
-                            return@runCatching
-                        }
-
-                        class_ = class_ {
-                            name = dySettingsNewVersionActivityClsName
-                        }
-                        settingsScrollView = field {
-                            name = settingsScrollViewFieldName
-                        }
-                        onResume = method {
-                            name = "onResume"
+                        requireAllNotNullThen(
+                            dySettingsNewVersionActivityClsName,
+                            settingsScrollViewFieldName
+                        ) { className, settingsScrollViewFieldNameVal ->
+                            class_ = class_ {
+                                name = className
+                            }
+                            settingsScrollView = field {
+                                name = settingsScrollViewFieldNameVal
+                            }
+                            onResume = method {
+                                name = "onResume"
+                            }
                         }
                     }.onFailure {
-                        YLog.error(populateFailedMsg.format(TAG), it)
+                        YLog.error(
+                            populateFailedMsg.format(
+                                TAG,
+                                Configs.DouYinSettingNewVersionActivity.getDescriptor().name
+                            ),
+                            it
+                        )
                     }
                 }
 
@@ -2469,106 +2551,116 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
                 }
 
                 awemeStatistics = awemeStatistics {
-                    val awemeStatisticsClassData = bridge.getClassData("com.ss.android.ugc.aweme.feed.model.AwemeStatistics")
-                    val collectCountFieldData = awemeStatisticsClassData?.let {
-                        bridge.findField {
-                            searchClasses = listOf(it)
-                            matcher {
-                                annotations {
-                                    add {
-                                        type = "com.google.gson.annotations.SerializedName"
-                                        addElement {
-                                            name = "value"
-                                            stringValue(
-                                                value = "collect_count",
-                                                matchType = StringMatchType.Equals
-                                            )
+                    runCatching {
+                        val awemeStatisticsClassData = bridge.getClassData("com.ss.android.ugc.aweme.feed.model.AwemeStatistics")
+                        val collectCountFieldData = awemeStatisticsClassData?.let {
+                            bridge.findField {
+                                searchClasses = listOf(it)
+                                matcher {
+                                    annotations {
+                                        add {
+                                            type = "com.google.gson.annotations.SerializedName"
+                                            addElement {
+                                                name = "value"
+                                                stringValue(
+                                                    value = "collect_count",
+                                                    matchType = StringMatchType.Equals
+                                                )
+                                            }
                                         }
                                     }
                                 }
-                            }
-                        }.singleOrNull()
-                    }
-                    val commentCountFieldData = awemeStatisticsClassData?.let {
-                        bridge.findField {
-                            searchClasses = listOf(it)
-                            matcher {
-                                annotations {
-                                    add {
-                                        type = "com.google.gson.annotations.SerializedName"
-                                        addElement {
-                                            name = "value"
-                                            stringValue(
-                                                value = "comment_count",
-                                                matchType = StringMatchType.Equals
-                                            )
+                            }.singleOrNull()
+                        }
+                        val commentCountFieldData = awemeStatisticsClassData?.let {
+                            bridge.findField {
+                                searchClasses = listOf(it)
+                                matcher {
+                                    annotations {
+                                        add {
+                                            type = "com.google.gson.annotations.SerializedName"
+                                            addElement {
+                                                name = "value"
+                                                stringValue(
+                                                    value = "comment_count",
+                                                    matchType = StringMatchType.Equals
+                                                )
+                                            }
                                         }
                                     }
                                 }
-                            }
-                        }.singleOrNull()
-                    }
-                    val diggCountFieldData = awemeStatisticsClassData?.let {
-                        bridge.findField {
-                            searchClasses = listOf(it)
-                            matcher {
-                                annotations {
-                                    add {
-                                        type = "com.google.gson.annotations.SerializedName"
-                                        addElement {
-                                            name = "value"
-                                            stringValue(
-                                                value = "digg_count",
-                                                matchType = StringMatchType.Equals
-                                            )
+                            }.singleOrNull()
+                        }
+                        val diggCountFieldData = awemeStatisticsClassData?.let {
+                            bridge.findField {
+                                searchClasses = listOf(it)
+                                matcher {
+                                    annotations {
+                                        add {
+                                            type = "com.google.gson.annotations.SerializedName"
+                                            addElement {
+                                                name = "value"
+                                                stringValue(
+                                                    value = "digg_count",
+                                                    matchType = StringMatchType.Equals
+                                                )
+                                            }
                                         }
                                     }
                                 }
-                            }
-                        }.singleOrNull()
-                    }
-                    val shareCountFieldData = awemeStatisticsClassData?.let {
-                        bridge.findField {
-                            searchClasses = listOf(it)
-                            matcher {
-                                annotations {
-                                    add {
-                                        type = "com.google.gson.annotations.SerializedName"
-                                        addElement {
-                                            name = "value"
-                                            stringValue(
-                                                value = "share_count",
-                                                matchType = StringMatchType.Equals
-                                            )
+                            }.singleOrNull()
+                        }
+                        val shareCountFieldData = awemeStatisticsClassData?.let {
+                            bridge.findField {
+                                searchClasses = listOf(it)
+                                matcher {
+                                    annotations {
+                                        add {
+                                            type = "com.google.gson.annotations.SerializedName"
+                                            addElement {
+                                                name = "value"
+                                                stringValue(
+                                                    value = "share_count",
+                                                    matchType = StringMatchType.Equals
+                                                )
+                                            }
                                         }
                                     }
                                 }
-                            }
-                        }.singleOrNull()
-                    }
+                            }.singleOrNull()
+                        }
 
-                    if (awemeStatisticsClassData == null || collectCountFieldData == null ||
-                        commentCountFieldData == null || diggCountFieldData == null ||
-                        shareCountFieldData == null
-                    ) {
-                        YLog.error(symbolNotFoundMsg.format(TAG, this::class.java.enclosingClass?.simpleName))
-                        return@awemeStatistics
-                    }
-
-                    class_ = class_ {
-                        name = awemeStatisticsClassData.name
-                    }
-                    collectCount = field {
-                        name = collectCountFieldData.name
-                    }
-                    commentCount = field {
-                        name = commentCountFieldData.name
-                    }
-                    diggCount = field {
-                        name = diggCountFieldData.name
-                    }
-                    shareCount = field {
-                        name = shareCountFieldData.name
+                        requireAllNotNullThen(
+                            awemeStatisticsClassData,
+                            collectCountFieldData,
+                            commentCountFieldData,
+                            diggCountFieldData,
+                            shareCountFieldData
+                        ) { classData, collectCountField, commentCountField, diggCountField, shareCountField ->
+                            class_ = class_ {
+                                name = classData.name
+                            }
+                            collectCount = field {
+                                name = collectCountField.name
+                            }
+                            commentCount = field {
+                                name = commentCountField.name
+                            }
+                            diggCount = field {
+                                name = diggCountField.name
+                            }
+                            shareCount = field {
+                                name = shareCountField.name
+                            }
+                        }
+                    }.onFailure {
+                        YLog.error(
+                            populateFailedMsg.format(
+                                TAG,
+                                Configs.AwemeStatistics.getDescriptor().name
+                            ),
+                            it
+                        )
                     }
                 }
 
@@ -2586,23 +2678,30 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
                                     add("DownLoadExecutor")
                                 }
                             }
-                        }.singleOrNull() ?: run {
-                            YLog.error(symbolNotFoundMsg.format(TAG, this::class.java.enclosingClass?.simpleName))
-                            return@downLoadExecutor
-                        }
+                        }.singleOrNull()
 
-                        class_ = class_ {
-                            name = executeMethodData.className
-                        }
-                        execute = method {
-                            name = executeMethodData.methodName
-                            parameters = MethodKt.parameters {
-                                values.clear()
-                                values.addAll(executeMethodData.paramTypeNames)
+                        requireNotNullThen(
+                            executeMethodData
+                        ) { executeMethod ->
+                            class_ = class_ {
+                                name = executeMethod.className
+                            }
+                            execute = method {
+                                name = executeMethod.methodName
+                                parameters = MethodKt.parameters {
+                                    values.clear()
+                                    values.addAll(executeMethod.paramTypeNames)
+                                }
                             }
                         }
                     }.onFailure {
-                        YLog.error(populateFailedMsg.format(TAG), it)
+                        YLog.error(
+                            populateFailedMsg.format(
+                                TAG,
+                                Configs.DownLoadExecutor.getDescriptor().name
+                            ),
+                            it
+                        )
                     }
                 }
 
@@ -2620,23 +2719,29 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
                             }.singleOrNull()
                         }
 
-                        if (absTaskClassData == null || getTargetFilePathsMethodData == null) {
-                            YLog.error(symbolNotFoundMsg.format(TAG, this::class.java.enclosingClass?.simpleName))
-                            return@absTask
-                        }
-
-                        class_ = class_ {
-                            name = absTaskClassData.name
-                        }
-                        getTargetFilePaths = method {
-                            name = getTargetFilePathsMethodData.methodName
-                            parameters = MethodKt.parameters {
-                                values.clear()
-                                values.addAll(getTargetFilePathsMethodData.paramTypeNames)
+                        requireAllNotNullThen(
+                            absTaskClassData,
+                            getTargetFilePathsMethodData
+                        ) { classData, getTargetFilePathsMethod ->
+                            class_ = class_ {
+                                name = classData.name
+                            }
+                            getTargetFilePaths = method {
+                                name = getTargetFilePathsMethod.methodName
+                                parameters = MethodKt.parameters {
+                                    values.clear()
+                                    values.addAll(getTargetFilePathsMethod.paramTypeNames)
+                                }
                             }
                         }
                     }.onFailure {
-                        YLog.error(populateFailedMsg.format(TAG), it)
+                        YLog.error(
+                            populateFailedMsg.format(
+                                TAG,
+                                Configs.AbsTask.getDescriptor().name
+                            ),
+                            it
+                        )
                     }
                 }
 
@@ -2651,23 +2756,30 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
                                     add("encode live photo isFinish: ")
                                 }
                             }
-                        }.singleOrNull() ?: run {
-                            YLog.error(symbolNotFoundMsg.format(TAG, this::class.java.enclosingClass?.simpleName))
-                            return@downloadLivePhotoExecutor
-                        }
+                        }.singleOrNull()
 
-                        class_ = class_ {
-                            name = encodeLivePhotoMethodData.className
-                        }
-                        encodeLivePhoto = method {
-                            name = encodeLivePhotoMethodData.methodName
-                            parameters = MethodKt.parameters {
-                                values.clear()
-                                values.addAll(encodeLivePhotoMethodData.paramTypeNames)
+                        requireNotNullThen(
+                            encodeLivePhotoMethodData
+                        ) { encodeLivePhotoMethod ->
+                            class_ = class_ {
+                                name = encodeLivePhotoMethod.className
+                            }
+                            encodeLivePhoto = method {
+                                name = encodeLivePhotoMethod.methodName
+                                parameters = MethodKt.parameters {
+                                    values.clear()
+                                    values.addAll(encodeLivePhotoMethod.paramTypeNames)
+                                }
                             }
                         }
                     }.onFailure {
-                        YLog.error(populateFailedMsg.format(TAG), it)
+                        YLog.error(
+                            populateFailedMsg.format(
+                                TAG,
+                                Configs.DownloadLivePhotoExecutor.getDescriptor().name
+                            ),
+                            it
+                        )
                     }
                 }
 
@@ -2781,41 +2893,47 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
                             }
                         }
 
-                        if (videoClassData == null || hasSuffixWaterMarkFieldData == null ||
-                            hasWaterMarkFieldData == null || downloadAddrFieldData == null ||
-                            getPlayAddrMethodData == null
-                        ) {
-                            YLog.error(symbolNotFoundMsg.format(TAG, this::class.java.enclosingClass?.simpleName))
-                            return@video
-                        }
-
-                        class_ = class_ {
-                            name = videoClassData.name
-                        }
-                        getPlayAddr = method {
-                            name = getPlayAddrMethodData.methodName
-                            parameters = MethodKt.parameters {
-                                values.clear()
-                                values.addAll(getPlayAddrMethodData.paramTypeNames)
+                        requireAllNotNullThen(
+                            videoClassData,
+                            hasSuffixWaterMarkFieldData,
+                            hasWaterMarkFieldData,
+                            downloadAddrFieldData,
+                            getPlayAddrMethodData
+                        ) { classData, hasSuffixWaterMarkField, hasWaterMarkField, downloadAddrField, getPlayAddrMethod ->
+                            class_ = class_ {
+                                name = classData.name
+                            }
+                            getPlayAddr = method {
+                                name = getPlayAddrMethod.methodName
+                                parameters = MethodKt.parameters {
+                                    values.clear()
+                                    values.addAll(getPlayAddrMethod.paramTypeNames)
+                                }
+                            }
+                            hasSuffixWaterMark = field {
+                                name = hasSuffixWaterMarkField.name
+                            }
+                            hasWaterMark = field {
+                                name = hasWaterMarkField.name
+                            }
+                            downloadAddr = field {
+                                name = downloadAddrField.name
                             }
                         }
-                        hasSuffixWaterMark = field {
-                            name = hasSuffixWaterMarkFieldData.name
-                        }
-                        hasWaterMark = field {
-                            name = hasWaterMarkFieldData.name
-                        }
-                        downloadAddr = field {
-                            name = downloadAddrFieldData.name
-                        }
                     }.onFailure {
-                        YLog.error(populateFailedMsg.format(TAG), it)
+                        YLog.error(
+                            populateFailedMsg.format(
+                                TAG,
+                                Configs.Video.getDescriptor().name
+                            ),
+                            it
+                        )
                     }
                 }
 
                 feedResponseHandler = feedResponseHandler {
                     runCatching {
-                        bridge.findMethod {
+                        val processAwemeListMethodData = bridge.findMethod {
                             matcher {
                                 modifiers = Modifier.PUBLIC + Modifier.STATIC
                                 returnType = "void"
@@ -2843,23 +2961,30 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
                                     }
                                 }
                             }
-                        }.singleOrNull()?.also { match ->
+                        }.singleOrNull()
+
+                        requireNotNullThen(
+                            processAwemeListMethodData
+                        ) { processAwemeListMethod ->
                             class_ = class_ {
-                                name = match.className
+                                name = processAwemeListMethod.className
                             }
                             processAwemeList = method {
-                                name = match.methodName
+                                name = processAwemeListMethod.methodName
                                 parameters = MethodKt.parameters {
                                     values.clear()
-                                    values.addAll(match.paramTypeNames)
+                                    values.addAll(processAwemeListMethod.paramTypeNames)
                                 }
                             }
-                        } ?: run {
-                            YLog.error(symbolNotFoundMsg.format(TAG, this::class.java.enclosingClass?.simpleName))
-                            return@feedResponseHandler
                         }
                     }.onFailure {
-                        YLog.error(populateFailedMsg.format(TAG), it)
+                        YLog.error(
+                            populateFailedMsg.format(
+                                TAG,
+                                Configs.FeedResponseHandler.getDescriptor().name
+                            ),
+                            it
+                        )
                     }
                 }
 
@@ -2879,23 +3004,30 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
                                     add("default")
                                 }
                             }
-                        }.singleOrNull() ?: run {
-                            YLog.error(symbolNotFoundMsg.format(TAG, this::class.java.enclosingClass?.simpleName))
-                            return@commentLongPressWhiteListProvider
-                        }
+                        }.singleOrNull()
 
-                        class_ = class_ {
-                            name = buildWhiteListMethodData.className
-                        }
-                        buildWhiteList = method {
-                            name = buildWhiteListMethodData.methodName
-                            parameters = MethodKt.parameters {
-                                values.clear()
-                                values.addAll(buildWhiteListMethodData.paramTypeNames)
+                        requireNotNullThen(
+                            buildWhiteListMethodData
+                        ) { buildWhiteListMethod ->
+                            class_ = class_ {
+                                name = buildWhiteListMethod.className
+                            }
+                            buildWhiteList = method {
+                                name = buildWhiteListMethod.methodName
+                                parameters = MethodKt.parameters {
+                                    values.clear()
+                                    values.addAll(buildWhiteListMethod.paramTypeNames)
+                                }
                             }
                         }
                     }.onFailure {
-                        YLog.error(populateFailedMsg.format(TAG), it)
+                        YLog.error(
+                            populateFailedMsg.format(
+                                TAG,
+                                Configs.CommentLongPressWhiteListProvider.getDescriptor().name
+                            ),
+                            it
+                        )
                     }
                 }
 
@@ -2952,23 +3084,30 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
                                     }
                                 }
                             }
-                        }.singleOrNull() ?: run {
-                            YLog.error(symbolNotFoundMsg.format(TAG, this::class.java.enclosingClass?.simpleName))
-                            return@miscDownloadAddrUtil
-                        }
+                        }.singleOrNull()
 
-                        class_ = class_ {
-                            name = getSuffixSceneDownloadAddrMethodData.className
-                        }
-                        getSuffixSceneDownloadAddr = method {
-                            name = getSuffixSceneDownloadAddrMethodData.methodName
-                            parameters = MethodKt.parameters {
-                                values.clear()
-                                values.addAll(getSuffixSceneDownloadAddrMethodData.paramTypeNames)
+                        requireNotNullThen(
+                            getSuffixSceneDownloadAddrMethodData
+                        ) { getSuffixSceneDownloadAddrMethod ->
+                            class_ = class_ {
+                                name = getSuffixSceneDownloadAddrMethod.className
+                            }
+                            getSuffixSceneDownloadAddr = method {
+                                name = getSuffixSceneDownloadAddrMethod.methodName
+                                parameters = MethodKt.parameters {
+                                    values.clear()
+                                    values.addAll(getSuffixSceneDownloadAddrMethod.paramTypeNames)
+                                }
                             }
                         }
                     }.onFailure {
-                        YLog.error(populateFailedMsg.format(TAG), it)
+                        YLog.error(
+                            populateFailedMsg.format(
+                                TAG,
+                                Configs.MiscDownloadAddrUtil.getDescriptor().name
+                            ),
+                            it
+                        )
                     }
                 }
 
@@ -3002,26 +3141,33 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
                             }.singleOrNull()
                         }
 
-                        if (startDownloadMethodData == null || downloadActionClassData == null || awemeFieldData == null) {
-                            YLog.error(symbolNotFoundMsg.format(TAG, this::class.java.enclosingClass?.simpleName))
-                            return@downloadAction
-                        }
-
-                        class_ = class_ {
-                            name = downloadActionClassData.name
-                        }
-                        startDownload = method {
-                            name = startDownloadMethodData.methodName
-                            parameters = MethodKt.parameters {
-                                values.clear()
-                                values.addAll(startDownloadMethodData.paramTypeNames)
+                        requireAllNotNullThen(
+                            startDownloadMethodData,
+                            downloadActionClassData,
+                            awemeFieldData
+                        ) { startDownloadMethod, classData, awemeField ->
+                            class_ = class_ {
+                                name = classData.name
+                            }
+                            startDownload = method {
+                                name = startDownloadMethod.methodName
+                                parameters = MethodKt.parameters {
+                                    values.clear()
+                                    values.addAll(startDownloadMethod.paramTypeNames)
+                                }
+                            }
+                            aweme = field {
+                                name = awemeField.fieldName
                             }
                         }
-                        aweme = field {
-                            name = awemeFieldData.fieldName
-                        }
                     }.onFailure {
-                        YLog.error(populateFailedMsg.format(TAG), it)
+                        YLog.error(
+                            populateFailedMsg.format(
+                                TAG,
+                                Configs.DownloadAction.getDescriptor().name
+                            ),
+                            it
+                        )
                     }
                 }
 
@@ -3044,70 +3190,80 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
                 }
 
                 abTestServiceImpl = aBTestServiceImpl {
-                    val abTestServiceImplClassData = bridge.findClass {
-                        matcher {
-                            modifiers = Modifier.PUBLIC or Modifier.FINAL
-                            interfaces {
-                                add {
-                                    className = "com.ss.android.ugc.aweme.services.external.IABTestService"
-                                }
-                            }
-                        }
-                    }.singleOrNull {
-                        it.simpleName != "StubAllServices"
-                    }
-                    val enableSaveImageToVideoLocalWaterMaskMethodData = abTestServiceImplClassData?.let {
-                        bridge.findMethod {
-                            searchClasses = listOf(it)
+                    runCatching {
+                        val abTestServiceImplClassData = bridge.findClass {
                             matcher {
                                 modifiers = Modifier.PUBLIC or Modifier.FINAL
-                                returnType = "boolean"
-                                usingStrings {
-                                    add("save_image_to_video_local_water_mask_enable")
-                                }
-                            }
-                        }.singleOrNull()
-                    }
-                    val enableVeAddLiveVideoWaterMarkMethodData = abTestServiceImplClassData?.let {
-                        bridge.findMethod {
-                            searchClasses = listOfNotNull(it, *it.interfaces.toTypedArray())
-                            matcher {
-                                paramCount = 0
-                                returnType = "boolean"
-                                callerMethods {
+                                interfaces {
                                     add {
-                                        usingStrings {
-                                            add("_with_watermark.mp4")
-                                            add("composeWaterMark")
-                                        }
+                                        className = "com.ss.android.ugc.aweme.services.external.IABTestService"
                                     }
                                 }
                             }
-                        }.singleOrNull()
-                    }
-                    if (abTestServiceImplClassData == null || enableSaveImageToVideoLocalWaterMaskMethodData == null ||
-                        enableVeAddLiveVideoWaterMarkMethodData == null
-                    ) {
-                        YLog.error(symbolNotFoundMsg.format(TAG, this::class.java.enclosingClass?.simpleName))
-                        return@aBTestServiceImpl
-                    }
+                        }.singleOrNull {
+                            it.simpleName != "StubAllServices"
+                        }
+                        val enableSaveImageToVideoLocalWaterMaskMethodData = abTestServiceImplClassData?.let {
+                            bridge.findMethod {
+                                searchClasses = listOf(it)
+                                matcher {
+                                    modifiers = Modifier.PUBLIC or Modifier.FINAL
+                                    returnType = "boolean"
+                                    usingStrings {
+                                        add("save_image_to_video_local_water_mask_enable")
+                                    }
+                                }
+                            }.singleOrNull()
+                        }
+                        val enableVeAddLiveVideoWaterMarkMethodData = abTestServiceImplClassData?.let {
+                            bridge.findMethod {
+                                searchClasses = listOfNotNull(it, *it.interfaces.toTypedArray())
+                                matcher {
+                                    paramCount = 0
+                                    returnType = "boolean"
+                                    callerMethods {
+                                        add {
+                                            usingStrings {
+                                                add("_with_watermark.mp4")
+                                                add("composeWaterMark")
+                                            }
+                                        }
+                                    }
+                                }
+                            }.singleOrNull()
+                        }
 
-                    class_ = class_ {
-                        name = abTestServiceImplClassData.name
-                    }
-                    enableSaveImageToVideoLocalWaterMask = method {
-                        name = enableSaveImageToVideoLocalWaterMaskMethodData.name
-                        parameters = MethodKt.parameters {
-                            values.clear()
-                            values.addAll(enableSaveImageToVideoLocalWaterMaskMethodData.paramTypeNames)
+                        requireAllNotNullThen(
+                            abTestServiceImplClassData,
+                            enableSaveImageToVideoLocalWaterMaskMethodData,
+                            enableVeAddLiveVideoWaterMarkMethodData
+                        ) { classData, enableSaveImageToVideoLocalWaterMaskMethod, enableVeAddLiveVideoWaterMarkMethod ->
+                            class_ = class_ {
+                                name = classData.name
+                            }
+                            enableSaveImageToVideoLocalWaterMask = method {
+                                name = enableSaveImageToVideoLocalWaterMaskMethod.name
+                                parameters = MethodKt.parameters {
+                                    values.clear()
+                                    values.addAll(enableSaveImageToVideoLocalWaterMaskMethod.paramTypeNames)
+                                }
+                            }
+                            enableVeAddLiveVideoWaterMark = method {
+                                name = enableVeAddLiveVideoWaterMarkMethod.name
+                                parameters = MethodKt.parameters {
+                                    values.clear()
+                                    values.addAll(enableVeAddLiveVideoWaterMarkMethod.paramTypeNames)
+                                }
+                            }
                         }
-                    }
-                    enableVeAddLiveVideoWaterMark = method {
-                        name = enableVeAddLiveVideoWaterMarkMethodData.name
-                        parameters = MethodKt.parameters {
-                            values.clear()
-                            values.addAll(enableVeAddLiveVideoWaterMarkMethodData.paramTypeNames)
-                        }
+                    }.onFailure {
+                        YLog.error(
+                            populateFailedMsg.format(
+                                TAG,
+                                Configs.ABTestServiceImpl.getDescriptor().name
+                            ),
+                            it
+                        )
                     }
                 }
 
@@ -3123,25 +3279,31 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
                                 }
                             }
                         }.singleOrNull()
-                        if (actionStatusClassData == null) {
-                            YLog.error(symbolNotFoundMsg.format(TAG, this::class.java.enclosingClass?.simpleName))
-                            return@actionStatus
-                        }
 
-                        class_ = class_ {
-                            name = actionStatusClassData.name
-                        }
-                        grayed = field {
-                            name = "GRAYED"
-                        }
-                        hidden = field {
-                            name = "HIDDEN"
-                        }
-                        normal = field {
-                            name = "NORMAL"
+                        requireNotNullThen(
+                            actionStatusClassData
+                        ) { classData ->
+                            class_ = class_ {
+                                name = classData.name
+                            }
+                            grayed = field {
+                                name = "GRAYED"
+                            }
+                            hidden = field {
+                                name = "HIDDEN"
+                            }
+                            normal = field {
+                                name = "NORMAL"
+                            }
                         }
                     }.onFailure {
-                        YLog.error(populateFailedMsg.format(TAG), it)
+                        YLog.error(
+                            populateFailedMsg.format(
+                                TAG,
+                                Configs.ActionStatus.getDescriptor().name
+                            ),
+                            it
+                        )
                     }
                 }
 
@@ -3179,19 +3341,19 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
                                 }
                             }
                         }.singleOrNull()
-                        if (getActionCheckResultMethodData == null) {
-                            YLog.error(symbolNotFoundMsg.format(TAG, this::class.java.enclosingClass?.simpleName))
-                            return@absPermissionChecker
-                        }
 
-                        class_ = class_ {
-                            name = getActionCheckResultMethodData.className
-                        }
-                        getActionCheckResult = method {
-                            name = getActionCheckResultMethodData.name
-                            parameters = MethodKt.parameters {
-                                values.clear()
-                                values.addAll(getActionCheckResultMethodData.paramTypeNames)
+                        requireNotNullThen(
+                            getActionCheckResultMethodData
+                        ) { getActionCheckResultMethod ->
+                            class_ = class_ {
+                                name = getActionCheckResultMethod.className
+                            }
+                            getActionCheckResult = method {
+                                name = getActionCheckResultMethod.name
+                                parameters = MethodKt.parameters {
+                                    values.clear()
+                                    values.addAll(getActionCheckResultMethod.paramTypeNames)
+                                }
                             }
                         }
 
@@ -3209,23 +3371,35 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
                                     }.singleOrNull()
                                 }
 
-                                if (actionCheckResultClassData == null || actionStatusFieldData == null) {
-                                    YLog.error(symbolNotFoundMsg.format(TAG, this::class.java.enclosingClass?.simpleName))
-                                    return@actionCheckResult
-                                }
-
-                                class_ = class_ {
-                                    name = actionCheckResultClassData.name
-                                }
-                                actionStatus = field {
-                                    name = actionStatusFieldData.name
+                                requireAllNotNullThen(
+                                    actionCheckResultClassData,
+                                    actionStatusFieldData
+                                ) { classData, actionStatusField ->
+                                    class_ = class_ {
+                                        name = classData.name
+                                    }
+                                    actionStatus = field {
+                                        name = actionStatusField.name
+                                    }
                                 }
                             }.onFailure {
-                                YLog.error(populateFailedMsg.format(TAG), it)
+                                YLog.error(
+                                    populateFailedMsg.format(
+                                        TAG,
+                                        Configs.ActionCheckResult.getDescriptor().name
+                                    ),
+                                    it
+                                )
                             }
                         }
                     }.onFailure {
-                        YLog.error(populateFailedMsg.format(TAG), it)
+                        YLog.error(
+                            populateFailedMsg.format(
+                                TAG,
+                                Configs.AbsPermissionChecker.getDescriptor().name
+                            ),
+                            it
+                        )
                     }
                 }
 
@@ -3256,23 +3430,30 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
                                     }
                                 }
                             }
-                        }.singleOrNull() ?: run {
-                            YLog.error(symbolNotFoundMsg.format(TAG, this::class.java.enclosingClass?.simpleName))
-                            return@galleryShareHelper
-                        }
+                        }.singleOrNull()
 
-                        class_ = class_ {
-                            name = startDownloadData.className
-                        }
-                        startDownload = method {
-                            name = startDownloadData.methodName
-                            parameters = MethodKt.parameters {
-                                values.clear()
-                                values.addAll(startDownloadData.paramTypeNames)
+                        requireNotNullThen(
+                            startDownloadData
+                        ) { startDownloadMethod ->
+                            class_ = class_ {
+                                name = startDownloadMethod.className
+                            }
+                            startDownload = method {
+                                name = startDownloadMethod.methodName
+                                parameters = MethodKt.parameters {
+                                    values.clear()
+                                    values.addAll(startDownloadMethod.paramTypeNames)
+                                }
                             }
                         }
                     }.onFailure {
-                        YLog.error(populateFailedMsg.format(TAG), it)
+                        YLog.error(
+                            populateFailedMsg.format(
+                                TAG,
+                                Configs.GalleryShareHelper.getDescriptor().name
+                            ),
+                            it
+                        )
                     }
                 }
 
@@ -3358,32 +3539,39 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
                                 }
                             }.singleOrNull()
                         }
-                        if (getDownloadStatusMethodData == null || videoResponseClassData == null ||
-                            msgFieldData == null || statusFieldData == null
-                        ) {
-                            YLog.error(symbolNotFoundMsg.format(TAG, this::class.java.enclosingClass?.simpleName))
-                            return@sharePrivacyVideoApi
-                        }
 
-                        class_ = class_ {
-                            name = getDownloadStatusMethodData.className
-                        }
-                        privacyVideoResponse = sharePrivacyVideoResponse {
+                        requireAllNotNullThen(
+                            getDownloadStatusMethodData,
+                            videoResponseClassData,
+                            msgFieldData,
+                            statusFieldData
+                        ) { getDownloadStatusMethod, videoResponseClass, msgField, statusField ->
                             class_ = class_ {
-                                name = videoResponseClassData.name
+                                name = getDownloadStatusMethod.className
                             }
-                            msg = field {
-                                name = msgFieldData.name
+                            privacyVideoResponse = sharePrivacyVideoResponse {
+                                class_ = class_ {
+                                    name = videoResponseClass.name
+                                }
+                                msg = field {
+                                    name = msgField.name
+                                }
+                                status = field {
+                                    name = statusField.name
+                                }
                             }
-                            status = field {
-                                name = statusFieldData.name
+                            getDownloadStatus = method {
+                                name = getDownloadStatusMethod.name
                             }
-                        }
-                        getDownloadStatus = method {
-                            name = getDownloadStatusMethodData.name
                         }
                     }.onFailure {
-                        YLog.error(populateFailedMsg.format(TAG), it)
+                        YLog.error(
+                            populateFailedMsg.format(
+                                TAG,
+                                Configs.SharePrivacyVideoApi.getDescriptor().name
+                            ),
+                            it
+                        )
                     }
                 }
 
@@ -3413,23 +3601,28 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
                             }
                         }.singleOrNull()
 
-                        if (acceptMethodData == null) {
-                            YLog.error(symbolNotFoundMsg.format(TAG, this::class.java.enclosingClass?.simpleName))
-                            return@listenAwemeFilter
-                        }
-
-                        class_ = class_ {
-                            name = acceptMethodData.declaredClassName
-                        }
-                        accept = method {
-                            name = acceptMethodData.methodName
-                            parameters = MethodKt.parameters {
-                                values.clear()
-                                values.addAll(acceptMethodData.paramTypeNames)
+                        requireNotNullThen(
+                            acceptMethodData
+                        ) { acceptMethod ->
+                            class_ = class_ {
+                                name = acceptMethod.declaredClassName
+                            }
+                            accept = method {
+                                name = acceptMethod.methodName
+                                parameters = MethodKt.parameters {
+                                    values.clear()
+                                    values.addAll(acceptMethod.paramTypeNames)
+                                }
                             }
                         }
                     }.onFailure {
-                        YLog.error(populateFailedMsg.format(TAG), it)
+                        YLog.error(
+                            populateFailedMsg.format(
+                                TAG,
+                                Configs.ListenAwemeFilter.getDescriptor().name
+                            ),
+                            it
+                        )
                     }
                 }
 
@@ -3588,74 +3781,82 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
                             }.singleOrNull()
                         }
 
-                        if (baseListFragmentPanelClassData == null ||
-                            handleDoubleClickMethodData == null ||
-                            handleVideoEventMethodData == null ||
-                            getCurrentAwemeMethodData == null ||
-                            onVideoPlayerEventMethodData == null ||
-                            handleBigDiggViewClickMethodData == null ||
-                            handlePauseMethodData == null ||
-                            canPlayOnVideoReadyMethodData == null ||
-                            mPlayStateHelperFieldData == null
+                        requireAllNotNullThen(
+                            baseListFragmentPanelClassData,
+                            handleDoubleClickMethodData,
+                            handleVideoEventMethodData,
+                            getCurrentAwemeMethodData,
+                            onVideoPlayerEventMethodData,
+                            handleBigDiggViewClickMethodData,
+                            handlePauseMethodData,
+                            canPlayOnVideoReadyMethodData,
+                            mPlayStateHelperFieldData
                         ) {
-                            YLog.error(symbolNotFoundMsg.format(TAG, this::class.java.enclosingClass?.simpleName))
-                            return@baseListFragmentPanel
-                        }
-
-                        class_ = class_ {
-                            name = baseListFragmentPanelClassData.name
-                        }
-                        handleDoubleClick = method {
-                            name = handleDoubleClickMethodData.methodName
-                            parameters = MethodKt.parameters {
-                                values.clear()
-                                values.addAll(handleDoubleClickMethodData.paramTypeNames)
+                                classData,
+                                handleDoubleClickMethod,
+                                handleVideoEventMethod,
+                                getCurrentAwemeMethod,
+                                onVideoPlayerEventMethod,
+                                handleBigDiggViewClickMethod,
+                                handlePauseMethod,
+                                canPlayOnVideoReadyMethod,
+                                mPlayStateHelperField
+                            ->
+                            class_ = class_ {
+                                name = classData.name
                             }
-                        }
-                        handleVideoEvent = method {
-                            name = handleVideoEventMethodData.methodName
-                            parameters = MethodKt.parameters {
-                                values.clear()
-                                values.addAll(handleVideoEventMethodData.paramTypeNames)
+                            handleDoubleClick = method {
+                                name = handleDoubleClickMethod.methodName
+                                parameters = MethodKt.parameters {
+                                    values.clear()
+                                    values.addAll(handleDoubleClickMethod.paramTypeNames)
+                                }
                             }
-                        }
-                        getCurrentAweme = method {
-                            name = getCurrentAwemeMethodData.methodName
-                            parameters = MethodKt.parameters {
-                                values.clear()
-                                values.addAll(getCurrentAwemeMethodData.paramTypeNames)
+                            handleVideoEvent = method {
+                                name = handleVideoEventMethod.methodName
+                                parameters = MethodKt.parameters {
+                                    values.clear()
+                                    values.addAll(handleVideoEventMethod.paramTypeNames)
+                                }
                             }
-                        }
-                        onVideoPlayerEvent = method {
-                            name = onVideoPlayerEventMethodData.methodName
-                            parameters = MethodKt.parameters {
-                                values.clear()
-                                values.addAll(onVideoPlayerEventMethodData.paramTypeNames)
+                            getCurrentAweme = method {
+                                name = getCurrentAwemeMethod.methodName
+                                parameters = MethodKt.parameters {
+                                    values.clear()
+                                    values.addAll(getCurrentAwemeMethod.paramTypeNames)
+                                }
                             }
-                        }
-                        handleBigDiggViewClick = method {
-                            name = handleBigDiggViewClickMethodData.name
-                            parameters = MethodKt.parameters {
-                                values.clear()
-                                values.addAll(handleBigDiggViewClickMethodData.paramTypeNames)
+                            onVideoPlayerEvent = method {
+                                name = onVideoPlayerEventMethod.methodName
+                                parameters = MethodKt.parameters {
+                                    values.clear()
+                                    values.addAll(onVideoPlayerEventMethod.paramTypeNames)
+                                }
                             }
-                        }
-                        handlePause = method {
-                            name = handlePauseMethodData.name
-                            parameters = MethodKt.parameters {
-                                values.clear()
-                                values.addAll(handlePauseMethodData.paramTypeNames)
+                            handleBigDiggViewClick = method {
+                                name = handleBigDiggViewClickMethod.name
+                                parameters = MethodKt.parameters {
+                                    values.clear()
+                                    values.addAll(handleBigDiggViewClickMethod.paramTypeNames)
+                                }
                             }
-                        }
-                        canPlayOnVideoReady = method {
-                            name = canPlayOnVideoReadyMethodData.methodName
-                            parameters = MethodKt.parameters {
-                                values.clear()
-                                values.addAll(canPlayOnVideoReadyMethodData.paramTypeNames)
+                            handlePause = method {
+                                name = handlePauseMethod.name
+                                parameters = MethodKt.parameters {
+                                    values.clear()
+                                    values.addAll(handlePauseMethod.paramTypeNames)
+                                }
                             }
-                        }
-                        mPlayStateHelper = field {
-                            name = mPlayStateHelperFieldData.name
+                            canPlayOnVideoReady = method {
+                                name = canPlayOnVideoReadyMethod.methodName
+                                parameters = MethodKt.parameters {
+                                    values.clear()
+                                    values.addAll(canPlayOnVideoReadyMethod.paramTypeNames)
+                                }
+                            }
+                            mPlayStateHelper = field {
+                                name = mPlayStateHelperField.name
+                            }
                         }
 
                         this@apply.videoPlayerStatus = videoPlayerStatus {
@@ -3670,19 +3871,26 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
                                         }
                                     }.singleOrNull()
                                 }
-                                if (videoPlayerStatusClassData == null || codeFieldData == null) {
-                                    YLog.error(symbolNotFoundMsg.format(TAG, this::class.java.enclosingClass?.simpleName))
-                                    return@videoPlayerStatus
-                                }
 
-                                class_ = class_ {
-                                    name = videoPlayerStatusClassData.name
-                                }
-                                code = field {
-                                    name = codeFieldData.name
+                                requireAllNotNullThen(
+                                    videoPlayerStatusClassData,
+                                    codeFieldData
+                                ) { classData, codeField ->
+                                    class_ = class_ {
+                                        name = classData.name
+                                    }
+                                    code = field {
+                                        name = codeField.name
+                                    }
                                 }
                             }.onFailure {
-                                YLog.error(populateFailedMsg.format(TAG), it)
+                                YLog.error(
+                                    populateFailedMsg.format(
+                                        TAG,
+                                        Configs.VideoPlayerStatus.getDescriptor().name
+                                    ),
+                                    it
+                                )
                             }
                         }
                         this@apply.playStatusHelper = playStatusHelper {
@@ -3695,23 +3903,36 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
                                         type = "int"
                                     }
                                 }.singleOrNull()
-                                if (playStatusFieldData == null) {
-                                    YLog.error(symbolNotFoundMsg.format(TAG, this::class.java.enclosingClass?.simpleName))
-                                    return@playStatusHelper
-                                }
 
-                                class_ = class_ {
-                                    name = playStatusHelperClassData.name
-                                }
-                                playStatus = field {
-                                    name = playStatusFieldData.name
+                                requireAllNotNullThen(
+                                    playStatusHelperClassData,
+                                    playStatusFieldData
+                                ) { classData, playStatusField ->
+                                    class_ = class_ {
+                                        name = classData.name
+                                    }
+                                    playStatus = field {
+                                        name = playStatusField.name
+                                    }
                                 }
                             }.onFailure {
-                                YLog.error(populateFailedMsg.format(TAG), it)
+                                YLog.error(
+                                    populateFailedMsg.format(
+                                        TAG,
+                                        Configs.PlayStatusHelper.getDescriptor().name
+                                    ),
+                                    it
+                                )
                             }
                         }
                     }.onFailure {
-                        YLog.error(populateFailedMsg.format(TAG), it)
+                        YLog.error(
+                            populateFailedMsg.format(
+                                TAG,
+                                Configs.BaseListFragmentPanel.getDescriptor().name
+                            ),
+                            it
+                        )
                     }
                 }
 
@@ -3760,19 +3981,25 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
                             }.singleOrNull()
                         }
 
-                        if (videoEventClassData == null || videTypeFieldData == null) {
-                            YLog.error(symbolNotFoundMsg.format(TAG, this::class.java.enclosingClass?.simpleName))
-                            return@videoEvent
-                        }
-
-                        class_ = class_ {
-                            name = videoEventClassData.name
-                        }
-                        type = field {
-                            name = videTypeFieldData.name
+                        requireAllNotNullThen(
+                            videoEventClassData,
+                            videTypeFieldData
+                        ) { classData, videTypeField ->
+                            class_ = class_ {
+                                name = classData.name
+                            }
+                            type = field {
+                                name = videTypeField.name
+                            }
                         }
                     }.onFailure {
-                        YLog.error(populateFailedMsg.format(TAG), it)
+                        YLog.error(
+                            populateFailedMsg.format(
+                                TAG,
+                                Configs.VideoEvent.getDescriptor().name
+                            ),
+                            it
+                        )
                     }
                 }
 
@@ -3800,23 +4027,29 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
                             }.singleOrNull()
                         }
 
-                        if (cleanModePresenterClassData == null || manageViewVisibilityMethodData == null) {
-                            YLog.error(symbolNotFoundMsg.format(TAG, this::class.java.enclosingClass?.simpleName))
-                            return@cleanModePresenter
-                        }
-
-                        class_ = class_ {
-                            name = cleanModePresenterClassData.name
-                        }
-                        manageViewVisibility = method {
-                            name = manageViewVisibilityMethodData.methodName
-                            parameters = MethodKt.parameters {
-                                values.clear()
-                                values.addAll(manageViewVisibilityMethodData.paramTypeNames)
+                        requireAllNotNullThen(
+                            cleanModePresenterClassData,
+                            manageViewVisibilityMethodData
+                        ) { classData, manageViewVisibilityMethod ->
+                            class_ = class_ {
+                                name = classData.name
+                            }
+                            manageViewVisibility = method {
+                                name = manageViewVisibilityMethod.methodName
+                                parameters = MethodKt.parameters {
+                                    values.clear()
+                                    values.addAll(manageViewVisibilityMethod.paramTypeNames)
+                                }
                             }
                         }
                     }.onFailure {
-                        YLog.error(populateFailedMsg.format(TAG), it)
+                        YLog.error(
+                            populateFailedMsg.format(
+                                TAG,
+                                Configs.CleanModePresenter.getDescriptor().name
+                            ),
+                            it
+                        )
                     }
                 }
 
@@ -3830,200 +4063,210 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
                 }
 
                 fluxComponentId = fluxComponentId {
-                    val fluxComponentClassData = bridge.findClass {
-                        matcher {
-                            superClass = "java.lang.Enum"
-                            fields {
-                                add {
-                                    name = "MUSIC_COVER"
-                                }
-                                add {
-                                    name = "REPORT_WARN"
-                                }
-                                add {
-                                    name = "DANMAKU_VERTICAL"
+                    runCatching {
+                        val fluxComponentClassData = bridge.findClass {
+                            matcher {
+                                superClass = "java.lang.Enum"
+                                fields {
+                                    add {
+                                        name = "MUSIC_COVER"
+                                    }
+                                    add {
+                                        name = "REPORT_WARN"
+                                    }
+                                    add {
+                                        name = "DANMAKU_VERTICAL"
+                                    }
                                 }
                             }
-                        }
-                    }.singleOrNull()
-                    if (fluxComponentClassData == null) {
-                        YLog.error(symbolNotFoundMsg.format(TAG, this::class.java.enclosingClass?.simpleName))
-                        return@fluxComponentId
-                    }
+                        }.singleOrNull()
 
-                    class_ = class_ {
-                        name = fluxComponentClassData.name
-                    }
-                    musicCoverBlock = field {
-                        name = "MUSIC_COVER_BLOCK"
-                    }
-                    musicListenCover = field {
-                        name = "MUSIC_LISTEN_COVER"
-                    }
-                    digg = field {
-                        name = "DIGG"
-                    }
-                    title = field {
-                        name = "TITLE"
-                    }
-                    musicCover = field {
-                        name = "MUSIC_COVER"
-                    }
-                    generalLabel = field {
-                        name = "GENERAL_LABEL"
-                    }
-                    feedLabelContainer = field {
-                        name = "FEED_LABEL_CONTAINER"
-                    }
-                    musicTitle = field {
-                        name = "MUSIC_TITLE"
-                    }
-                    story25DiverseDigg = field {
-                        name = "STORY_25_DIVERSE_DIGG"
-                    }
-                    ecomStore = field {
-                        name = "ECOM_STORE"
-                    }
-                    buttonImQuickShare = field {
-                        name = "BUTTON_IM_QUICK_SHARE"
-                    }
-                    buttonFeedImShareGuideV2 = field {
-                        name = "BUTTON_FEED_IM_SHARE_GUIDE_V2"
-                    }
-                    buttonForceFeedImShareGuide = field {
-                        name = "BUTTON_FORCE_FEED_IM_SHARE_GUIDE"
-                    }
-                    socialNewCommentGuideBubble = field {
-                        name = "SOCIAL_NEW_COMMENT_GUIDE_BUBBLE"
-                    }
-                    commentBottomAnimation = field {
-                        name = "COMMENT_BOTTOM_ANIMATION"
-                    }
-                    nearbyIdentityTag = field {
-                        name = "NEARBY_IDENTITY_TAG"
-                    }
-                    livePhotoTag = field {
-                        name = "LIVE_PHOTO_TAG"
-                    }
-                    photosTag = field {
-                        name = "PHOTOS_TAG"
-                    }
-                    story24Tag = field {
-                        name = "STORY24_TAG"
-                    }
-                    socialNewStyleStoryTag = field {
-                        name = "SOCIAL_NEW_STYLE_STORY_TAG"
-                    }
-                    longVideoHighlightTag = field {
-                        name = "LONG_VIDEO_HIGHLIGHT_TAG"
-                    }
-                    danmakuVertical = field {
-                        name = "DANMAKU_VERTICAL"
-                    }
-                    avatar = field {
-                        name = "AVATAR"
-                    }
-                    nickname = field {
-                        name = "NICKNAME"
-                    }
-                    postTime = field {
-                        name = "POST_TIME"
-                    }
-                    bellowDescTime = field {
-                        name = "BELLOW_DESC_TIME"
-                    }
-                    this@fluxComponentId.comment = field {
-                        name = "COMMENT"
-                    }
-                    reply = field {
-                        name = "REPLY"
-                    }
-                    share = field {
-                        name = "SHARE"
-                    }
-                    collect = field {
-                        name = "COLLECT"
-                    }
-                    anchorFramework = field {
-                        name = "ANCHOR_FRAMEWORK"
-                    }
-                    bottomBarCommon = field {
-                        name = "BOTTOM_BAR_COMMON"
-                    }
-                    commonButton = field {
-                        name = "COMMON_BUTTON"
-                    }
-                    sticker = field {
-                        name = "STICKER"
-                    }
-                    aiSearch = field {
-                        name = "AI_SEARCH"
-                    }
-                    c2Feed = field {
-                        name = "C2_FEED"
-                    }
-                    flow = field {
-                        name = "FLOW"
-                    }
-                    nearbyHotComment = field {
-                        name = "NEARBY_HOT_COMMENT"
-                    }
-                    buttonUnfollowFamiliar = field {
-                        name = "BUTTON_UNFOLLOW_FAMILIAR"
-                    }
-                    buttonUnfollowFamiliarRec = field {
-                        name = "BUTTON_UNFOLLOW_FAMILIAR_REC"
-                    }
-                    coCreatorAuthor = field {
-                        name = "CO_CREATOR_AUTHOR"
-                    }
-                    chapterTag = field {
-                        name = "CHAPTER_TAG"
-                    }
-                    ecomTagFriend = field {
-                        name = "ECOM_TAG_FRIEND"
-                    }
-                    socialNewStylePostTimeBottom = field {
-                        name = "SOCIAL_NEW_STYLE_POST_TIME_BOTTOM"
-                    }
-                    socialNewStyleMusicBelow = field {
-                        name = "SOCIAL_NEW_STYLE_MUSIC_BELOW"
-                    }
-                    chapterDetail = field {
-                        name = "CHAPTER_DETAIL"
-                    }
-                    titleTagContainer = field {
-                        name = "TITLE_TAG_CONTAINER"
-                    }
-                    rightMenuLl = field {
-                        name = "RIGHT_MENU_LL"
-                    }
-                    musicMuteCover = field {
-                        name = "MUSIC_MUTE_COVER"
-                    }
-                    jxLeftBottomLongVideoPlusTitleTag = field {
-                        name = "JX_LEFT_BOTTOM_LONG_VIDEO_PLUS_TITLE_TAG"
-                    }
-                    bottomBarMix = field {
-                        name = "BOTTOM_BAR_MIX"
-                    }
-                    bottomBarNormalSearch = field {
-                        name = "BOTTOM_BAR_NORMAL_SEARCH"
-                    }
-                    bottomBarCommonPrioritySearch = field {
-                        name = "BOTTOM_BAR_COMMON_PRIORITY_SEARCH"
-                    }
-                    jxPick = field {
-                        name = "JX_PICK"
-                    }
-                    bottomBarContainer = field {
-                        name = "BOTTOM_BAR_CONTAINER"
-                    }
-                    aiCoCreatorsThree = field {
-                        name = "AI_CO_CREATORS_THREE"
-                    }
-                    aigcCocreateStatusTitle = field {
-                        name = "AIGC_COCREATE_STATUS_TITLE"
+                        requireNotNullThen(
+                            fluxComponentClassData
+                        ) { classData ->
+                            class_ = class_ {
+                                name = classData.name
+                            }
+                            musicCoverBlock = field {
+                                name = "MUSIC_COVER_BLOCK"
+                            }
+                            musicListenCover = field {
+                                name = "MUSIC_LISTEN_COVER"
+                            }
+                            digg = field {
+                                name = "DIGG"
+                            }
+                            title = field {
+                                name = "TITLE"
+                            }
+                            musicCover = field {
+                                name = "MUSIC_COVER"
+                            }
+                            generalLabel = field {
+                                name = "GENERAL_LABEL"
+                            }
+                            feedLabelContainer = field {
+                                name = "FEED_LABEL_CONTAINER"
+                            }
+                            musicTitle = field {
+                                name = "MUSIC_TITLE"
+                            }
+                            story25DiverseDigg = field {
+                                name = "STORY_25_DIVERSE_DIGG"
+                            }
+                            ecomStore = field {
+                                name = "ECOM_STORE"
+                            }
+                            buttonImQuickShare = field {
+                                name = "BUTTON_IM_QUICK_SHARE"
+                            }
+                            buttonFeedImShareGuideV2 = field {
+                                name = "BUTTON_FEED_IM_SHARE_GUIDE_V2"
+                            }
+                            buttonForceFeedImShareGuide = field {
+                                name = "BUTTON_FORCE_FEED_IM_SHARE_GUIDE"
+                            }
+                            socialNewCommentGuideBubble = field {
+                                name = "SOCIAL_NEW_COMMENT_GUIDE_BUBBLE"
+                            }
+                            commentBottomAnimation = field {
+                                name = "COMMENT_BOTTOM_ANIMATION"
+                            }
+                            nearbyIdentityTag = field {
+                                name = "NEARBY_IDENTITY_TAG"
+                            }
+                            livePhotoTag = field {
+                                name = "LIVE_PHOTO_TAG"
+                            }
+                            photosTag = field {
+                                name = "PHOTOS_TAG"
+                            }
+                            story24Tag = field {
+                                name = "STORY24_TAG"
+                            }
+                            socialNewStyleStoryTag = field {
+                                name = "SOCIAL_NEW_STYLE_STORY_TAG"
+                            }
+                            longVideoHighlightTag = field {
+                                name = "LONG_VIDEO_HIGHLIGHT_TAG"
+                            }
+                            danmakuVertical = field {
+                                name = "DANMAKU_VERTICAL"
+                            }
+                            avatar = field {
+                                name = "AVATAR"
+                            }
+                            nickname = field {
+                                name = "NICKNAME"
+                            }
+                            postTime = field {
+                                name = "POST_TIME"
+                            }
+                            bellowDescTime = field {
+                                name = "BELLOW_DESC_TIME"
+                            }
+                            this@fluxComponentId.comment = field {
+                                name = "COMMENT"
+                            }
+                            reply = field {
+                                name = "REPLY"
+                            }
+                            share = field {
+                                name = "SHARE"
+                            }
+                            collect = field {
+                                name = "COLLECT"
+                            }
+                            anchorFramework = field {
+                                name = "ANCHOR_FRAMEWORK"
+                            }
+                            bottomBarCommon = field {
+                                name = "BOTTOM_BAR_COMMON"
+                            }
+                            commonButton = field {
+                                name = "COMMON_BUTTON"
+                            }
+                            sticker = field {
+                                name = "STICKER"
+                            }
+                            aiSearch = field {
+                                name = "AI_SEARCH"
+                            }
+                            c2Feed = field {
+                                name = "C2_FEED"
+                            }
+                            flow = field {
+                                name = "FLOW"
+                            }
+                            nearbyHotComment = field {
+                                name = "NEARBY_HOT_COMMENT"
+                            }
+                            buttonUnfollowFamiliar = field {
+                                name = "BUTTON_UNFOLLOW_FAMILIAR"
+                            }
+                            buttonUnfollowFamiliarRec = field {
+                                name = "BUTTON_UNFOLLOW_FAMILIAR_REC"
+                            }
+                            coCreatorAuthor = field {
+                                name = "CO_CREATOR_AUTHOR"
+                            }
+                            chapterTag = field {
+                                name = "CHAPTER_TAG"
+                            }
+                            ecomTagFriend = field {
+                                name = "ECOM_TAG_FRIEND"
+                            }
+                            socialNewStylePostTimeBottom = field {
+                                name = "SOCIAL_NEW_STYLE_POST_TIME_BOTTOM"
+                            }
+                            socialNewStyleMusicBelow = field {
+                                name = "SOCIAL_NEW_STYLE_MUSIC_BELOW"
+                            }
+                            chapterDetail = field {
+                                name = "CHAPTER_DETAIL"
+                            }
+                            titleTagContainer = field {
+                                name = "TITLE_TAG_CONTAINER"
+                            }
+                            rightMenuLl = field {
+                                name = "RIGHT_MENU_LL"
+                            }
+                            musicMuteCover = field {
+                                name = "MUSIC_MUTE_COVER"
+                            }
+                            jxLeftBottomLongVideoPlusTitleTag = field {
+                                name = "JX_LEFT_BOTTOM_LONG_VIDEO_PLUS_TITLE_TAG"
+                            }
+                            bottomBarMix = field {
+                                name = "BOTTOM_BAR_MIX"
+                            }
+                            bottomBarNormalSearch = field {
+                                name = "BOTTOM_BAR_NORMAL_SEARCH"
+                            }
+                            bottomBarCommonPrioritySearch = field {
+                                name = "BOTTOM_BAR_COMMON_PRIORITY_SEARCH"
+                            }
+                            jxPick = field {
+                                name = "JX_PICK"
+                            }
+                            bottomBarContainer = field {
+                                name = "BOTTOM_BAR_CONTAINER"
+                            }
+                            aiCoCreatorsThree = field {
+                                name = "AI_CO_CREATORS_THREE"
+                            }
+                            aigcCocreateStatusTitle = field {
+                                name = "AIGC_COCREATE_STATUS_TITLE"
+                            }
+                        }
+                    }.onFailure {
+                        YLog.error(
+                            populateFailedMsg.format(
+                                TAG,
+                                Configs.FluxComponentId.getDescriptor().name
+                            ),
+                            it
+                        )
                     }
                 }
 
@@ -4041,23 +4284,30 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
                                 }
                             }.singleOrNull()
                         }
-                        if (fluxComponentDataActionClassData == null || getSetMethodData == null) {
-                            YLog.error(symbolNotFoundMsg.format(TAG, this::class.java.enclosingClass?.simpleName))
-                            return@fluxComponentDataAction
-                        }
 
-                        class_ = class_ {
-                            name = fluxComponentDataActionClassData.name
-                        }
-                        getSet = method {
-                            name = getSetMethodData.name
-                            parameters = MethodKt.parameters {
-                                values.clear()
-                                values.addAll(getSetMethodData.paramTypeNames)
+                        requireAllNotNullThen(
+                            fluxComponentDataActionClassData,
+                            getSetMethodData
+                        ) { classData, getSetMethod ->
+                            class_ = class_ {
+                                name = classData.name
+                            }
+                            getSet = method {
+                                name = getSetMethod.name
+                                parameters = MethodKt.parameters {
+                                    values.clear()
+                                    values.addAll(getSetMethod.paramTypeNames)
+                                }
                             }
                         }
                     }.onFailure {
-                        YLog.error(populateFailedMsg.format(TAG), it)
+                        YLog.error(
+                            populateFailedMsg.format(
+                                TAG,
+                                Configs.FluxComponentDataAction.getDescriptor().name
+                            ),
+                            it
+                        )
                     }
                 }
 
@@ -4089,23 +4339,30 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
                                 }
                             }.singleOrNull()
                         }
-                        if (heifClassData == null || toRgbaMethodData == null) {
-                            YLog.error(symbolNotFoundMsg.format(TAG, this::class.java.enclosingClass?.simpleName))
-                            return@heif
-                        }
 
-                        class_ = class_ {
-                            name = heifClassData.name
-                        }
-                        toRgba = method {
-                            name = toRgbaMethodData.name
-                            parameters = MethodKt.parameters {
-                                values.clear()
-                                values.addAll(toRgbaMethodData.paramTypeNames)
+                        requireAllNotNullThen(
+                            heifClassData,
+                            toRgbaMethodData
+                        ) { classData, toRgbaMethod ->
+                            class_ = class_ {
+                                name = classData.name
+                            }
+                            toRgba = method {
+                                name = toRgbaMethod.name
+                                parameters = MethodKt.parameters {
+                                    values.clear()
+                                    values.addAll(toRgbaMethod.paramTypeNames)
+                                }
                             }
                         }
                     }.onFailure {
-                        YLog.error(populateFailedMsg.format(TAG), it)
+                        YLog.error(
+                            populateFailedMsg.format(
+                                TAG,
+                                Configs.Heif.getDescriptor().name
+                            ),
+                            it
+                        )
                     }
                 }
 
@@ -4121,23 +4378,30 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
                                 }
                             }.singleOrNull()
                         }
-                        if (heifDataClassData == null || newBitmapMethodData == null) {
-                            YLog.error(symbolNotFoundMsg.format(TAG, this::class.java.enclosingClass?.simpleName))
-                            return@heifData
-                        }
 
-                        class_ = class_ {
-                            name = heifDataClassData.name
-                        }
-                        newBitmap = method {
-                            name = newBitmapMethodData.name
-                            parameters = MethodKt.parameters {
-                                values.clear()
-                                values.addAll(newBitmapMethodData.paramTypeNames)
+                        requireAllNotNullThen(
+                            heifDataClassData,
+                            newBitmapMethodData
+                        ) { classData, newBitmapMethod ->
+                            class_ = class_ {
+                                name = classData.name
+                            }
+                            newBitmap = method {
+                                name = newBitmapMethod.name
+                                parameters = MethodKt.parameters {
+                                    values.clear()
+                                    values.addAll(newBitmapMethod.paramTypeNames)
+                                }
                             }
                         }
                     }.onFailure {
-                        YLog.error(populateFailedMsg.format(TAG), it)
+                        YLog.error(
+                            populateFailedMsg.format(
+                                TAG,
+                                Configs.HeifData.getDescriptor().name
+                            ),
+                            it
+                        )
                     }
                 }
 
@@ -4153,23 +4417,30 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
                                 }
                             }.singleOrNull()
                         }
-                        if (closeableReferenceClassData == null || getMethodData == null) {
-                            YLog.error(symbolNotFoundMsg.format(TAG, this::class.java.enclosingClass?.simpleName))
-                            return@closeableReference
-                        }
 
-                        class_ = class_ {
-                            name = closeableReferenceClassData.name
-                        }
-                        get = method {
-                            name = getMethodData.name
-                            parameters = MethodKt.parameters {
-                                values.clear()
-                                values.addAll(getMethodData.paramTypeNames)
+                        requireAllNotNullThen(
+                            closeableReferenceClassData,
+                            getMethodData
+                        ) { classData, getMethod ->
+                            class_ = class_ {
+                                name = classData.name
+                            }
+                            get = method {
+                                name = getMethod.name
+                                parameters = MethodKt.parameters {
+                                    values.clear()
+                                    values.addAll(getMethod.paramTypeNames)
+                                }
                             }
                         }
                     }.onFailure {
-                        YLog.error(populateFailedMsg.format(TAG), it)
+                        YLog.error(
+                            populateFailedMsg.format(
+                                TAG,
+                                Configs.CloseableReference.getDescriptor().name
+                            ),
+                            it
+                        )
                     }
                 }
 
@@ -4221,33 +4492,39 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
                                 }
                             }.singleOrNull()
                         }
-                        if (storyServiceImplClassData == null || singleLivePhotoToMp4MethodData == null ||
-                            convertImgToMp4MethodData == null
-                        ) {
-                            YLog.error(symbolNotFoundMsg.format(TAG, this::class.java.enclosingClass?.simpleName))
-                            return@storyServiceImpl
-                        }
 
-                        class_ = class_ {
-                            name = storyServiceImplClassData.name
-                        }
-                        convertSingleLivePhotoToMp4UseMusicUrl = method {
-                            name = singleLivePhotoToMp4MethodData.name
-                            parameters = MethodKt.parameters {
-                                values.clear()
-                                values.addAll(singleLivePhotoToMp4MethodData.paramTypeNames)
+                        requireAllNotNullThen(
+                            storyServiceImplClassData,
+                            singleLivePhotoToMp4MethodData,
+                            convertImgToMp4MethodData
+                        ) { classData, singleLivePhotoToMp4Method, convertImgToMp4Method ->
+                            class_ = class_ {
+                                name = classData.name
                             }
-                        }
+                            convertSingleLivePhotoToMp4UseMusicUrl = method {
+                                name = singleLivePhotoToMp4Method.name
+                                parameters = MethodKt.parameters {
+                                    values.clear()
+                                    values.addAll(singleLivePhotoToMp4Method.paramTypeNames)
+                                }
+                            }
 
-                        convertImgToMp4 = method {
-                            name = convertImgToMp4MethodData.name
-                            parameters = MethodKt.parameters {
-                                values.clear()
-                                values.addAll(convertImgToMp4MethodData.paramTypeNames)
+                            convertImgToMp4 = method {
+                                name = convertImgToMp4Method.name
+                                parameters = MethodKt.parameters {
+                                    values.clear()
+                                    values.addAll(convertImgToMp4Method.paramTypeNames)
+                                }
                             }
                         }
                     }.onFailure {
-                        YLog.error(populateFailedMsg.format(TAG), it)
+                        YLog.error(
+                            populateFailedMsg.format(
+                                TAG,
+                                Configs.StoryServiceImpl.getDescriptor().name
+                            ),
+                            it
+                        )
                     }
                 }
 
@@ -4343,31 +4620,38 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
                                 methodData.name != getShowingTopTabIdsMethodData?.name
                             }
                         }
-                        if (homeTabDataSourceServerClassData == null || getShowingBottomTabIdsMethodData == null ||
-                            getShowingTopTabIdsMethodData == null
-                        ) {
-                            YLog.error(symbolNotFoundMsg.format(TAG, this::class.java.enclosingClass?.simpleName))
-                            return@homeTabDataSourceServer
-                        }
-                        class_ = class_ {
-                            name = homeTabDataSourceServerClassData.name
-                        }
-                        getShowingBottomTabIds = method {
-                            name = getShowingBottomTabIdsMethodData.name
-                            parameters = MethodKt.parameters {
-                                values.clear()
-                                values.addAll(getShowingBottomTabIdsMethodData.paramTypeNames)
+
+                        requireAllNotNullThen(
+                            homeTabDataSourceServerClassData,
+                            getShowingBottomTabIdsMethodData,
+                            getShowingTopTabIdsMethodData
+                        ) { classData, getShowingBottomTabIdsMethod, getShowingTopTabIdsMethod ->
+                            class_ = class_ {
+                                name = classData.name
                             }
-                        }
-                        getShowingTopTabIds = method {
-                            name = getShowingTopTabIdsMethodData.name
-                            parameters = MethodKt.parameters {
-                                values.clear()
-                                values.addAll(getShowingTopTabIdsMethodData.paramTypeNames)
+                            getShowingBottomTabIds = method {
+                                name = getShowingBottomTabIdsMethod.name
+                                parameters = MethodKt.parameters {
+                                    values.clear()
+                                    values.addAll(getShowingBottomTabIdsMethod.paramTypeNames)
+                                }
+                            }
+                            getShowingTopTabIds = method {
+                                name = getShowingTopTabIdsMethod.name
+                                parameters = MethodKt.parameters {
+                                    values.clear()
+                                    values.addAll(getShowingTopTabIdsMethod.paramTypeNames)
+                                }
                             }
                         }
                     }.onFailure {
-                        YLog.error(populateFailedMsg.format(TAG), it)
+                        YLog.error(
+                            populateFailedMsg.format(
+                                TAG,
+                                Configs.HomeTabDataSourceServer.getDescriptor().name
+                            ),
+                            it
+                        )
                     }
                 }
 
@@ -4401,31 +4685,38 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
                                 }
                             }.singleOrNull()
                         }
-                        if (homeTabDataSourceDefaultClassData == null || getShowingBottomTabIdsMethodData == null ||
-                            getShowingTopTabIdsMethodData == null
-                        ) {
-                            YLog.error(symbolNotFoundMsg.format(TAG, this::class.java.enclosingClass?.simpleName))
-                            return@homeTabDataSourceDefault
-                        }
-                        class_ = class_ {
-                            name = homeTabDataSourceDefaultClassData.name
-                        }
-                        getShowingBottomTabIds = method {
-                            name = getShowingBottomTabIdsMethodData.name
-                            parameters = MethodKt.parameters {
-                                values.clear()
-                                values.addAll(getShowingBottomTabIdsMethodData.paramTypeNames)
+
+                        requireAllNotNullThen(
+                            homeTabDataSourceDefaultClassData,
+                            getShowingBottomTabIdsMethodData,
+                            getShowingTopTabIdsMethodData
+                        ) { classData, getShowingBottomTabIdsMethod, getShowingTopTabIdsMethod ->
+                            class_ = class_ {
+                                name = classData.name
                             }
-                        }
-                        getShowingTopTabIds = method {
-                            name = getShowingTopTabIdsMethodData.name
-                            parameters = MethodKt.parameters {
-                                values.clear()
-                                values.addAll(getShowingTopTabIdsMethodData.paramTypeNames)
+                            getShowingBottomTabIds = method {
+                                name = getShowingBottomTabIdsMethod.name
+                                parameters = MethodKt.parameters {
+                                    values.clear()
+                                    values.addAll(getShowingBottomTabIdsMethod.paramTypeNames)
+                                }
+                            }
+                            getShowingTopTabIds = method {
+                                name = getShowingTopTabIdsMethod.name
+                                parameters = MethodKt.parameters {
+                                    values.clear()
+                                    values.addAll(getShowingTopTabIdsMethod.paramTypeNames)
+                                }
                             }
                         }
                     }.onFailure {
-                        YLog.error(populateFailedMsg.format(TAG), it)
+                        YLog.error(
+                            populateFailedMsg.format(
+                                TAG,
+                                Configs.HomeTabDataSourceDefault.getDescriptor().name
+                            ),
+                            it
+                        )
                     }
                 }
 
@@ -4466,32 +4757,37 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
                             }.singleOrNull()
                         }
 
-                        if (feedAvatarPresenterClassData == null || updateFollowViewMethodData == null ||
-                            performFollowMethodData == null
-                        ) {
-                            YLog.error(symbolNotFoundMsg.format(TAG, this::class.java.enclosingClass?.simpleName))
-                            return@feedAvatarPresenter
-                        }
-
-                        class_ = class_ {
-                            name = feedAvatarPresenterClassData.name
-                        }
-                        updateFollowView = method {
-                            name = updateFollowViewMethodData.methodName
-                            parameters = MethodKt.parameters {
-                                values.clear()
-                                values.addAll(updateFollowViewMethodData.paramTypeNames)
+                        requireAllNotNullThen(
+                            feedAvatarPresenterClassData,
+                            updateFollowViewMethodData,
+                            performFollowMethodData
+                        ) { classData, updateFollowViewMethod, performFollowMethod ->
+                            class_ = class_ {
+                                name = classData.name
                             }
-                        }
-                        performFollow = method {
-                            name = performFollowMethodData.methodName
-                            parameters = MethodKt.parameters {
-                                values.clear()
-                                values.addAll(performFollowMethodData.paramTypeNames)
+                            updateFollowView = method {
+                                name = updateFollowViewMethod.methodName
+                                parameters = MethodKt.parameters {
+                                    values.clear()
+                                    values.addAll(updateFollowViewMethod.paramTypeNames)
+                                }
+                            }
+                            performFollow = method {
+                                name = performFollowMethod.methodName
+                                parameters = MethodKt.parameters {
+                                    values.clear()
+                                    values.addAll(performFollowMethod.paramTypeNames)
+                                }
                             }
                         }
                     }.onFailure {
-                        YLog.error(populateFailedMsg.format(TAG), it)
+                        YLog.error(
+                            populateFailedMsg.format(
+                                TAG,
+                                Configs.FeedAvatarPresenter.getDescriptor().name
+                            ),
+                            it
+                        )
                     }
                 }
 
@@ -4571,73 +4867,86 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
                             }.singleOrNull()
                         }
 
-                        if (heifImageClassData == null ||
-                            createMethodData == null ||
-                            disposeMethodData == null ||
-                            getWidthMethodData == null ||
-                            getHeightMethodData == null ||
-                            getFrameMethodData == null ||
-                            getFrameCountMethodData == null ||
-                            getFrameDurationsMethodData == null
+                        requireAllNotNullThen(
+                            heifImageClassData,
+                            createMethodData,
+                            disposeMethodData,
+                            getWidthMethodData,
+                            getHeightMethodData,
+                            getFrameMethodData,
+                            getFrameCountMethodData,
+                            getFrameDurationsMethodData
                         ) {
-                            YLog.error(symbolNotFoundMsg.format(TAG, this::class.java.enclosingClass?.simpleName))
-                            return@heifImage
-                        }
-
-                        class_ = class_ {
-                            name = heifImageClassData.name
-                        }
-                        create = method {
-                            name = createMethodData.methodName
-                            parameters = MethodKt.parameters {
-                                values.clear()
-                                values.addAll(createMethodData.paramTypeNames)
+                                classData,
+                                createMethod,
+                                disposeMethod,
+                                getWidthMethod,
+                                getHeightMethod,
+                                getFrameMethod,
+                                getFrameCountMethod,
+                                getFrameDurationsMethod
+                            ->
+                            class_ = class_ {
+                                name = classData.name
                             }
-                        }
-                        dispose = method {
-                            name = disposeMethodData.methodName
-                            parameters = MethodKt.parameters {
-                                values.clear()
-                                values.addAll(disposeMethodData.paramTypeNames)
+                            create = method {
+                                name = createMethod.methodName
+                                parameters = MethodKt.parameters {
+                                    values.clear()
+                                    values.addAll(createMethod.paramTypeNames)
+                                }
                             }
-                        }
-                        getWidth = method {
-                            name = getWidthMethodData.methodName
-                            parameters = MethodKt.parameters {
-                                values.clear()
-                                values.addAll(getWidthMethodData.paramTypeNames)
+                            dispose = method {
+                                name = disposeMethod.methodName
+                                parameters = MethodKt.parameters {
+                                    values.clear()
+                                    values.addAll(disposeMethod.paramTypeNames)
+                                }
                             }
-                        }
-                        getHeight = method {
-                            name = getHeightMethodData.methodName
-                            parameters = MethodKt.parameters {
-                                values.clear()
-                                values.addAll(getHeightMethodData.paramTypeNames)
+                            getWidth = method {
+                                name = getWidthMethod.methodName
+                                parameters = MethodKt.parameters {
+                                    values.clear()
+                                    values.addAll(getWidthMethod.paramTypeNames)
+                                }
                             }
-                        }
-                        getFrame = method {
-                            name = getFrameMethodData.methodName
-                            parameters = MethodKt.parameters {
-                                values.clear()
-                                values.addAll(getFrameMethodData.paramTypeNames)
+                            getHeight = method {
+                                name = getHeightMethod.methodName
+                                parameters = MethodKt.parameters {
+                                    values.clear()
+                                    values.addAll(getHeightMethod.paramTypeNames)
+                                }
                             }
-                        }
-                        getFrameCount = method {
-                            name = getFrameCountMethodData.methodName
-                            parameters = MethodKt.parameters {
-                                values.clear()
-                                values.addAll(getFrameCountMethodData.paramTypeNames)
+                            getFrame = method {
+                                name = getFrameMethod.methodName
+                                parameters = MethodKt.parameters {
+                                    values.clear()
+                                    values.addAll(getFrameMethod.paramTypeNames)
+                                }
                             }
-                        }
-                        getFrameDurations = method {
-                            name = getFrameDurationsMethodData.methodName
-                            parameters = MethodKt.parameters {
-                                values.clear()
-                                values.addAll(getFrameDurationsMethodData.paramTypeNames)
+                            getFrameCount = method {
+                                name = getFrameCountMethod.methodName
+                                parameters = MethodKt.parameters {
+                                    values.clear()
+                                    values.addAll(getFrameCountMethod.paramTypeNames)
+                                }
+                            }
+                            getFrameDurations = method {
+                                name = getFrameDurationsMethod.methodName
+                                parameters = MethodKt.parameters {
+                                    values.clear()
+                                    values.addAll(getFrameDurationsMethod.paramTypeNames)
+                                }
                             }
                         }
                     }.onFailure {
-                        YLog.error(populateFailedMsg.format(TAG), it)
+                        YLog.error(
+                            populateFailedMsg.format(
+                                TAG,
+                                Configs.HeifImage.getDescriptor().name
+                            ),
+                            it
+                        )
                     }
                 }
 
@@ -4670,33 +4979,37 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
                             }.singleOrNull()
                         }
 
-                        if (heifFrameClassData == null ||
-                            renderFrameMethodData == null ||
-                            disposeMethodData == null
-                        ) {
-                            YLog.error(symbolNotFoundMsg.format(TAG, this::class.java.enclosingClass?.simpleName))
-                            return@heifFrame
-                        }
-
-                        class_ = class_ {
-                            name = heifFrameClassData.name
-                        }
-                        renderFrame = method {
-                            name = renderFrameMethodData.methodName
-                            parameters = MethodKt.parameters {
-                                values.clear()
-                                values.addAll(renderFrameMethodData.paramTypeNames)
+                        requireAllNotNullThen(
+                            heifFrameClassData,
+                            renderFrameMethodData,
+                            disposeMethodData
+                        ) { classData, renderFrameMethod, disposeMethod ->
+                            class_ = class_ {
+                                name = classData.name
                             }
-                        }
-                        dispose = method {
-                            name = disposeMethodData.methodName
-                            parameters = MethodKt.parameters {
-                                values.clear()
-                                values.addAll(disposeMethodData.paramTypeNames)
+                            renderFrame = method {
+                                name = renderFrameMethod.methodName
+                                parameters = MethodKt.parameters {
+                                    values.clear()
+                                    values.addAll(renderFrameMethod.paramTypeNames)
+                                }
+                            }
+                            dispose = method {
+                                name = disposeMethod.methodName
+                                parameters = MethodKt.parameters {
+                                    values.clear()
+                                    values.addAll(disposeMethod.paramTypeNames)
+                                }
                             }
                         }
                     }.onFailure {
-                        YLog.error(populateFailedMsg.format(TAG), it)
+                        YLog.error(
+                            populateFailedMsg.format(
+                                TAG,
+                                Configs.HeifFrame.getDescriptor().name
+                            ),
+                            it
+                        )
                     }
                 }
 
@@ -4728,25 +5041,30 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
                                 }
                             }.singleOrNull()
                         }
-                        if (dismissWindowEventClassData == null ||
-                            dismissWithSurfaceFieldData == null ||
-                            enterMethodFieldData == null
-                        ) {
-                            YLog.error(symbolNotFoundMsg.format(TAG, this::class.java.enclosingClass?.simpleName))
-                            return@dismissWindowEvent
-                        }
 
-                        class_ = class_ {
-                            name = dismissWindowEventClassData.name
-                        }
-                        dismissWithSurface = field {
-                            name = dismissWithSurfaceFieldData.name
-                        }
-                        enterMethod = field {
-                            name = enterMethodFieldData.name
+                        requireAllNotNullThen(
+                            dismissWindowEventClassData,
+                            dismissWithSurfaceFieldData,
+                            enterMethodFieldData
+                        ) { classData, dismissWithSurfaceField, enterMethodField ->
+                            class_ = class_ {
+                                name = classData.name
+                            }
+                            dismissWithSurface = field {
+                                name = dismissWithSurfaceField.name
+                            }
+                            enterMethod = field {
+                                name = enterMethodField.name
+                            }
                         }
                     }.onFailure {
-                        YLog.error(populateFailedMsg.format(TAG), it)
+                        YLog.error(
+                            populateFailedMsg.format(
+                                TAG,
+                                Configs.DismissWindowEvent.getDescriptor().name
+                            ),
+                            it
+                        )
                     }
                 }
 
@@ -4797,42 +5115,38 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
                                 }
                             }.singleOrNull()
                         }
-                        if (pinchViewModelClassData == null ||
-                            dismissWindowMethodData == null ||
-                            setDismissWindowEventMethodData == null
-                        ) {
-                            if (pinchViewModelClassData == null) {
-                                YLog.error("$TAG: pinchViewModelClassData is null")
-                            }
-                            if (dismissWindowMethodData == null) {
-                                YLog.error("$TAG: dismissWindowMethodData is null")
-                            }
-                            if (setDismissWindowEventMethodData == null) {
-                                YLog.error("$TAG: setDismissWindowEventMethodData is null")
-                            }
-                            YLog.error(symbolNotFoundMsg.format(TAG, this::class.java.enclosingClass?.simpleName))
-                            return@pinchViewModel
-                        }
 
-                        class_ = class_ {
-                            name = pinchViewModelClassData.name
-                        }
-                        dismissWindow = method {
-                            name = dismissWindowMethodData.methodName
-                            parameters = MethodKt.parameters {
-                                values.clear()
-                                values.addAll(dismissWindowMethodData.paramTypeNames)
+                        requireAllNotNullThen(
+                            pinchViewModelClassData,
+                            dismissWindowMethodData,
+                            setDismissWindowEventMethodData
+                        ) { classData, dismissWindowMethod, setDismissWindowEventMethod ->
+                            class_ = class_ {
+                                name = classData.name
                             }
-                        }
-                        setDismissWindowEvent = method {
-                            name = setDismissWindowEventMethodData.methodName
-                            parameters = MethodKt.parameters {
-                                values.clear()
-                                values.addAll(setDismissWindowEventMethodData.paramTypeNames)
+                            dismissWindow = method {
+                                name = dismissWindowMethod.methodName
+                                parameters = MethodKt.parameters {
+                                    values.clear()
+                                    values.addAll(dismissWindowMethod.paramTypeNames)
+                                }
+                            }
+                            setDismissWindowEvent = method {
+                                name = setDismissWindowEventMethod.methodName
+                                parameters = MethodKt.parameters {
+                                    values.clear()
+                                    values.addAll(setDismissWindowEventMethod.paramTypeNames)
+                                }
                             }
                         }
                     }.onFailure {
-                        YLog.error(populateFailedMsg.format(TAG), it)
+                        YLog.error(
+                            populateFailedMsg.format(
+                                TAG,
+                                Configs.PinchViewModel.getDescriptor().name
+                            ),
+                            it
+                        )
                     }
                 }
 
@@ -4864,21 +5178,26 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
                                 }
                             }.singleOrNull()
                         }
-                        if (topCornerEntranceDataClassData == null ||
-                            entranceIdFieldData == null
-                        ) {
-                            YLog.error(symbolNotFoundMsg.format(TAG, this::class.java.enclosingClass?.simpleName))
-                            return@topCornerEntranceData
-                        }
 
-                        class_ = class_ {
-                            name = topCornerEntranceDataClassData.name
-                        }
-                        entranceId = field {
-                            name = entranceIdFieldData.name
+                        requireAllNotNullThen(
+                            topCornerEntranceDataClassData,
+                            entranceIdFieldData
+                        ) { classData, entranceIdField ->
+                            class_ = class_ {
+                                name = classData.name
+                            }
+                            entranceId = field {
+                                name = entranceIdField.name
+                            }
                         }
                     }.onFailure {
-                        YLog.error(populateFailedMsg.format(TAG), it)
+                        YLog.error(
+                            populateFailedMsg.format(
+                                TAG,
+                                Configs.TopCornerEntranceData.getDescriptor().name
+                            ),
+                            it
+                        )
                     }
                 }
 
@@ -4907,29 +5226,34 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
                                 field.declaredClass == it.declaredClass && field.typeName == "java.util.List"
                             }
                         }
-                        if (getRightEntranceListMethodData == null ||
-                            topCornerEntranceDataSourceClassData == null ||
-                            getLeftEntranceListMethodData == null ||
-                            leftEntranceListFieldData == null
-                        ) {
-                            YLog.error(symbolNotFoundMsg.format(TAG, this::class.java.enclosingClass?.simpleName))
-                            return@topCornerEntranceDataSource
-                        }
 
-                        class_ = class_ {
-                            name = topCornerEntranceDataSourceClassData.name
-                        }
-                        leftEntranceList = field {
-                            name = leftEntranceListFieldData.name
-                        }
-                        getLeftEntranceList = method {
-                            name = getLeftEntranceListMethodData.methodName
-                        }
-                        getRightEntranceList = method {
-                            name = getRightEntranceListMethodData.methodName
+                        requireAllNotNullThen(
+                            topCornerEntranceDataSourceClassData,
+                            getRightEntranceListMethodData,
+                            getLeftEntranceListMethodData,
+                            leftEntranceListFieldData
+                        ) { classData, getRightEntranceListMethod, getLeftEntranceListMethod, leftEntranceListField ->
+                            class_ = class_ {
+                                name = classData.name
+                            }
+                            leftEntranceList = field {
+                                name = leftEntranceListField.name
+                            }
+                            getLeftEntranceList = method {
+                                name = getLeftEntranceListMethod.methodName
+                            }
+                            getRightEntranceList = method {
+                                name = getRightEntranceListMethod.methodName
+                            }
                         }
                     }.onFailure {
-                        YLog.error(populateFailedMsg.format(TAG), it)
+                        YLog.error(
+                            populateFailedMsg.format(
+                                TAG,
+                                Configs.TopCornerEntranceDataSource.getDescriptor().name
+                            ),
+                            it
+                        )
                     }
                 }
 
@@ -4947,19 +5271,26 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
                                 }
                             }.singleOrNull()
                         }
-                        if (classData == null || needInheritSpeedMethodData == null) {
-                            YLog.error(symbolNotFoundMsg.format(TAG, this::class.java.enclosingClass?.simpleName))
-                            return@compilationSpeedInheritComponent
-                        }
 
-                        class_ = class_ {
-                            name = classData.name
-                        }
-                        needInheritSpeed = method {
-                            name = needInheritSpeedMethodData.methodName
+                        requireAllNotNullThen(
+                            classData,
+                            needInheritSpeedMethodData
+                        ) { classData, needInheritSpeedMethod ->
+                            class_ = class_ {
+                                name = classData.name
+                            }
+                            needInheritSpeed = method {
+                                name = needInheritSpeedMethod.methodName
+                            }
                         }
                     }.onFailure {
-                        YLog.error(populateFailedMsg.format(TAG), it)
+                        YLog.error(
+                            populateFailedMsg.format(
+                                TAG,
+                                Configs.CompilationSpeedInheritComponent.getDescriptor().name
+                            ),
+                            it
+                        )
                     }
                 }
 
@@ -4990,30 +5321,34 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
                                 }.singleOrNull()
                             }
 
-                            if (functionGroupListFieldData == null || story25LongPressPanelConfigClassData == null ||
-                                getFunctionGroupListMethodData == null
-                            ) {
-                                YLog.error(symbolNotFoundMsg.format(TAG, this::class.java.enclosingClass?.simpleName))
-                                return@story25LongPressPanelConfig
-                            }
-
-                            class_ = class_ {
-                                name = story25LongPressPanelConfigClassData.name
-                            }
-                            getFunctionGroupList = method {
-                                name = getFunctionGroupListMethodData.methodName
-                                parameters = MethodKt.parameters {
-                                    values.clear()
-                                    values.addAll(getFunctionGroupListMethodData.paramTypeNames)
+                            requireAllNotNullThen(
+                                story25LongPressPanelConfigClassData,
+                                getFunctionGroupListMethodData
+                            ) { classData, getFunctionGroupListMethod ->
+                                class_ = class_ {
+                                    name = classData.name
+                                }
+                                getFunctionGroupList = method {
+                                    name = getFunctionGroupListMethod.methodName
+                                    parameters = MethodKt.parameters {
+                                        values.clear()
+                                        values.addAll(getFunctionGroupListMethod.paramTypeNames)
+                                    }
                                 }
                             }
                         }.onFailure {
-                            YLog.error(populateFailedMsg.format(TAG), it)
+                            YLog.error(
+                                populateFailedMsg.format(
+                                    TAG,
+                                    Configs.Story25LongPressPanelConfig.getDescriptor().name
+                                ),
+                                it
+                            )
                         }
                     }
                 } else {
                     YLog.warn(
-                        "$TAG: story25LongPressPanelConfig has been removed since host version 40.3.0," +
+                        "$TAG: ${Configs.Story25LongPressPanelConfig.getDescriptor().name} has been removed since host version 40.3.0," +
                             " fields are intentionally left unfilled"
                     )
                 }
@@ -5041,19 +5376,19 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
                             }.singleOrNull()
                         }
 
-                        if (lppConfigModuleIdClassData == null || getIdMethodData == null) {
-                            YLog.error(symbolNotFoundMsg.format(TAG, this::class.java.enclosingClass?.simpleName))
-                            return@lPPConfigModuleId
-                        }
-
-                        class_ = class_ {
-                            name = lppConfigModuleIdClassData.name
-                        }
-                        getId = method {
-                            name = getIdMethodData.methodName
-                            parameters = MethodKt.parameters {
-                                values.clear()
-                                values.addAll(getIdMethodData.paramTypeNames)
+                        requireAllNotNullThen(
+                            lppConfigModuleIdClassData,
+                            getIdMethodData
+                        ) { classData, getIdMethod ->
+                            class_ = class_ {
+                                name = classData.name
+                            }
+                            getId = method {
+                                name = getIdMethod.methodName
+                                parameters = MethodKt.parameters {
+                                    values.clear()
+                                    values.addAll(getIdMethod.paramTypeNames)
+                                }
                             }
                         }
                         // In fact, enum fields may be renamed by R8.
@@ -5086,7 +5421,13 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
                             name = "AUTO_FEED_PAD"
                         }
                     }.onFailure {
-                        YLog.error(populateFailedMsg.format(TAG), it)
+                        YLog.error(
+                            populateFailedMsg.format(
+                                TAG,
+                                Configs.LPPConfigModuleId.getDescriptor().name
+                            ),
+                            it
+                        )
                     }
                 }
 
@@ -5119,25 +5460,29 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
                             }.singleOrNull()
                         }
 
-                        if (otherFunctionWhiteListFieldData == null || story25SharePanelConfigClassData == null ||
-                            getOtherFunctionWhiteListMethodData == null
-                        ) {
-                            YLog.error(symbolNotFoundMsg.format(TAG, this::class.java.enclosingClass?.simpleName))
-                            return@story25SharePanelConfig
-                        }
-
-                        class_ = class_ {
-                            name = story25SharePanelConfigClassData.name
-                        }
-                        getOtherFunctionWhiteList = method {
-                            name = getOtherFunctionWhiteListMethodData.methodName
-                            parameters = MethodKt.parameters {
-                                values.clear()
-                                values.addAll(getOtherFunctionWhiteListMethodData.paramTypeNames)
+                        requireAllNotNullThen(
+                            story25SharePanelConfigClassData,
+                            getOtherFunctionWhiteListMethodData
+                        ) { classData, getOtherFunctionWhiteListMethod ->
+                            class_ = class_ {
+                                name = classData.name
+                            }
+                            getOtherFunctionWhiteList = method {
+                                name = getOtherFunctionWhiteListMethod.methodName
+                                parameters = MethodKt.parameters {
+                                    values.clear()
+                                    values.addAll(getOtherFunctionWhiteListMethod.paramTypeNames)
+                                }
                             }
                         }
                     }.onFailure {
-                        YLog.error(populateFailedMsg.format(TAG), it)
+                        YLog.error(
+                            populateFailedMsg.format(
+                                TAG,
+                                Configs.Story25SharePanelConfig.getDescriptor().name
+                            ),
+                            it
+                        )
                     }
                 }
 
@@ -5192,25 +5537,29 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
                             }.singleOrNull()
                         }
 
-                        if (funcConfigFieldData == null || funcConfigClassData == null ||
-                            getFuncConfigMethodData == null
-                        ) {
-                            YLog.error(symbolNotFoundMsg.format(TAG, this::class.java.enclosingClass?.simpleName))
-                            return@sharePanelFuncConfig
-                        }
-
-                        class_ = class_ {
-                            name = funcConfigClassData.name
-                        }
-                        getFuncConfig = method {
-                            name = getFuncConfigMethodData.methodName
-                            parameters = MethodKt.parameters {
-                                values.clear()
-                                values.addAll(getFuncConfigMethodData.paramTypeNames)
+                        requireAllNotNullThen(
+                            funcConfigClassData,
+                            getFuncConfigMethodData
+                        ) { classData, getFuncConfigMethod ->
+                            class_ = class_ {
+                                name = classData.name
+                            }
+                            getFuncConfig = method {
+                                name = getFuncConfigMethod.methodName
+                                parameters = MethodKt.parameters {
+                                    values.clear()
+                                    values.addAll(getFuncConfigMethod.paramTypeNames)
+                                }
                             }
                         }
                     }.onFailure {
-                        YLog.error(populateFailedMsg.format(TAG), it)
+                        YLog.error(
+                            populateFailedMsg.format(
+                                TAG,
+                                Configs.SharePanelFuncConfig.getDescriptor().name
+                            ),
+                            it
+                        )
                     }
                 }
 
@@ -5238,19 +5587,24 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
                             }
                         }.singleOrNull()
 
-                        if (lineFieldData == null) {
-                            YLog.error(symbolNotFoundMsg.format(TAG, this::class.java.enclosingClass?.simpleName))
-                            return@sharePanelLine
-                        }
-
-                        class_ = class_ {
-                            name = lineFieldData.className
-                        }
-                        line = field {
-                            name = lineFieldData.name
+                        requireNotNullThen(
+                            lineFieldData
+                        ) { lineField ->
+                            class_ = class_ {
+                                name = lineField.className
+                            }
+                            line = field {
+                                name = lineField.name
+                            }
                         }
                     }.onFailure {
-                        YLog.error(populateFailedMsg.format(TAG), it)
+                        YLog.error(
+                            populateFailedMsg.format(
+                                TAG,
+                                Configs.SharePanelLine.getDescriptor().name
+                            ),
+                            it
+                        )
                     }
                 }
 
@@ -5293,19 +5647,24 @@ class DouyinPackage(private val classLoader: ClassLoader, context: Context) {
                             }
                         }.singleOrNull()
 
-                        if (keyFieldData == null) {
-                            YLog.error(symbolNotFoundMsg.format(TAG, this::class.java.enclosingClass?.simpleName))
-                            return@sharePanelBtn
-                        }
-
-                        class_ = class_ {
-                            name = keyFieldData.className
-                        }
-                        key = field {
-                            name = keyFieldData.name
+                        requireNotNullThen(
+                            keyFieldData
+                        ) { keyField ->
+                            class_ = class_ {
+                                name = keyField.className
+                            }
+                            key = field {
+                                name = keyField.name
+                            }
                         }
                     }.onFailure {
-                        YLog.error(populateFailedMsg.format(TAG), it)
+                        YLog.error(
+                            populateFailedMsg.format(
+                                TAG,
+                                Configs.SharePanelBtn.getDescriptor().name
+                            ),
+                            it
+                        )
                     }
                 }
             }
