@@ -335,6 +335,44 @@ fun SettingsContentPreview() {
             SettingsContentUiConfig(keepDanmakuVisible = false, hideFollowButton = false, keepCleanMode = false),
             SettingsContentModuleConfig(hiddenFeature = false, disableVerbose = false)
         ),
-        actions = SettingsContentActions()
+        actions = SettingsContentActions(
+            saveActions = SettingsContentSaveActions(
+                onPurifyCommentImageChange = {},
+                onUnlockCommentEmojiChange = {},
+                onDownloadCommentAudioChange = {},
+                onRemoveVideoWatermarkChange = {},
+                onBypassVideoDownloadChange = {},
+                onRemoveMultiImageWatermarkChange = {},
+                onUnfilterTodayPubDownloadChange = {}
+            ),
+            feedActions = SettingsContentFeedActions(
+                onNavigateToRecommendedFeedFilter = {},
+                onDisableDoubleTapDiggChange = {},
+                onDoubleTabOpenCommentChange = {},
+                onBypassListenAwemeChange = {},
+                onBlockAutoReplayChange = {},
+                onBlockResumePlaybackChange = {},
+                onKeepInheritedSpeedChange = {}
+            ),
+            uiActions = SettingsContentUiActions(
+                onNavigateToPlaybackComponent = {},
+                onNavigateToHomeTab = {},
+                onNavigateToHomeTopCornerEntrance = {},
+                onKeepDanmakuVisibleChange = {},
+                onHideFollowButtonChange = {},
+                onKeepCleanModeChange = {}
+            ),
+            configActions = SettingsContentConfigActions(
+                onExportConfig = {},
+                onImportConfig = {}
+            ),
+            moduleActions = SettingsContentModuleActions(
+                onHiddenFeatureChange = {},
+                onDisableVerboseChange = {},
+                onResetMapping = {},
+                onLoadCustomMapping = {},
+                onClearCustomMapping = {}
+            )
+        )
     )
 }
