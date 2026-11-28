@@ -40,6 +40,8 @@ A small Xposed module that adds quality-of-life features to Douyin
 - Hiding follow button below avatar on playback
 - Hiding home top corner entrances
 - Keep Clean Mode when switching feeds
+- Keep playback speed when switching feeds
+- Unfilter save-to-album entry for in-today-publish
 
 ---
 See more about future development: [PM.md](PM.md)
